@@ -24,6 +24,7 @@ import {
 	type UiVersionSwitchDialogValues,
 } from "@/components/ui-version-switch";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { getLanguage, setLanguage } from "@/i18n";
 import { isUiAvailable } from "@/utils/ui-version";
 
 export function AppSidebar() {
@@ -176,6 +177,21 @@ export function AppSidebar() {
 			</SidebarContent>
 			<SidebarFooter>
 				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							title="切换语言后将重新载入页面 / Reload after switching language"
+							onClick={() => {
+								setLanguage(getLanguage() === "zh-CN" ? "en" : "zh-CN");
+								window.location.reload();
+							}}
+						>
+							<span>
+								{getLanguage() === "zh-CN"
+									? "语言：简体中文 / English"
+									: "Language: English / 中文"}
+							</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
 					{showPromotionalContent && (
 						<>
 							<SidebarMenuItem>

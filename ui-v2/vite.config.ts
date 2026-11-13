@@ -2,6 +2,7 @@ import path from "node:path";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
+import { chineseUi } from "./localization/plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -11,6 +12,7 @@ export default defineConfig(({ mode }) => {
 	return {
 		base,
 		plugins: [
+			chineseUi(),
 			TanStackRouterVite({
 				autoCodeSplitting: !process.env.VITEST,
 			}),
@@ -27,6 +29,7 @@ export default defineConfig(({ mode }) => {
 			},
 			env: {
 				TZ: "UTC",
+				VITE_DEFAULT_LOCALE: "en",
 			},
 		},
 		resolve: {

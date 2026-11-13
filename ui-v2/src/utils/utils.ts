@@ -1,3 +1,5 @@
+import { translateUi } from "@/i18n";
+
 /**
  *
  * @param str
@@ -32,9 +34,9 @@ export const pluralize = (
 	plural?: string,
 ): string => {
 	if (count === 1) {
-		return singular;
+		return translateUi(singular);
 	}
-	return plural || `${singular}s`;
+	return translateUi(plural || `${singular}s`);
 };
 
 /**

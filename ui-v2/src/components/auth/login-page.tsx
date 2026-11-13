@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PrefectLogo } from "@/components/ui/prefect-logo";
+import { getLanguage, setLanguage, translateUi } from "@/i18n";
 
 interface LoginPageProps {
 	redirectTo?: string;
@@ -28,7 +29,7 @@ export function LoginPage({ redirectTo = "/dashboard" }: LoginPageProps) {
 			if (result.success) {
 				void navigate({ to: redirectTo });
 			} else {
-				setError(result.error ?? "Authentication failed");
+				setError(translateUi(result.error ?? "Authentication failed"));
 				setIsSubmitting(false);
 			}
 		});
@@ -42,6 +43,19 @@ export function LoginPage({ redirectTo = "/dashboard" }: LoginPageProps) {
 					<CardTitle>Login</CardTitle>
 				</CardHeader>
 				<CardContent>
+					<div className="mb-4 flex justify-end">
+						<Button
+							type="button"
+							size="sm"
+							variant="ghost"
+							onClick={() => {
+								setLanguage(getLanguage() === "zh-CN" ? "en" : "zh-CN");
+								window.location.reload();
+							}}
+						>
+							中文 / English
+						</Button>
+					</div>
 					<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 						<Input
 							type="password"

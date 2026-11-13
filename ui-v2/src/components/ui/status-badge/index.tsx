@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority";
 import { Circle, Pause } from "lucide-react";
 import type { components } from "@/api/prefect";
+import { translateUi } from "@/i18n";
 import { capitalize } from "@/utils";
 import { Badge } from "../badge";
 
@@ -39,7 +40,7 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
 	return (
 		<Badge className={statusBadgeVariants({ status })}>
 			<StatusIcon status={status} />
-			{statusText}
+			{translateUi(statusText)}
 		</Badge>
 	);
 };

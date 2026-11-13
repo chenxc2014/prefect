@@ -7,6 +7,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { translateState } from "@/i18n";
 import { capitalize, cn } from "@/utils";
 import { Badge } from "../badge";
 
@@ -65,7 +66,7 @@ export const StateBadge = ({ type, name, className }: StateBadgeProps) => {
 			className={cn(stateBadgeVariants({ state: type }), "px-2", className)}
 		>
 			<Icon size={16} />
-			{name ?? capitalize(type)}
+			{translateState(name ?? capitalize(type))}
 		</Badge>
 	);
 };
@@ -96,7 +97,7 @@ export const StateIcon = ({
 	size = 16,
 }: StateIconProps) => {
 	const Icon = STATE_ICONS[type];
-	const tooltipText = name ?? capitalize(type);
+	const tooltipText = translateState(name ?? capitalize(type));
 
 	return (
 		<Tooltip>

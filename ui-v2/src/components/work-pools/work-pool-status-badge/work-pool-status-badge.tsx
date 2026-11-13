@@ -1,6 +1,7 @@
 import { Pause } from "lucide-react";
 import type { WorkPoolStatus } from "@/api/work-pools";
 import { Badge } from "@/components/ui/badge";
+import { translateUi } from "@/i18n";
 import { cn } from "@/utils";
 
 type WorkPoolStatusBadgeProps = {
@@ -47,7 +48,7 @@ export const WorkPoolStatusBadge = ({
 			) : (
 				<div className={cn("h-2 w-2 rounded-full", colorClass)} />
 			)}
-			<span>{label}</span>
+			<span>{translateUi(label)}</span>
 		</Badge>
 	);
 };
