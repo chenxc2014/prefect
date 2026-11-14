@@ -31,6 +31,31 @@ openssl x509 -in /etc/crawler-dev/server.crt -noout -ext subjectAltName 2>/dev/n
 find /etc/crawler-dev -maxdepth 2 -type f -printf '%f\\n'
 docker ps --format '{{.Names}} {{.Image}}'
 ''', timeout=30))
+    elif action == 'sso-rollout':
+        from datetime import datetime
+        backup = '/opt/crawler-dev/backups/sso-code-' + datetime.now().strftime('%Y%m%d-%H%M%S')
+        ssh.execute(client, 'mkdir -p ' + backup + ' && chmod 700 ' + backup, timeout=20)
+        names = ['runtime/auth.py', 'tools/portal_auth.py', 'tools/collector.py', 'deploy/web/login.html', 'deploy/web/auth-client.js', 'deploy/web/collector.html', 'deploy/web/suite-theme.css', 'deploy/web/suite-theme.js', 'deploy/linux/install-sso.py']
+        with client.open_sftp() as sftp:
+            for name in names:
+                remote = '/opt/crawler-dev/releases/dev-v1/' + name
+                try:
+                    with sftp.open(remote, 'rb') as handle:
+                        data = handle.read()
+                    with sftp.open(backup + '/' + name.replace('/', '__'), 'wb') as handle:
+                        handle.write(data)
+                except FileNotFoundError:
+                    pass
+                with sftp.open(remote, 'wb') as handle:
+                    handle.write((ROOT / name).read_bytes())
+            with sftp.open('/opt/crawler-dev/maxun/gateway.py', 'wb') as handle:
+                handle.write((ROOT / 'deploy/maxun/gateway.py').read_bytes())
+            for name in ('apply-branding.py', 'extract-web.py'):
+                with sftp.open('/opt/crawler-dev/maxun/' + name, 'wb') as handle:
+                    handle.write((ROOT / 'deploy/maxun' / name).read_bytes())
+        code = ssh.execute(client, '/opt/crawler-dev/venv/bin/python -m py_compile /opt/crawler-dev/releases/dev-v1/tools/portal_auth.py /opt/crawler-dev/releases/dev-v1/tools/collector.py /opt/crawler-dev/releases/dev-v1/runtime/auth.py && python3.12 /opt/crawler-dev/maxun/apply-branding.py && systemctl restart crawler-dev-collector && python3.12 /opt/crawler-dev/releases/dev-v1/deploy/linux/install-sso.py && systemctl is-active crawler-dev-collector crawler-dev-gateway crawler-dev-worker crawler-dev-server', timeout=50)
+        print('认证代码变更前备份：' + backup)
+        sys.exit(code)
     elif action == 'portal-rollout':
         from datetime import datetime
         backup = '/opt/crawler-dev/backups/portal-' + datetime.now().strftime('%Y%m%d-%H%M%S')

@@ -34,3 +34,7 @@ language="<script>if(!localStorage.getItem('i18nextLng'))localStorage.setItem('i
 if language not in text:index.write_text(text.replace('<head>','<head>'+language,1))
 (root/'web.lock.json').write_text(json.dumps({'image_manifest':hashlib.sha256(manifest).hexdigest(),'application_layer':digest,'files':count},indent=2))
 print('已校验并提取在线设计器前端：'+str(count)+' 个文件')
+branding = root / 'apply-branding.py'
+if branding.exists():
+    import runpy
+    runpy.run_path(str(branding), run_name='__main__')

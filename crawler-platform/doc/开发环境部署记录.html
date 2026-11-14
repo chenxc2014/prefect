@@ -1,7 +1,7 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>开发环境使用说明</title><style>body{max-width:1000px;margin:40px auto;padding:0 24px;color:#193345;font:15px/1.9 system-ui,"Microsoft YaHei",sans-serif;background:#f6f8fa}h1{color:#126d71}section{background:white;border:1px solid #dce5e9;border-radius:12px;padding:24px;margin:18px 0}pre{overflow:auto;background:#183345;color:#eaf2f5;padding:16px;border-radius:8px;font-size:12px}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{padding:12px;text-align:left;border-bottom:1px solid #ddd}a{color:#126d71}.note{background:#fff4dc;padding:15px;border-left:4px solid #d9a039}</style></head><body>
 <h1>网爬平台开发环境</h1><p>部署日期：2026-11-13。当前交付的是开发基础设施、隔离执行样例和跨节点联调工具，尚未接管生产业务。</p><p>管理首页修复：服务账户无法在只读安装目录生成 UI 文件，曾导致首页 404。现已配置独立目录 <code>/var/lib/crawler-dev/ui</code>，并保留安装目录只读。部署生成脚本和联调入口均已补充此配置及首页/静态资源/深链接检查。详细结果见 <a href="管理首页修复验证.json">管理首页修复验证</a>。</p>
 <section><h2>源码与代码位置</h2><p>当前开发仓库：<a href="https://github.com/chenxc2014/prefect.git">chenxc2014/prefect</a>；本地 <code>vendor/prefect</code> 的 <code>origin</code> 已指向该地址。<code>upstream</code> 保留为官方 <code>https://github.com/PrefectHQ/prefect.git</code>，供后续合并上游更新。中文定制已提交并推送至 ui-v2/chinese-localization 分支（提交 69c06336f9e604c7aa1f799dcaec33da5c0f56d7）；服务器当前运行版本继续为 3.9.2，不因仓库地址切换而自动升级。</p><table><tr><th>内容</th><th>位置</th></tr><tr><td>Prefect 开发仓库源码</td><td>vendor\prefect，标签 3.9.2，提交 b0479c0c26045b06321191bbad0cdfbb334d7380。</td></tr><tr><td>项目开发代码</td><td>flows、runtime、tools、deploy。</td></tr><tr><td>本地 Python 环境</td><td>.venv（Python 3.11）；远端为各自独立的 Python 3.12 环境。</td></tr></table><p>vendor 中的 Prefect UI v2 已在 ui-v2/chinese-localization 分支进行中文界面定制，后端运行固定版本 3.9.2 的发布包。原有 fetch-crawler 目录没有修改。</p></section>
-<section><h2>服务与登录</h2><p>管理界面：<a href="https://192.168.1.169:8443/">https://192.168.1.169:8443/</a>；API：<code>https://192.168.1.169:8443/api</code>。</p><p>用户名为 <code>crawlerdev</code>。随机生成的认证值保存在当前工作区 <code>.local\client.json</code> 的 <code>env.PREFECT_API_AUTH_STRING</code>，格式为 <code>用户名:密码</code>；不写入版本控制和公开文档。开发证书 CA 位于 <code>.local\ca.pem</code>。Python 客户端会使用该 CA 验证服务。</p><div class="note">浏览器需要信任本项目开发 CA 才能无证书提示访问。可先核对 CA 来源与指纹，再由使用者按本机证书管理流程导入；不要通过关闭证书验证访问。防火墙当前只允许开发机 192.168.1.74 和 Windows 节点 192.168.1.167 访问 8443，新增开发机时需加入准确来源地址。</div></section>
+<section><h2>服务与登录</h2><p>管理界面：<a href="https://192.168.1.169:8443/">https://192.168.1.169:8443/</a>；API：<code>https://192.168.1.169:8443/api</code>。</p><p>统一网页登录统一网页登录用户名为 <code>crawlerdev</code>。随机生成的认证值保存在当前工作区 <code>.local\client.json</code> 的 <code>env.PREFECT_API_AUTH_STRING</code>，格式为 <code>用户名:密码</code>；不写入版本控制和公开文档。开发证书 CA 位于 <code>.local\ca.pem</code>。Python 客户端会使用该 CA 验证服务。</p><div class="note">浏览器需要信任本项目开发 CA 才能无证书提示访问。可先核对 CA 来源与指纹，再由使用者按本机证书管理流程导入；不要通过关闭证书验证访问。防火墙当前只允许开发机 192.168.1.74 和 Windows 节点 192.168.1.167 访问 8443，新增开发机时需加入准确来源地址。</div></section>
 <section><h2>节点与任务</h2><table><tr><th>节点</th><th>服务 / 工作池</th><th>目录</th></tr><tr><td>169 / Linux</td><td>crawler-dev-server、crawler-dev-gateway、crawler-dev-worker、postgresql；工作池 dev-linux，队列 node-169，并发 2。</td><td>/opt/crawler-dev；任务 /var/lib/crawler-dev/runs。</td></tr><tr><td>167 / Windows</td><td>计划任务 CrawlerDev-Worker，以 SYSTEM 运行；工作池 dev-windows，队列 node-167，并发 2。</td><td>D:\CrawlerDev；日志 D:\CrawlerDev\logs\worker.log。</td></tr></table><p>UI 中有两个部署：<code>crawler-dev-probe/linux-169</code>、<code>crawler-dev-probe/windows-167</code>。它们只访问执行器自己启动的本地模拟接口，不访问生产网站或数据库。Windows Worker 属于非交互开发进程，不能据此认定桌面爬虫已经可用。</p></section>
 <section><h2>本地开发与验证</h2><p>在工作区运行以下命令。远程操作需要现有免密 SSH 与正常网络权限；脚本检查既有 known_hosts，不自动接受未知主机密钥。</p><pre>.\.venv\Scripts\python.exe -m pip check
 python -m compileall -q flows runtime tools deploy/linux
@@ -27,11 +27,46 @@ python .tmp/crawler-dev/manage.py 169 ui-browser remote
 
 # 在 169 回退界面（会重启开发控制中心）
 python3.12 /opt/crawler-dev/releases/dev-v1/deploy/linux/release_ui.py --rollback</pre><p>验证：8 个测试文件、52 项测试通过；TypeScript 与生产构建通过；ESLint 无错误，保留上游已有 64 项警告。发布后通过首页、静态资源、API 健康及未认证 401 检查。浏览器验收结果见 <a href="界面汉化浏览器验证.json">界面汉化浏览器验证</a>。</p><p>后续升级 Prefect 时需重新构建并复验定制界面；直接切换官方前端资源会恢复英文。</p></section><section><h2>A 方案：可视化采集入口与首站验收</h2><p>EasySpider 开发仓库已切换为 <a href="https://github.com/chenxc2014/EasySpider.git">chenxc2014/EasySpider</a>。本地 <code>vendor/easyspider</code> 的 origin 指向该仓库，官方 <code>NaiboWang/EasySpider</code> 保留为 upstream。运行基线继续固定 v0.6.5 / 191bd6d7547bb397e4c579dd2c70ae835be3f512，切换源码地址不自动发版；设计客户端已安装包仍保留官方来源记录。</p><p>采集管理入口：<a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>，使用现有开发管理账号。桌面设计器启动命令：<code>powershell -File tools/start-designer.ps1</code>。</p><p>EasySpider v0.6.5 已通过独立 Python 环境接入两个 Worker；模板发布、参数绑定、账号引用、单节点账号互斥、集中归档与认证下载已实现。169 新增 crawler-dev-collector 和 crawler-dev-demo；167 新增 CrawlerDev-Demo 本机模拟站点计划任务。</p><p>已验收千金供应商系统“商品流向 / 配送记录”：2026-11-12 单日、3 条数据、日期正确，与独立浏览器取证业务数据一致。运行 ID：f71c1f20-72fd-4049-bbe6-ed011e825a10。管理页使用活动站点模板、日期参数及账号引用 qjdyf-test 发起运行；网站密码保存在受限节点配置中。</p><p>当前归档上限每次 10MB，尚未开启业务定时计划；旧生产程序仍未接管，旧函数入口和完整业务后处理尚待专项回归。此前两次站点调试失败均因文件校验未通过，保留原状态；正式使用活动版本。</p><p><a href="爬虫任务编排与执行平台.html#implementation-a">完整使用与目录说明</a> · <a href="A方案双节点验收.json">双节点验收</a> · <a href="千金商品流向自动采集.json">真实站点验收</a></p></section><section><h2>2026-11-14 多引擎工作台改版</h2>
+
+
+<div id="unified-ui" class="note"><h3>2026-11-15 更新：三个应用统一视觉风格</h3>
+<p>以采集工作台为主视觉，Prefect、Maxun 共用「采集管理 / COLLECTION HUB」品牌、深色侧栏、蓝色主操作、浅色背景、系统中文字体与圆角卡片。顶部提供采集工作台 / Prefect 调度 / Maxun 设计切换，以及当前账号和退出统一登录。各应用继续保留自己的专业导航与工作布局。</p>
+<div class="table-wrap"><table><thead><tr><th>界面</th><th>统一内容</th><th>保留的能力</th></tr></thead><tbody>
+<tr><td>采集工作台</td><td>沿用已有布局，增加共享应用切换栏。</td><td>三引擎入口、模板发布、参数、任务提交与产物下载。</td></tr>
+<tr><td>Prefect</td><td>共用品牌、顶部导航、侧栏颜色、字体、卡片和表单外观。</td><td>调度、部署、工作池、运行状态、日志与原有状态颜色。</td></tr>
+<tr><td>Maxun</td><td>共用品牌、导航、侧栏、表单与蓝色品牌色；明暗切换继续可用。</td><td>机器人与录制工作区；录制页保留原有浏览器区域和坐标布局。</td></tr>
+</tbody></table></div>
+<h4>主题文件与部署</h4>
+<ul><li><code>deploy/web/suite-theme.css</code>：共享视觉变量及两个原生界面的组件样式适配。</li><li><code>deploy/web/suite-theme.js</code>：应用切换、品牌与组件标记；不搬移原应用的 React 节点，不向被录制网页的 iframe 注入主题。</li><li><code>tools/portal_auth.py</code>：通过现有统一会话提供主题资源；<code>deploy/linux/install-sso.py</code> 将其接入 8443、9443 的 HTML 入口。</li><li><code>deploy/maxun/apply-branding.py</code>：仅替换 Maxun 静态 JS / CSS 内已经确认的固定品牌色；不处理接口响应、被采集网站的网页或业务文件。提取新版前端后自动重新应用。</li><li>原有红色失败 / 放弃、绿色成功等语义颜色继续保留；品牌色替换规则和静态文件前后摘要记录在 <code>/opt/crawler-dev/maxun/branding.lock.json</code>。</li></ul>
+<p>Maxun 静态资源修改前备份：<code>/opt/crawler-dev/backups/maxun-palette-20261115-005111/</code>。共享主题初次发布前的认证代码与网关备份分别为 <code>sso-code-20261115-004322/</code> 和 <code>sso-gateway-20261115-004325/</code>，均位于 /opt/crawler-dev/backups/。</p>
+<p>如需仅停用共享外观，可将服务器发布目录中的 suite-theme.css、suite-theme.js 暂时替换为空的有效文件，并恢复上述 Maxun 静态资源备份，再刷新浏览器；保留统一登录模块、会话数据库与认证网关，不必重启采集执行引擎。主题样式修改后刷新生效，涉及认证路由或网关的变更仍按检查、重载流程发布。</p>
+<p>验证记录：<a href="统一界面风格验收.json">统一界面风格验收</a>、<a href="统一登录部署验收.json">登录与采集回归</a>。主题验证覆盖桌面与窄屏、原生页面切换及明暗模式；演示网站验证日期输入、查询、远程录制与文件下载。本次仅操作当前工作区和 Linux 169。</p>
+</div>
+<div id="unified-login" class="note"><h3>2026-11-15 更新：统一主入口与登录</h3>
+<p><strong>日常主入口：</strong><a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>。原 8443 根地址现在也跳转到采集工作台。未登录访问 Prefect 或 Maxun，会引导到同一个中文登录页。</p>
+<p>使用现有平台用户名 <code>crawlerdev</code> 和原平台密码登录。登录后，点击「Prefect 调度监控」或「进入 Maxun 在线设计器」，均无需再次填写账号、邮箱或密码。设计器的底层开发账号仍保留，由平台服务端衔接，不需要用户另行登录。</p>
+<p>会话默认有效期 8 小时。平台右上角，以及 Prefect、Maxun 的「退出统一登录」按钮，可撤销当前统一会话；已打开的其他界面最迟在下一次会话检查时回到登录页，检查间隔为 10 秒。退出后，旧会话不能再次调用受保护接口；重新登录后方可继续使用。</p>
+<h4>实现与兼容边界</h4>
+<ul><li>统一会话由采集管理 API 管理。浏览器仅保存 Secure、HttpOnly、SameSite=Lax 的随机会话 Cookie；平台密码不进入 URL 或 localStorage。</li><li>Nginx 对 Prefect 浏览器请求检查统一会话，再在服务端转发原有 API 认证；Prefect 后端认证保持开启。Worker 的 Basic 接口认证继续保留，不要求执行节点使用浏览器会话。</li><li>Maxun 通过服务端登录衔接获取原生 Cookie，并初始化其界面用户状态；公开入口由统一会话保护。仅访问 9443 且未登录时也会返回统一登录页。</li><li>会话写请求校验来源与 CSRF，登录失败进行限速；SQLite 仅保存会话令牌摘要，支持到期与退出撤销。当前仍为单开发账号模式，尚未建设企业身份源及多用户角色权限。</li><li>SSO Cookie 不区分端口。日常请使用同一台 169 的内网 IP 地址访问两个端口，避免混用不同域名、IP 或不同浏览器配置。证书与防火墙来源白名单要求继续沿用。</li></ul>
+<h4>代码与服务位置</h4>
+<div class="table-wrap"><table><thead><tr><th>位置</th><th>作用</th></tr></thead><tbody>
+<tr><td>runtime/auth.py</td><td>会话摘要、到期与撤销、登录失败限速。</td></tr>
+<tr><td>tools/portal_auth.py</td><td>统一登录、退出、内部网关校验、Prefect 设置适配与 Maxun 进入桥接。</td></tr>
+<tr><td>deploy/web/login.html / auth-client.js</td><td>中文登录页、统一账号操作、跨界面会话失效检查。</td></tr>
+<tr><td>deploy/linux/install-sso.py</td><td>生成统一网关配置，检查认证服务就绪后平滑重载；失败时恢复原配置文件。</td></tr>
+<tr><td>/etc/crawler-dev/sso.json</td><td>受限网关密钥与两个应用的允许来源，不入代码仓库。</td></tr>
+<tr><td>/var/lib/crawler-dev/auth/sessions.sqlite</td><td>受限会话数据库，不保存明文平台密码或明文会话令牌。</td></tr>
+<tr><td>/opt/crawler-dev/control/nginx.conf / maxun.conf</td><td>统一登录网关；deploy/maxun/gateway.py 检测到 SSO 配置后保持该网关，避免普通发版恢复旧认证。</td></tr>
+</tbody></table></div>
+<p>网关初次切换前备份：<code>/opt/crawler-dev/backups/sso-gateway-20261115-001033/</code>。代码首次变更前备份：<code>/opt/crawler-dev/backups/sso-code-20261115-000952/</code>。如需回退，先恢复两份网关配置并检查、平滑重载，再恢复 collector.py 与 collector.html 并重启 crawler-dev-collector，并将 /etc/crawler-dev/sso.json 改名留存以停用普通发版时的 SSO 自动恢复；新增认证文件可留存，不要清理业务运行目录。回退期间应保持原来源白名单和原 API 认证。</p>
+<p>实际验证见 <a href="统一登录部署验收.json">统一登录部署验收</a>：一次登录、两个子系统免登录、刷新保留状态、WebSocket 录制、Linux 演示任务与文件下载、统一退出及旧会话拒绝均通过。本次未连接 Windows 167，未执行真实业务网站任务。</p>
+<p class="small">网关采用 Nginx 官方支持的 <a href="https://nginx.org/en/docs/http/ngx_http_auth_request_module.html">auth_request 子请求认证</a>和 <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html">反向代理配置</a>。浏览器免二次登录不等于取消后端认证。</p>
+</div>
 <div id="multi-engine-workspace" class="note">
 <h3>2026-11-14 更新：多引擎采集工作台</h3>
 <p>采集管理入口仍为 <a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>。首页已重构为侧栏导航、三个引擎卡片、实际服务状态、活动任务列表与架构说明；发布与运行功能分为独立工作区。</p>
 <div class="table-wrap"><table><thead><tr><th>入口</th><th>设计方式与操作路径</th><th>当前边界</th></tr></thead><tbody>
-<tr><td>Maxun</td><td>首页「进入 Maxun 在线设计器」→ Web 录制与保存机器人 → 回到 Maxun 工作区刷新、绑定参数并发布 → 已发布任务运行。</td><td>地址 <a href="https://192.168.1.169:9443/">https://192.168.1.169:9443/</a>。账号 crawlerdev@crawler.local，密码沿用开发管理账号，不在文档记录明文。服务可用不等于所有网站已完成业务验收。</td></tr>
+<tr><td>Maxun</td><td>首页「进入 Maxun 在线设计器」→ Web 录制与保存机器人 → 回到 Maxun 工作区刷新、绑定参数并发布 → 已发布任务运行。</td><td>地址 <a href="https://192.168.1.169:9443/">https://192.168.1.169:9443/</a>。通过采集管理平台统一登录进入，无需手动输入 Maxun 邮箱与密码。服务可用不等于所有网站已完成业务验收。</td></tr>
 <tr><td>EasySpider</td><td>首页「打开客户端启动指引」→ 开发机运行 tools/start-designer.ps1 → 客户端设计、导出 JSON → 平台导入与发布。</td><td>浏览器不能直接启动本机 exe；工作区提供启动命令和上游安装包链接。日常服务器执行不依赖本地客户端常开。</td></tr>
 <tr><td>fetch-crawler</td><td>首页「查看原有爬虫接入」→ 查阅原路径、适配入口、隔离与成功检查要求 → 逐站登记、验证后再注册调度。</td><td>runtime/legacy.py 已提供适配代码，当前没有开放旧业务直接发布运行，没有接管生产队列。</td></tr>
 </tbody></table></div>

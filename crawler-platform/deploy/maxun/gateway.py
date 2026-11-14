@@ -1,6 +1,10 @@
 """增加独立 HTTPS 在线设计器入口，检查通过后平滑重载现有网关。"""
 from pathlib import Path
 import subprocess
+if Path('/etc/crawler-dev/sso.json').exists():
+    # 后续普通发版继续保留已安装的统一登录网关。
+    subprocess.run(['python3.12', '/opt/crawler-dev/releases/dev-v1/deploy/linux/install-sso.py'], check=True)
+    raise SystemExit(0)
 if subprocess.check_output(['getenforce'],text=True).strip()=='Enforcing':
     ports=subprocess.check_output(['semanage','port','-l'],text=True)
     if not any(line.startswith('http_port_t') and '9443' in line for line in ports.splitlines()):

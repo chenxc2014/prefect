@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-14T16:52:18.982Z",
+  "preview": false,
+  "checks": [
+    "三个应用的应用切换栏、品牌、中文字体及深色侧栏显示正常",
+    "Prefect 与 Maxun 在 1920 / 1280 / 768 / 390 宽度下无页面横向溢出",
+    "Prefect 部署页、Maxun 新建页切换后主题继续生效",
+    "Maxun 原生明暗切换仍可用，共享标题栏和表单随主题切换"
+  ],
+  "windows_167_accessed": false,
+  "passed": true,
+  "regression_report": "统一登录部署验收.json",
+  "verified_behavior": [
+    "录制器日期输入与查询成功",
+    "录制操作条使用统一蓝色，放弃操作保留红色",
+    "被录制网页未注入主题",
+    "演示任务执行及结果下载成功",
+    "统一登录、退出及 Worker 认证保持可用"
+  ],
+  "screenshots": [
+    ".local/screenshots/theme-platform.png",
+    ".local/screenshots/theme-prefect.png",
+    ".local/screenshots/theme-maxun.png",
+    ".local/screenshots/theme-maxun-create.png",
+    ".local/screenshots/theme-maxun-mobile.png",
+    ".local/screenshots/unified-recorder.png"
+  ]
+}

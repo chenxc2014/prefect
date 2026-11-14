@@ -19,6 +19,13 @@
   "development_control": "native-systemd-postgresql",
   "linux_node": "192.168.1.169",
   "windows_node": "192.168.1.167",
+  "portal_auth": {
+    "mode": "gateway-server-side-session",
+    "primary_url": "https://192.168.1.169:8443/collector/",
+    "session_lifetime_seconds": 28800,
+    "implementation": "tools/portal_auth.py",
+    "machine_api_auth_preserved": true
+  },
   "online_engine": {
     "name": "Maxun",
     "repository": "https://github.com/getmaxun/maxun.git",
@@ -38,5 +45,13 @@
     "license": "AGPL-3.0",
     "execution_mode": "isolated-python-subprocess",
     "portal": "https://192.168.1.169:8443/collector/"
+  },
+  "portal_theme": {
+    "version": "2026.11.15",
+    "styles": "deploy/web/suite-theme.css",
+    "navigation": "deploy/web/suite-theme.js",
+    "maxun_palette_adapter": "deploy/maxun/apply-branding.py",
+    "primary_color": "#405bf0",
+    "sidebar_color": "#111a32"
   }
 }

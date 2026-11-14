@@ -4,9 +4,10 @@
 <p>此目录保存基于 Prefect 3.9.2 的独立采集应用，包括 Maxun 在线设计接入、EasySpider 模板发布与执行、原有 fetch-crawler 适配入口，以及 Linux / Windows 部署脚本。运行代码位于此目录中，不属于 Prefect 核心包。</p>
 <p>仓库：chenxc2014/prefect；应用分支：crawler-platform/development。该分支以现有 ui-v2/chinese-localization 分支为基础，包含中文 UI 定制。</p>
 <table><tr><th>目录</th><th>用途</th></tr><tr><td>flows / runtime</td><td>Prefect 编排、执行引擎适配、模板版本、参数和产物校验。</td></tr><tr><td>tools</td><td>采集管理 API、执行节点工具、单元测试。</td></tr><tr><td>deploy</td><td>管理页面、Maxun 部署与补丁、Linux / Windows 服务脚本、示例及站点模板。</td></tr><tr><td>doc</td><td>实施方案、部署记录与已脱敏的实际验收结果。</td></tr><tr><td>.tmp</td><td>现有开发维护与验收脚本；为保留既有命令路径而纳入版本控制，生成数据不在其中。</td></tr></table>
-<h2>环境与验证</h2><p>命令在此目录中执行。控制与采集 API 使用独立 Python 环境；requirements.txt 固定 Prefect 版本，deploy/locks 保存各执行环境依赖。网站凭据、会话、证书私钥与原始导出数据需在受限目录独立配置。</p>
-<pre>python -m unittest tools.test_catalog tools.test_artifacts tools.test_maxun</pre>
-<p>在线界面验收脚本为 <code>.tmp/maxun/verify-portal.mjs</code>，需配置 .local/client.json 与 CA、建立内部验证隧道并启动 .tmp/maxun/proxy.mjs。测试会在 Linux 演示站点发布并执行采集任务。当前外网环境禁止连接 Windows 167。</p>
+<h2>共享界面主题</h2><p>采集工作台、Prefect、Maxun 使用共享品牌、深色侧栏、蓝色主操作与应用切换。源文件为 deploy/web/suite-theme.css 和 suite-theme.js；Maxun 固定品牌色通过 deploy/maxun/apply-branding.py 适配。认证与专业工作区继续保留，验证见 doc/统一界面风格验收.json。</p><h2>环境与验证</h2><p>命令在此目录中执行。控制与采集 API 使用独立 Python 环境；requirements.txt 固定 Prefect 版本，deploy/locks 保存各执行环境依赖。网站凭据、会话、证书私钥与原始导出数据需在受限目录独立配置。</p>
+<pre>python -m unittest tools.test_auth tools.test_catalog tools.test_artifacts tools.test_maxun</pre>
+<p>统一主入口为采集工作台，使用现有 crawlerdev 账号登录后，可免再次输入密码进入 Prefect 与 Maxun；退出统一登录后，各界面回到同一登录页。平台密码不进入 URL 或浏览器 localStorage，Worker 仍使用原接口认证。</p>
+<p>当前界面验收脚本为 <code>.tmp/maxun/verify-sso.mjs</code>，需配置 .local/client.json 与 CA、使用 .tmp/maxun/tunnel.py --verify-only 建立内部验证隧道并启动 .tmp/maxun/proxy.mjs。测试会在 Linux 演示站点执行采集任务；--quick 参数跳过录制与采集，只复验统一登录与退出。当前外网环境禁止连接 Windows 167。</p>
 <p>前端验收及 UI 发布工具引用 <code>vendor/prefect/ui-v2</code>；从此仓库运行时可使用 <code>vendor/prefect</code> 指向上级仓库根目录的本地目录链接。EasySpider 与 Maxun 源码按 framework.lock.json 的仓库和提交单独准备到 vendor 下，源码副本与运行镜像不重复提交。</p>
 <p>Maxun Web 录制服务已部署并验证登录、创建及远程页面显示；EasySpider 已验收真实商品流向采集。原有爬虫仍需逐站隔离接入，Maxun 同站业务验收尚未完成。</p>
-<p><a href="doc/爬虫任务编排与执行平台.html">完整实施方案</a> · <a href="doc/开发环境部署记录.html">部署记录</a> · <a href="doc/多引擎工作台界面验收.json">界面验收</a></p></html>
+<p><a href="doc/爬虫任务编排与执行平台.html">完整实施方案</a> · <a href="doc/开发环境部署记录.html">部署记录</a> · <a href="doc/统一登录部署验收.json">统一登录验收</a></p></html>

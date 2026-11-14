@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-14T16:53:08.395Z",
+  "checks": [
+    "未登录统一跳转中文登录页，受保护接口拒绝访问，无 Basic 弹窗",
+    "新浏览器仅输入一次平台账号密码，建立 Secure / HttpOnly 统一会话",
+    "Prefect 网关验证写请求的来源与 CSRF，有效会话可调用 API",
+    "从工作台进入 Prefect，直接显示中文管理界面，无需二次登录",
+    "从工作台进入 Maxun，服务端自动衔接原有账号，直接进入机器人页面",
+    "三个界面刷新后仍免登录，浏览器 localStorage 无平台密码",
+    "统一会话下 Maxun 可创建录制、建立 WebSocket，远程网页的日期输入与查询交互通过",
+    "统一会话提交 EasySpider 演示任务，Prefect / Worker 执行完成并下载 6 行 CSV",
+    "从 Maxun 退出统一登录，三个界面同步回到登录页，旧会话重放及接口访问均被拒绝",
+    "退出浏览器会话后，Worker 使用的原有 Basic 接口认证仍然有效"
+  ],
+  "method": "经 SSH 隧道及校验 CA 的 HTTPS 代理验证实际服务",
+  "windows_167_accessed": false,
+  "cookie_flags": {
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax"
+  },
+  "run_id": "e3f50ace-6e35-4f11-84eb-1c2ca8ed16d2",
+  "frontend_errors": [],
+  "passed": true
+}

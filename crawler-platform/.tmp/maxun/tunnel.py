@@ -40,15 +40,17 @@ for local,remote in [(18443,8443),(19443,9443),(9443,9443),(18080,18080)]:
     server.server_bind();server.server_activate()
     threading.Thread(target=server.serve_forever,daemon=True).start()
 
+verify_only = '--verify-only' in sys.argv
 proxy=urlsplit(getproxies().get('https',''))
-if proxy.hostname not in ('127.0.0.1','localhost') or not proxy.port:
+if not verify_only and (proxy.hostname not in ('127.0.0.1','localhost') or not proxy.port):
     raise RuntimeError('缺少本机现有网络代理，不创建任意外部出口')
 print('内部验收隧道就绪：18443/19443/18080；临时下载出口仅绑定服务器回环地址',flush=True)
 while True:
     client=None
     try:
         client=ssh.connect('169');transport=client.get_transport();transport.set_keepalive(10)
-        transport.request_port_forward('127.0.0.1',28080)
+        if not verify_only:
+            transport.request_port_forward('127.0.0.1',28080)
         print('SSH 下载和验收隧道已连接',flush=True)
         while transport.is_active():
             channel=transport.accept(10)

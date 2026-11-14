@@ -2,35 +2,39 @@
 import json
 import os
 from pathlib import Path
-import secrets
 from urllib.request import Request, urlopen
 from fastapi import Depends, FastAPI, HTTPException, Request as WebRequest
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from runtime.catalog import Catalog, materialize
+from tools.portal_auth import PortalAuth
 
 ROOT = Path(__file__).resolve().parents[1]
 config = json.loads(Path(os.environ.get('CRAWLER_CLIENT_CONFIG', '/etc/crawler-dev/client.json')).read_text(encoding='utf-8-sig'))
 os.environ.update(config['env'])
 catalog = Catalog(os.environ.get('CRAWLER_CATALOG_ROOT', '/var/lib/crawler-dev/catalog'))
 app = FastAPI(docs_url=None, redoc_url=None)
-security = HTTPBasic()
 MAXUN_DESIGNER_URL = os.environ.get('CRAWLER_MAXUN_DESIGNER_URL', 'https://192.168.1.169:9443/')
+portal_auth = PortalAuth(config['env']['PREFECT_API_AUTH_STRING'], catalog.root.parent / 'auth')
+app.include_router(portal_auth.router)
 
 
-def authenticate(request: WebRequest, credentials: HTTPBasicCredentials = Depends(security)):
-    actual = (credentials.username + ':' + credentials.password).encode()
-    if not secrets.compare_digest(actual, config['env']['PREFECT_API_AUTH_STRING'].encode()):
-        raise HTTPException(401, '认证失败', headers={'WWW-Authenticate': 'Basic'})
+def authenticate(request: WebRequest):
+    session = portal_auth.session(request)
+    if session:
+        portal_auth.protect_write(request, session)
+    elif not portal_auth.basic_valid(request.headers.get('authorization')):
+        raise HTTPException(401, '请先登录采集管理平台')
     if request.method != 'GET' and request.headers.get('origin'):
         from urllib.parse import urlparse
         if urlparse(request.headers['origin']).netloc != request.headers.get('host'):
             raise HTTPException(403, '请求来源不匹配')
 
 
-@app.get('/', dependencies=[Depends(authenticate)])
-def home():
-    return HTMLResponse((ROOT / 'deploy/web/collector.html').read_text(encoding='utf-8'))
+@app.get('/')
+def home(request: WebRequest):
+    if not portal_auth.session(request):
+        return portal_auth.login_redirect()
+    return portal_auth.private(HTMLResponse((ROOT / 'deploy/web/collector.html').read_text(encoding='utf-8')))
 
 
 @app.get('/api/templates', dependencies=[Depends(authenticate)])
@@ -126,7 +130,7 @@ def download(identifier: str, index: int):
 @app.get('/designer', dependencies=[Depends(authenticate)])
 def designer():
     # 入口固定使用部署地址，避免堡垒机或本地转发域名被拼成错误的 9443 地址。
-    return RedirectResponse(MAXUN_DESIGNER_URL, status_code=307)
+    return RedirectResponse('/collector/open/maxun', status_code=303)
 
 
 @app.get('/api/platform', dependencies=[Depends(authenticate)])
@@ -160,7 +164,7 @@ async def platform_info():
         'checked_at': datetime.now(timezone.utc).isoformat(),
         'prefect': {'state': prefect_state, 'url': '/v2/'},
         'engines': {
-            'maxun': {'state': maxun_state, 'designer_url': MAXUN_DESIGNER_URL, 'mode': 'web'},
+            'maxun': {'state': maxun_state, 'designer_url': '/collector/open/maxun', 'direct_url': MAXUN_DESIGNER_URL, 'mode': 'web'},
             'easyspider': {'state': 'configured' if Path(os.environ.get('CRAWLER_ENGINE_CONFIG', '/etc/crawler-dev/easyspider.json')).is_file() else 'unavailable', 'mode': 'desktop'},
             'legacy': {'state': 'adapter_only', 'mode': 'python'},
         },
