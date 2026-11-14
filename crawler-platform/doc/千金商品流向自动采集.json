@@ -1,0 +1,33 @@
+{
+  "template_id": "a744036fe20645a3eca0645a21899f17b9d64b663a7aba4bd71c1c5d3ee978df",
+  "run": {
+    "id": "f71c1f20-72fd-4049-bbe6-ed011e825a10",
+    "url": "/v2/runs/flow-run/f71c1f20-72fd-4049-bbe6-ed011e825a10"
+  },
+  "status": {
+    "id": "f71c1f20-72fd-4049-bbe6-ed011e825a10",
+    "state": "COMPLETED",
+    "message": null,
+    "artifacts": [
+      {
+        "name": "esfile_2026-11-12-2026-11-12配送信息.xlsx_f726fa06-a203-4710-aae6-34fdf399409d_2026-11-12-2026-11-12配送信息.xlsx",
+        "sha256": "7ed898a810d386453f2454ac59ee60143edd482843b2bbf185afc7cb8aae188b",
+        "size": 3857,
+        "url": "/collector/api/results/f71c1f20-72fd-4049-bbe6-ed011e825a10/0"
+      }
+    ]
+  },
+  "passed": true,
+  "date_range": [
+    "2026-11-12",
+    "2026-11-12"
+  ],
+  "file_validation": {
+    "row_count": 3,
+    "dates": [
+      "2026-11-12"
+    ]
+  },
+  "equivalent_to_manual": true,
+  "local_file": ".local\\sites\\qjdyf\\商品流向_20261112_自动采集.xlsx"
+}

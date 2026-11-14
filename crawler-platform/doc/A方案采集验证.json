@@ -1,0 +1,13 @@
+{
+  "template_id": "ab14b0290642aadeebe47838607860446fb0c562f97b3b6a1893ef2ec3f2d2d7",
+  "run": {
+    "id": "01467239-5730-4aaf-81cd-3e74c790a661",
+    "url": "/v2/runs/flow-run/01467239-5730-4aaf-81cd-3e74c790a661"
+  },
+  "status": {
+    "id": "01467239-5730-4aaf-81cd-3e74c790a661",
+    "state": "COMPLETED",
+    "message": null
+  },
+  "passed": true
+}

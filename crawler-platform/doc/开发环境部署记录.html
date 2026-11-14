@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>开发环境使用说明</title><style>body{max-width:1000px;margin:40px auto;padding:0 24px;color:#193345;font:15px/1.9 system-ui,"Microsoft YaHei",sans-serif;background:#f6f8fa}h1{color:#126d71}section{background:white;border:1px solid #dce5e9;border-radius:12px;padding:24px;margin:18px 0}pre{overflow:auto;background:#183345;color:#eaf2f5;padding:16px;border-radius:8px;font-size:12px}code{overflow-wrap:anywhere}table{border-collapse:collapse;width:100%}td,th{padding:12px;text-align:left;border-bottom:1px solid #ddd}a{color:#126d71}.note{background:#fff4dc;padding:15px;border-left:4px solid #d9a039}</style></head><body>
+<h1>网爬平台开发环境</h1><p>部署日期：2026-11-13。当前交付的是开发基础设施、隔离执行样例和跨节点联调工具，尚未接管生产业务。</p><p>管理首页修复：服务账户无法在只读安装目录生成 UI 文件，曾导致首页 404。现已配置独立目录 <code>/var/lib/crawler-dev/ui</code>，并保留安装目录只读。部署生成脚本和联调入口均已补充此配置及首页/静态资源/深链接检查。详细结果见 <a href="管理首页修复验证.json">管理首页修复验证</a>。</p>
+<section><h2>源码与代码位置</h2><p>当前开发仓库：<a href="https://github.com/chenxc2014/prefect.git">chenxc2014/prefect</a>；本地 <code>vendor/prefect</code> 的 <code>origin</code> 已指向该地址。<code>upstream</code> 保留为官方 <code>https://github.com/PrefectHQ/prefect.git</code>，供后续合并上游更新。中文定制已提交并推送至 ui-v2/chinese-localization 分支（提交 69c06336f9e604c7aa1f799dcaec33da5c0f56d7）；服务器当前运行版本继续为 3.9.2，不因仓库地址切换而自动升级。</p><table><tr><th>内容</th><th>位置</th></tr><tr><td>Prefect 开发仓库源码</td><td>vendor\prefect，标签 3.9.2，提交 b0479c0c26045b06321191bbad0cdfbb334d7380。</td></tr><tr><td>项目开发代码</td><td>flows、runtime、tools、deploy。</td></tr><tr><td>本地 Python 环境</td><td>.venv（Python 3.11）；远端为各自独立的 Python 3.12 环境。</td></tr></table><p>vendor 中的 Prefect UI v2 已在 ui-v2/chinese-localization 分支进行中文界面定制，后端运行固定版本 3.9.2 的发布包。原有 fetch-crawler 目录没有修改。</p></section>
+<section><h2>服务与登录</h2><p>管理界面：<a href="https://192.168.1.169:8443/">https://192.168.1.169:8443/</a>；API：<code>https://192.168.1.169:8443/api</code>。</p><p>用户名为 <code>crawlerdev</code>。随机生成的认证值保存在当前工作区 <code>.local\client.json</code> 的 <code>env.PREFECT_API_AUTH_STRING</code>，格式为 <code>用户名:密码</code>；不写入版本控制和公开文档。开发证书 CA 位于 <code>.local\ca.pem</code>。Python 客户端会使用该 CA 验证服务。</p><div class="note">浏览器需要信任本项目开发 CA 才能无证书提示访问。可先核对 CA 来源与指纹，再由使用者按本机证书管理流程导入；不要通过关闭证书验证访问。防火墙当前只允许开发机 192.168.1.74 和 Windows 节点 192.168.1.167 访问 8443，新增开发机时需加入准确来源地址。</div></section>
+<section><h2>节点与任务</h2><table><tr><th>节点</th><th>服务 / 工作池</th><th>目录</th></tr><tr><td>169 / Linux</td><td>crawler-dev-server、crawler-dev-gateway、crawler-dev-worker、postgresql；工作池 dev-linux，队列 node-169，并发 2。</td><td>/opt/crawler-dev；任务 /var/lib/crawler-dev/runs。</td></tr><tr><td>167 / Windows</td><td>计划任务 CrawlerDev-Worker，以 SYSTEM 运行；工作池 dev-windows，队列 node-167，并发 2。</td><td>D:\CrawlerDev；日志 D:\CrawlerDev\logs\worker.log。</td></tr></table><p>UI 中有两个部署：<code>crawler-dev-probe/linux-169</code>、<code>crawler-dev-probe/windows-167</code>。它们只访问执行器自己启动的本地模拟接口，不访问生产网站或数据库。Windows Worker 属于非交互开发进程，不能据此认定桌面爬虫已经可用。</p></section>
+<section><h2>本地开发与验证</h2><p>在工作区运行以下命令。远程操作需要现有免密 SSH 与正常网络权限；脚本检查既有 known_hosts，不自动接受未知主机密钥。</p><pre>.\.venv\Scripts\python.exe -m pip check
+python -m compileall -q flows runtime tools deploy/linux
+python tools/dev_api.py
+python .tmp/crawler-dev/manage.py 169 verify</pre><p>验证会投递 9 个测试任务：7 个完成，1 个预期主动失败，1 个预期超时失败。结果写入 <code>doc\开发环境验证结果.json</code>。最后两个 Failed 是有意的故障注入，不代表待修复业务任务。</p><p>修改代码后，通过项目管理脚本的 <code>169 push</code> 和 <code>167 push</code> 同步到两个开发节点。只在没有运行中测试任务时同步；正式版本发布应使用新 release 目录，不能沿用开发覆盖方式。</p></section>
+<section><h2>运维与部署差异</h2><p>169 已安装 Docker，但 Docker Hub 连接超时，因此实际控制中心使用原生 systemd + PostgreSQL 16.15，尚未运行 Compose 容器。PostgreSQL 与 Prefect API 仅监听本机；HTTPS 网关对授权来源开放。SELinux 保持 Enforcing，已开启反向代理所需网络连接 Boolean。</p><p>首次备份 <code>/opt/crawler-dev/backups/prefect-20261113T020753Z.dump</code> 的 SHA-256 验证通过，成功还原至独立数据库 <code>crawler_dev_restore_20261113020927</code>，还原的 flow_run 数量为 9；验证库暂保留供复查，没有覆盖运行数据库。</p><pre># 169：仅查看本项目服务
+systemctl status crawler-dev-server crawler-dev-gateway crawler-dev-worker --no-pager
+journalctl -u crawler-dev-worker -n 50 --no-pager
+systemctl list-timers crawler-dev-backup.timer --no-pager
+
+# 167：查看独立开发任务
+Get-ScheduledTask -TaskName 'CrawlerDev-Worker'
+Get-Content 'D:\CrawlerDev\logs\worker.log' -Tail 30</pre><p>每天 03:15（服务器当前 Asia/Shanghai）备份开发数据库到 <code>/opt/crawler-dev/backups</code>。首轮备份和独立数据库恢复演练结果见部署记录。备份目前在同机，尚未实现异机备份或生产级高可用。</p></section>
+<section><h2>尚需完成的业务开发</h2><ul><li>现有类式与 FetchresultDown 旧入口适配、路径隔离和完整后处理回归。</li><li>业务任务领取、ownership、outbox、租约、账号互斥、导入幂等与对账。</li><li>真实浏览器/驱动、网站账号、SQL Server 及共享文件链路接入。</li><li>Linux 站点迁移、Windows 桌面会话、主动取消及节点失联恢复验证。</li></ul><p>当前样例的进程超时已验证，不等于已经验证所有 Prefect 主动取消或整机故障场景。Windows 异步子进程日志中出现过管道关闭告警，但测试任务仍完成；生产接入前应继续跟踪。</p><p><a href="../doc/爬虫任务编排与执行平台.html">完整实施方案</a> · <a href="../doc/开发环境验证结果.json">实际验证结果</a></p></section><section><h2>中文管理界面</h2><p>2026-11-13 已发布中文界面版本 <code>3.9.2-zh.1</code>，默认简体中文。访问原管理地址，使用 Ctrl+F5 刷新；登录页及左下角均可切换中文 / English，语言选择保存在当前浏览器。</p><p>覆盖常用导航、登录、部署、运行状态、工作池及表单提示。业务任务名称、自定义状态名称、运行日志、API 参数与技术标识保留原值；旧版 v1 界面仍为英文，部分高级功能或动态文案后续继续补充。</p><p>源码位置：<code>vendor/prefect/ui-v2/localization</code>（词典及构建转换）、<code>src/i18n</code>（语言选择与状态翻译）。构建转换仅针对可显示文案，不替换接口枚举、业务名称或路由值。后端与数据库结构未更改。</p><p>169 当前资源目录：<code>/var/lib/crawler-dev/ui-releases/zh-cn-20261113T025217Z</code>，之前目录 <code>/var/lib/crawler-dev/ui</code> 保留；配置为 <code>/etc/crawler-dev/ui.env</code>，版本指针为 <code>/etc/crawler-dev/ui-release.json</code>。</p><pre># 在 UI 源码目录构建
+npm ci
+npm run build
+
+# 在工作区同步发布脚本、发布前端、验证实际部署
+python .tmp/crawler-dev/manage.py 169 push
+python .tmp/crawler-dev/manage.py 169 release-ui
+python .tmp/crawler-dev/manage.py 169 check-ui
+python .tmp/crawler-dev/manage.py 169 ui-browser remote
+
+# 在 169 回退界面（会重启开发控制中心）
+python3.12 /opt/crawler-dev/releases/dev-v1/deploy/linux/release_ui.py --rollback</pre><p>验证：8 个测试文件、52 项测试通过；TypeScript 与生产构建通过；ESLint 无错误，保留上游已有 64 项警告。发布后通过首页、静态资源、API 健康及未认证 401 检查。浏览器验收结果见 <a href="界面汉化浏览器验证.json">界面汉化浏览器验证</a>。</p><p>后续升级 Prefect 时需重新构建并复验定制界面；直接切换官方前端资源会恢复英文。</p></section><section><h2>A 方案：可视化采集入口与首站验收</h2><p>EasySpider 开发仓库已切换为 <a href="https://github.com/chenxc2014/EasySpider.git">chenxc2014/EasySpider</a>。本地 <code>vendor/easyspider</code> 的 origin 指向该仓库，官方 <code>NaiboWang/EasySpider</code> 保留为 upstream。运行基线继续固定 v0.6.5 / 191bd6d7547bb397e4c579dd2c70ae835be3f512，切换源码地址不自动发版；设计客户端已安装包仍保留官方来源记录。</p><p>采集管理入口：<a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>，使用现有开发管理账号。桌面设计器启动命令：<code>powershell -File tools/start-designer.ps1</code>。</p><p>EasySpider v0.6.5 已通过独立 Python 环境接入两个 Worker；模板发布、参数绑定、账号引用、单节点账号互斥、集中归档与认证下载已实现。169 新增 crawler-dev-collector 和 crawler-dev-demo；167 新增 CrawlerDev-Demo 本机模拟站点计划任务。</p><p>已验收千金供应商系统“商品流向 / 配送记录”：2026-11-12 单日、3 条数据、日期正确，与独立浏览器取证业务数据一致。运行 ID：f71c1f20-72fd-4049-bbe6-ed011e825a10。管理页使用活动站点模板、日期参数及账号引用 qjdyf-test 发起运行；网站密码保存在受限节点配置中。</p><p>当前归档上限每次 10MB，尚未开启业务定时计划；旧生产程序仍未接管，旧函数入口和完整业务后处理尚待专项回归。此前两次站点调试失败均因文件校验未通过，保留原状态；正式使用活动版本。</p><p><a href="爬虫任务编排与执行平台.html#implementation-a">完整使用与目录说明</a> · <a href="A方案双节点验收.json">双节点验收</a> · <a href="千金商品流向自动采集.json">真实站点验收</a></p></section><section><h2>2026-11-14 多引擎工作台改版</h2>
+<div id="multi-engine-workspace" class="note">
+<h3>2026-11-14 更新：多引擎采集工作台</h3>
+<p>采集管理入口仍为 <a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>。首页已重构为侧栏导航、三个引擎卡片、实际服务状态、活动任务列表与架构说明；发布与运行功能分为独立工作区。</p>
+<div class="table-wrap"><table><thead><tr><th>入口</th><th>设计方式与操作路径</th><th>当前边界</th></tr></thead><tbody>
+<tr><td>Maxun</td><td>首页「进入 Maxun 在线设计器」→ Web 录制与保存机器人 → 回到 Maxun 工作区刷新、绑定参数并发布 → 已发布任务运行。</td><td>地址 <a href="https://192.168.1.169:9443/">https://192.168.1.169:9443/</a>。账号 crawlerdev@crawler.local，密码沿用开发管理账号，不在文档记录明文。服务可用不等于所有网站已完成业务验收。</td></tr>
+<tr><td>EasySpider</td><td>首页「打开客户端启动指引」→ 开发机运行 tools/start-designer.ps1 → 客户端设计、导出 JSON → 平台导入与发布。</td><td>浏览器不能直接启动本机 exe；工作区提供启动命令和上游安装包链接。日常服务器执行不依赖本地客户端常开。</td></tr>
+<tr><td>fetch-crawler</td><td>首页「查看原有爬虫接入」→ 查阅原路径、适配入口、隔离与成功检查要求 → 逐站登记、验证后再注册调度。</td><td>runtime/legacy.py 已提供适配代码，当前没有开放旧业务直接发布运行，没有接管生产队列。</td></tr>
+</tbody></table></div>
+<p><strong>关系：</strong>平台负责版本发布、参数与结果管理；Prefect 负责调度、队列、节点、运行状态和日志；Maxun、EasySpider、原有采集类分别执行网站操作。Maxun 与 EasySpider 模板格式独立，当前不支持自动互转。旧爬虫接入仍需逐站完成隔离与验收。</p>
+<h4>Maxun 无法打开的原因与修复</h4>
+<p>实际检查确认：169 的 9443 已监听，HTTPS 页面返回 200，但防火墙此前仅为 8443 配置了精确来源白名单。此次 deploy/maxun/gateway.py 将同一组来源规则应用到 9443，并同时写入运行时与持久化配置；未扩大到任意来源。首页入口改用部署配置中的固定地址，不再将当前浏览器访问主机机械拼接为 9443 地址；/collector/designer 也改为实际跳转。</p>
+<p>现有允许来源为 192.168.1.74/32 和 192.168.1.167/32，8443 与 9443 一致。若堡垒机实际出口改变，应按准确来源追加两个入口的规则。内部浏览器通过 SSH 隧道及严格校验开发 CA 的代理验证；未从用户堡垒机发起连通性测试。</p>
+<h4>Linux 169 的 Maxun 部署位置</h4>
+<div class="table-wrap"><table><thead><tr><th>目录 / 服务</th><th>用途</th></tr></thead><tbody>
+<tr><td>/opt/crawler-dev/maxun/</td><td>Maxun 部署脚本、解析后 Compose、受限环境变量与镜像补丁；backend 容器只监听本机 18080。</td></tr>
+<tr><td>/opt/crawler-dev/maxun-web/</td><td>经镜像应用层摘要校验提取的 Web 静态资源，由 Nginx 9443 服务。</td></tr>
+<tr><td>/opt/crawler-dev/control/maxun.conf</td><td>独立 HTTPS 入口与 API / WebSocket 代理，主配置仍为 control/nginx.conf。</td></tr>
+<tr><td>/opt/crawler-dev/maxun-browser/</td><td>独立浏览器连接服务；crawler-maxun-browser 使用服务账户与已有 Chrome，监听 Docker 网桥地址。</td></tr>
+<tr><td>/var/lib/pgsql/maxun-data/</td><td>独立 PostgreSQL 集群，crawler-maxun-database；不使用 Prefect 的原数据目录。</td></tr>
+<tr><td>/var/lib/crawler-maxun/objects/</td><td>独立对象存储数据，crawler-maxun-storage；禁止随普通前端发布清理。</td></tr>
+<tr><td>/etc/crawler-dev/maxun.json</td><td>受限集成凭据，由采集服务读取，不进入公开模板。</td></tr>
+<tr><td>crawler-maxun-ocr</td><td>内部图片识别服务，业务网站适用性需逐站验证。</td></tr>
+</tbody></table></div>
+<p>改版前文件备份位于 <code>/opt/crawler-dev/backups/portal-20261114-231017/</code>，包含原 collector.html、collector.py、gateway.py。回退页面及采集 API 后仅重启 crawler-dev-collector；保留已修正的 9443 白名单规则和 Maxun 服务。其他发布时间的 portal-* 目录保存各次发布前文件。</p>
+<p>验收记录：<a href="多引擎工作台界面验收.json">多引擎工作台界面验收</a>。本次未访问或操作 Windows 167，历史双节点验证结果仅作为历史记录；千金商品流向此前的业务验收属于 EasySpider，不代表 Maxun 已完成同站验收。</p>
+</div>
+</section></body></html>

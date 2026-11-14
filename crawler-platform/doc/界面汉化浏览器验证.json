@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "source": "169-deployed-ui",
+  "checks": [
+    "中文登录",
+    "中文导航",
+    "概览内容加载",
+    "部署列表与业务名称保留",
+    "工作池列表与业务名称保留",
+    "英文切换",
+    "切回中文"
+  ],
+  "screenshots": "D:\\01_source\\05_ai\\doc\\网爬平台框架\\.local\\screenshots"
+}

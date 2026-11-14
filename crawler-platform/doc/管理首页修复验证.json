@@ -1,0 +1,428 @@
+{
+  "passed": true,
+  "pages_and_assets": [
+    {
+      "url": "https://192.168.1.169:8443/v2/",
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 7124
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/index-BP8d67P7.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 204774
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/rolldown-runtime-COiEfhsA.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1116
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-codemirror-CCXRnK5R.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 645651
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-date-sIzZu1UK.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 230537
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-radix-BVWILIqi.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 179265
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-react-DdFHGe1I.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 206810
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-mermaid-DZXN5VZG.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 4825930
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-pixi-CP4Y8Smz.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 639593
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-recharts-D1Wnu-LR.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 348409
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-tanstack-XHWgg6l3.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 203487
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/error-utils-CRZTwdQh.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1067
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/ui-settings-CJ2nhIH2.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 3957
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/service-BOxvAHRa.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 8981
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/admin-CVl_4FSp.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1350
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/dist-CI3Dbl5f.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 33596
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/button-1Y0KMiAx.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 76179
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/select-CyH2HTZ6.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 3835
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/seconds-DHsbPwSJ.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1464
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/date-BV4FlYL3.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 653
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/input-CalKw7By.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1520
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/skeleton-ClDKC8sg.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 253
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/tooltip-Cl4FFnX-.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1177
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/card-CR27q03G.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 969
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/vendor-forms-CPwgnVUd.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 137662
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/checkbox-BT4ow4kX.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 892
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/dialog-CeFFLadO.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2503
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/label-Cdm13mGg.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 472
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/loading-BVtB-I6j.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 906
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/deployments-BHm3GCGN.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 4927
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/flow-runs-BrHQPcNx.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 4238
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/task-runs-PYl9oRhu.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2900
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/work-pools-Durwa-pR.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2941
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/badge-CFQS5QD1.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1572
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/state-badge-BC_puavv.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1920
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/popover-C0zAadpJ.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1189
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/tag-badge-BHc9RThl.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 655
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/tag-badge-group-_CTUpHT7.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2770
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/work-queues-5GCfN1DT.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1322
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/status-badge-nHR1Xiir.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 776
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/work-queue-icon-text-DLwmgRJ8.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1118
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/breadcrumb-DMsvQfAY.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1342
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/json-input-lazy-h80ga17W.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2986
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/pagination-BBBjYvXp.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1692
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/combobox-B03xQVZM.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 14969
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/scroll-area-BeoDRxL7.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1041
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/date-time-picker-2nD5tkdb.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 52209
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/date-range-select-DSsfRVqM.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 12147
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/constants-DNk4ayrJ.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 895
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/dropdown-menu-CpDddWef.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2195
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/state-type-filter-Zo4YEzm5.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2404
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/state-name-badge-Dk2o8OXX.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 327
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/delete-confirmation-dialog-DFtDl3uL.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 3474
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/flow-runs-list-CAyI9Aka.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 22696
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/work-pool-queues-fU0tAgM0.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2454
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/work-pools-cd9fH9_B.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 33
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/formatted-date-BOgwMjlB.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1230
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/artifacts-zKTo99xF.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1591
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/automations-Tlx1-3De.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2251
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/automations-Chd_SrKd.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 34
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/events-jqOoA5J3.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 1820
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/block-documents-nGPx4AW1.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2735
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/block-types-BfnduzI7.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 737
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/task-run-concurrency-limits-BW1PNr0r.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 2595
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/sort-filter.constants-BBQ2oQb-.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 81
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/logs-D0tH0qhh.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 571
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/block-schemas-D7Ou1FOG.js",
+      "status": 200,
+      "content_type": "text/javascript",
+      "bytes": 446
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/assets/index-D8hZcVO-.css",
+      "status": 200,
+      "content_type": "text/css",
+      "bytes": 187447
+    },
+    {
+      "url": "https://192.168.1.169:8443/v2/deployments",
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 7124
+    }
+  ],
+  "ui_api_url": "https://192.168.1.169:8443/api",
+  "api_health": true,
+  "unauthenticated_api_status": 401,
+  "deployments": [
+    "linux-169",
+    "linux-169",
+    "windows-167",
+    "windows-167"
+  ]
+}

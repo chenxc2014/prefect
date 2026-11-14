@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="基于 Prefect 的爬虫任务编排与执行平台实施部署方案：Linux 优先、Windows 兼容、旧爬虫接入、单机并发和多机调度。">
+<title>爬虫任务编排与执行平台｜实施与部署方案</title>
+<style>
+:root{--ink:#172d40;--muted:#596d7c;--brand:#126d71;--brand-soft:#e7f3f1;--blue:#285b90;--line:#dce5e9;--paper:#fff;--bg:#f1f5f7;--amber:#8a5718;--amber-soft:#fff5e3;--red:#a33d3d;--shadow:0 8px 30px #1b3c5010}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.8 "Microsoft YaHei","PingFang SC",system-ui,sans-serif}a{color:var(--brand);text-underline-offset:3px}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #da932a;outline-offset:3px}.layout{max-width:1560px;margin:auto;display:grid;grid-template-columns:245px minmax(0,1fr);gap:32px;padding:32px}.sidebar{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;padding:23px 17px;background:var(--paper);border:1px solid var(--line);border-radius:15px}.sidebar strong{font-size:17px}.sidebar small{display:block;color:var(--muted);margin:4px 0 15px}.toc a{display:block;padding:7px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13px;line-height:1.5}.toc a:hover,.toc a.active{background:var(--brand-soft);color:var(--brand)}main{min-width:0}.hero{padding:40px;background:linear-gradient(125deg,#102d3f,#155b61);color:#fff;border-radius:18px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:260px;height:260px;border:45px solid #ffffff08;border-radius:50%;right:-85px;top:-60px;pointer-events:none}.eyebrow{font-size:12px;letter-spacing:2px;color:#acd9d6}.hero h1{font-size:36px;line-height:1.3;margin:12px 0}.hero .lead{max-width:820px;color:#d6e7ed;font-size:16px}.badges{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.badge{font-size:12px;padding:4px 10px;border-radius:6px;background:#ffffff15;border:1px solid #ffffff25}.hero .meta{font-size:12px;color:#b6d0d9}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.actions button{border:1px solid #ffffff66;background:#fff;color:#174651;padding:8px 15px;border-radius:8px}.actions .secondary{background:transparent;color:#fff}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.summary article{background:white;border:1px solid var(--line);border-radius:12px;padding:18px}.summary b{display:block;font-size:20px;color:var(--brand)}.summary span{font-size:13px;color:var(--muted)}section{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:14px;padding:30px;margin:22px 0;scroll-margin-top:24px}h2{font-size:24px;margin:0 0 18px;line-height:1.45}h2 .num{font-size:13px;font-weight:600;display:block;color:var(--brand);letter-spacing:1px;margin-bottom:4px}h3{font-size:18px;margin:26px 0 10px}h4{font-size:15px;margin:18px 0 8px}p{margin:10px 0}ul,ol{padding-left:24px}li{margin:6px 0}.note{border-left:4px solid var(--brand);padding:13px 17px;background:var(--brand-soft);border-radius:0 8px 8px 0;margin:18px 0}.warn{border-color:#d69a36;background:var(--amber-soft);color:#64451d}.note p:first-child{margin-top:0}.note p:last-child{margin-bottom:0}.table-wrap{overflow:auto;margin:16px 0;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}th,td{padding:12px 13px;vertical-align:top;border-bottom:1px solid var(--line);min-width:95px}th{background:#edf3f5;font-weight:600;white-space:nowrap}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafcfd}td code,li code,p code{font-size:.91em;color:#22596e;background:#edf3f5;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}pre{margin:0;white-space:pre;tab-size:4;overflow:auto;padding:20px;background:#152c3c;color:#deebf1;font:12px/1.8 Consolas,"Microsoft YaHei",monospace;max-height:620px}.codebox{margin:15px 0;border-radius:9px;overflow:hidden;border:1px solid #203e51}.codehead{background:#203e51;color:#bcd5df;padding:8px 13px;display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:12px}.copy{background:transparent;color:#d7e7ed;border:1px solid #698694;border-radius:5px;padding:2px 9px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{padding:18px;border:1px solid var(--line);border-radius:9px;background:#fbfdfe}.card h3{margin-top:0}.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--brand-soft);color:var(--brand)}.pill.todo{background:var(--amber-soft);color:var(--amber)}.architecture{background:#f3f7f8;padding:22px;border-radius:12px}.arch-top{text-align:center;border:1px solid #abc9ca;background:#e5f1ef;border-radius:9px;padding:17px}.arch-top strong{font-size:18px}.arrow{text-align:center;color:#749498;font-size:24px;line-height:1.6}.arch-lanes{display:grid;grid-template-columns:2fr 1fr;gap:17px}.lane{background:#fff;border:1px solid #bcd0db;border-radius:9px;padding:17px}.lane.linux{border-top:4px solid var(--brand)}.lane.windows{border-top:4px solid var(--blue)}.lane b{display:block;margin-bottom:9px}.lane small{display:block;color:var(--muted)}.arch-bottom{margin-top:18px;padding:13px;text-align:center;background:#e8eef3;border-radius:8px;font-size:13px}.steps{counter-reset:step}.step{position:relative;padding:0 0 24px 45px;border-left:2px solid var(--line);margin-left:13px}.step:last-child{padding-bottom:0;border-left-color:transparent}.step:before{counter-increment:step;content:counter(step);position:absolute;left:-16px;top:0;width:30px;height:30px;border-radius:50%;background:var(--brand);color:white;text-align:center;line-height:30px;font-size:13px}.step h3{margin:0 0 8px}.checklist label{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.checklist input{accent-color:var(--brand);margin-top:7px;flex:none}.checklist label:has(input:checked){color:#57746c;background:#f1f8f5}.checklist input:checked+span{text-decoration:line-through}.small{font-size:12px;color:var(--muted)}.source-list li{margin:12px 0}.footer{padding:15px 5px 35px;color:var(--muted);font-size:12px}.progress{height:5px;background:#dce8e8;border-radius:3px;overflow:hidden;margin:12px 0}.progress span{display:block;background:var(--brand);height:100%;width:0}.check-meta{display:flex;justify-content:space-between;gap:15px;align-items:center}.reset{background:#fff;border:1px solid var(--line);padding:4px 10px;border-radius:5px;color:var(--muted)}.mobile-toc{display:none}.nowrap{white-space:nowrap}
+@media(max-width:1100px){.layout{grid-template-columns:205px minmax(0,1fr);gap:20px;padding:20px}.sidebar{padding:18px 10px}section{padding:24px}.hero{padding:30px}.hero h1{font-size:30px}.summary{gap:10px}}
+@media(max-width:760px){.layout{display:block;padding:12px}.sidebar{position:static;max-height:none;padding:14px;margin-bottom:15px}.sidebar>strong,.sidebar>small{display:none}.mobile-toc{display:block;border:0;background:transparent;color:var(--brand);width:100%;text-align:left;font-weight:600}.toc{display:none;grid-template-columns:1fr 1fr;margin-top:10px}.sidebar.open .toc{display:grid}.hero{padding:25px 22px}.hero h1{font-size:28px}.summary{grid-template-columns:1fr}.summary article{padding:13px 17px}.summary b{font-size:18px}.grid2,.arch-lanes{grid-template-columns:1fr}section{padding:22px 17px;margin:16px 0}h2{font-size:21px}body{font-size:14px}.architecture{padding:13px}pre{font-size:11px;padding:15px}.check-meta{align-items:flex-start}.table-wrap th,.table-wrap td{min-width:110px}}
+@media print{html{scroll-behavior:auto}body{background:#fff;font-size:10pt;line-height:1.6;color:#111}.layout{display:block;padding:0;max-width:none}.sidebar,.actions,.copy,.reset{display:none!important}.hero{background:#edf3f5!important;color:#132d40;padding:20px;border:1px solid #aaa}.hero .lead,.hero .meta,.eyebrow{color:#344e60}.badge{border-color:#aaa}.summary{margin:12px 0}.summary article{box-shadow:none}section{border:0;border-top:1px solid #aaa;border-radius:0;box-shadow:none;padding:16px 0;margin:14px 0;break-inside:auto}h2,h3,h4{break-after:avoid}.note,.card,.summary article{break-inside:avoid}.table-wrap{overflow:visible}table{font-size:8pt}th,td{padding:7px;min-width:0!important}thead{display:table-header-group}tr{break-inside:avoid}pre{max-height:none;overflow:visible;white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f4f5;color:#111;font-size:8pt;padding:12px}.codehead{background:#e9edef;color:#111}.codebox{break-inside:auto;border-color:#bbb}a{color:#174e69}.hero:after{display:none}.toc{display:none}.footer{padding-bottom:0}@page{size:A4;margin:16mm}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" aria-label="文档目录">
+<strong>实施与部署手册</strong><small>Linux 优先 · Windows 兼容</small>
+<button class="mobile-toc" aria-expanded="false" aria-controls="toc">展开文档目录 ▾</button>
+<nav class="toc" id="toc">
+<a href="#scope">01 目标与实施边界</a><a href="#baseline">02 源码基线与盘点</a><a href="#architecture">03 目标架构与部署拓扑</a><a href="#environments">03-A 工作区与两台服务器的关系</a><a href="#deployment-directories">03-B 三环境部署与目录说明</a><a href="#implementation-a">03-C A方案实施与使用</a><a href="#capacity">04 环境、容量与版本</a><a href="#routing">05 节点、队列与并发</a><a href="#tasks">06 任务协议与可靠性</a><a href="#legacy">07 旧爬虫接入与隔离</a><a href="#linux-migration">08 Linux 迁移方案</a><a href="#deliverables">09 工程目录与开发清单</a><a href="#control-deploy">10 Linux 控制中心部署</a><a href="#worker-deploy">11 双系统执行节点部署</a><a href="#smoke">12 最小调度验证</a><a href="#business-deploy">13 业务接入与发布</a><a href="#rollout">14 实施计划与灰度切换</a><a href="#acceptance">15 测试与验收矩阵</a><a href="#operations">16 运维、备份与恢复</a><a href="#rollback">17 回退与故障处理</a><a href="#ai">18 自动分析与代码生成</a><a href="#checklist">19 执行检查清单</a><a href="#sources">20 依据与待确认项</a>
+</nav>
+</aside>
+<main>
+<header class="hero">
+<div class="eyebrow">实施方案 / 版本 1.0</div>
+<h1>爬虫任务编排与执行平台</h1>
+<p class="lead"><strong>平台定位：</strong>以 Prefect 工作流编排为底座，提供任务调度、分配、并发控制与运行监控。当前已完成基础环境、可视化模板执行和首个真实网站验证；原爬虫全面适配、生产接管及自动分析与代码生成仍待建设。</p>
+<p class="lead">以 Prefect 为任务调度底座，承接现有 Selenium 爬虫，建设支持单机并发、多机执行、固定范围分配的采集平台。控制中心与新增节点优先使用 Linux，Windows 节点保留兼容能力。</p>
+<div class="badges"><span class="badge">旧程序功能延续</span><span class="badge">进程与文件隔离</span><span class="badge">混合操作系统</span><span class="badge">可灰度、可回退</span></div>
+<p class="meta">编制日期：2026-11-12　｜　源码基线：D:\01_source\04_python\cnb\fetch-crawler　｜　2026-11-13 更新：补充三环境关系、实际部署目录与中文界面，生产接管尚未启用</p>
+<div class="actions"><button id="print-button">打印 / 保存为 PDF</button><button class="secondary" id="check-button">查看执行检查清单</button></div>
+</header>
+<div class="summary"><article><b>一套调度中心</b><span>Linux 自托管 Prefect + PostgreSQL</span></article><article><b>两类执行节点</b><span>Linux 主执行池 / Windows 兼容池</span></article><article><b>按阶段交付</b><span>先保功能与隔离，再迁移与扩展 AI</span></article></div>
+<aside class="note"><strong>开发环境实际进展 · 2026-11-13：</strong>169 已部署原生 systemd Prefect 3.9.2、PostgreSQL 16.15 和 HTTPS 网关；167 已部署独立 Windows Worker。两节点各并发 2 的验证通过：7 个任务完成，主动失败与超时各 1 个按预期失败，文件隔离和子进程回收通过；备份已还原至独立验证库。Prefect 继续使用原生服务；2026-11-14 新增 Maxun 后端容器及独立的数据库、浏览器和对象存储服务。框架源码位于工作区 vendor\prefect（3.9.2），UI v2 已定制中文界面并发布到 169。<a href="#environments">查看工作区与两台服务器的关系</a>。<a href="开发环境部署记录.html">查看实际环境与操作说明</a> · <a href="开发环境验证结果.json">查看验证结果</a>。A 方案已进一步完成 EasySpider 双节点接入及千金商品流向真实采集，详见 <a href="#implementation-a">03-C 实施与使用</a>。原业务队列适配、领取防重与生产接管仍待开发验证。</aside>
+
+<section id="scope">
+<h2><span class="num">01 / 实施原则</span>目标与实施边界</h2>
+<p><strong>最终交付：</strong>现有网站采集能力持续可用；同一服务器能安全执行多个独立任务；多台 Linux/Windows 服务器由统一平台管理；网站可绑定服务器，也可在符合条件的节点间分配；出现故障能够定位、核对与恢复。</p>
+<div class="grid2"><div class="card"><h3>首期必须完成</h3><ul><li>旧类式入口和旧函数式入口的完整接入。</li><li>下载、验证码、截图、日志、浏览器会话隔离。</li><li>任务路由、账号互斥、业务防重、状态回写。</li><li>Linux/Windows 节点、监控与发布回退。</li><li>代表性网站迁移 Linux 并核对数据等价性。</li></ul></div><div class="card"><h3>后续逐步完善</h3><ul><li>Linux 单任务容器、按需扩容。</li><li>网站分析、定位取证与受约束代码生成。</li><li>页面变化检测、采集方案推荐。</li><li>大规模节点和控制中心高可用。</li></ul></div></div>
+<div class="note"><strong>保留约定：</strong>DataDownloadXXX 的构造参数、login/fetch/fetchRK/fetchKC、已有业务公共方法继续沿用。CommonImports、CommonCheckCode 等模块只允许为经验证的隔离或跨平台问题作最小修改，并配兼容回归；不进行整体重写。</div>
+<div class="note warn"><strong>两个验收口径分开：</strong>“旧功能能被新平台执行”通过 Windows 兼容节点首先保证；“旧源码在 Linux 运行”需要迁移和逐站验证。多机执行不等于控制中心高可用，多进程也不等于文件或桌面已隔离。</div>
+<p class="small">本页中的部署片段用于形成可执行的实施基线；标注“待开发”的工程接口不是现有功能。命令先在测试环境按冻结版本验证，再进入生产。</p>
+</section>
+
+<section id="baseline">
+<h2><span class="num">02 / 当前系统</span>源码基线与实施前盘点</h2>
+<p><strong>当前开发仓库：</strong><a href="https://github.com/chenxc2014/prefect.git" target="_blank" rel="noopener noreferrer">chenxc2014/prefect</a>。本地源码位于 <code>vendor/prefect</code>，<code>origin</code> 指向该仓库，中文界面定制位于 <code>ui-v2/chinese-localization</code> 分支；保留 <code>upstream</code> 指向官方 <code>PrefectHQ/prefect</code>，用于后续核对和合并官方更新。版本基线继续固定为 3.9.2（提交 <code>b0479c0c26045b06321191bbad0cdfbb334d7380</code>），切换仓库地址不自动升级运行版本或发布服务器。</p>
+<div class="table-wrap"><table><thead><tr><th>已核实的源码事实</th><th>实施影响</th><th>处理方式</th></tr></thead><tbody>
+<tr><td>DataDownload 目录有 693 个 DataDownload*.py 文件；不等同于 693 个生产活跃网站。</td><td>需要用生产任务反查实际使用范围。</td><td>按网站、账号、业务类型、执行入口、频率、日均耗时建立台账。</td></tr>
+<tr><td>requirements.txt 固定 Selenium 4.5.0；本地 venv 记录 Python 3.7。</td><td>生产各机版本尚未核实，不能直接整体升级。</td><td>采集每台机的解释器路径、pip 清单、浏览器/驱动版本、源码提交号。</td></tr>
+<tr><td>FetchresultQueue 通过 crawl_code 调用 Pro_Flow_Queue；set_queue 条件更新 ISCL。</td><td>已有任务范围和领取机制，不能与新调度重复消费。</td><td>查阅存储过程正文、提交边界及全部更新方，确定原子领取与切换协议。</td></tr>
+<tr><td>除类式批处理外，还有 FetchresultDown.a() 旧入口。</td><td>只适配 DataDownloadXXX 会遗漏旧功能。</td><td>开发 class_batch / legacy_function 两种执行适配器。</td></tr>
+<tr><td>batch_run 返回批次数量；内部存在捕获并打印异常的路径。</td><td>返回数量或进程退出 0 不代表业务成功。</td><td>核对每项业务结果、处理回写和结果清单；缺失结果按未确认处理。</td></tr>
+<tr><td>固定下载目录、验证码 screenImg.png、日志路径；部分处理使用 C:\screen。</td><td>并发会互相清理、覆盖或错误归档。</td><td>全路径清单审计，按运行实例配置并验证文件处理全链路。</td></tr>
+<tr><td>批处理有模块全局 browser、列表等状态；已有浏览器作用域释放。</td><td>不适合同进程多线程混跑旧业务。</td><td>一个隔离执行单元一个子进程，保留原浏览器生命周期管理。</td></tr>
+<tr><td>公共导入链包含 WindowsCommon；ScreenImg 使用桌面截图。</td><td>即使某网站为 API 采集，也可能因导入失败而不能在 Linux 启动。</td><td>分离平台依赖、使用显式能力声明，逐站迁移。</td></tr>
+</tbody></table></div>
+<h3>盘点成果：site-inventory.csv 与 node-inventory.csv</h3>
+<p>网站台账至少包含：site_id、业务范围、funcName、入口类型、getFlowB、账号引用、是否必须复用会话、操作系统要求、桌面依赖、网络区域、下载/接口方式、文件格式、后处理入口、现负责 crawl_code、负责人、最近一次成功样本。节点台账补充 OS 具体版本、内存、浏览器能力、SQL Server/文件共享可达性。</p>
+<p><strong>进入开发门槛：</strong>取得活跃任务清单、两种旧入口样本、流向/入库/库存/参数配置样本、生产存储过程定义及结果状态语义。未确认的返回码不能映射为成功。</p>
+</section>
+
+<section id="architecture">
+<h2><span class="num">03 / 目标形态</span>目标架构与部署拓扑</h2>
+<div class="architecture" role="img" aria-label="业务数据库经任务桥接进入 Linux Prefect 控制中心，分发至 Linux 主执行池和 Windows 兼容执行池，统一保存文件和业务结果。">
+<div class="arch-top">现有业务数据库 / 任务来源<br><strong>任务桥接与路由服务 → Linux Prefect 控制中心</strong><br><small>PostgreSQL 保存编排元数据；业务库保存任务归属与业务结果</small></div><div class="arrow">↓</div>
+<div class="arch-lanes"><div class="lane linux"><b>Linux 主执行池</b><p>首期：Process Worker + 每任务独立子进程<br>后续：Docker Worker + 每任务独立容器</p><small>已迁移 Selenium、HTTP/API、新增 Playwright 任务；隔离工作目录与浏览器配置。</small></div><div class="lane windows"><b>Windows 兼容池</b><p>Process Worker + 旧解释器<br>桌面任务绑定交互会话</p><small>现存 Windows 专用爬虫与过渡任务；按节点能力分配。</small></div></div>
+<div class="arch-bottom">统一产物清单 / 文件存储 / 业务入库与回写 / 运行日志 / 对账与异常恢复</div>
+</div>
+<h3>首期最小拓扑</h3>
+<div class="table-wrap"><table><thead><tr><th>逻辑角色</th><th>建议部署</th><th>职责</th><th>首期边界</th></tr></thead><tbody>
+<tr><td>控制节点 ctrl-01</td><td>Linux，独立部署</td><td>Prefect API/UI、后台服务、PostgreSQL；HTTPS 网关。</td><td>单控制节点，有备份但没有自动高可用。</td></tr>
+<tr><td>接入桥接 bridge-01</td><td>Linux；初期可与控制节点共机</td><td>读取业务任务、领取/投递、路由、对账；生产先单活。</td><td>通过发件箱和唯一键保障恢复，不靠“永不重启”。</td></tr>
+<tr><td>Linux 节点 linux-01/02</td><td>两台可互相验证的 Linux 执行节点</td><td>主要采集任务、并发和迁移验证。</td><td>先 Process，后按需要引入 Docker。</td></tr>
+<tr><td>Windows 节点 win-01</td><td>现有服务器择一试点</td><td>验证旧爬虫接入、桌面任务与完整后处理。</td><td>新 Worker 所需 Python 必须受 OS 支持；旧 Python 独立保留。</td></tr>
+<tr><td>产物存储</td><td>首期复用既有共享存储</td><td>原始文件、manifest、校验结果、归档。</td><td>Linux 访问 SMB/对象存储方式另行实测；Prefect 元数据库不存大文件。</td></tr>
+</tbody></table></div>
+<p>控制节点只处理编排，不承载浏览器。任务节点主动访问控制 API；浏览器 Cookie、WebDriver 连接和活动登录会话不在节点间传输。一个需要复用登录的站点/账号批次在同一节点、同一隔离执行单元内完成。</p>
+</section>
+
+<section id="environments">
+<h2><span class="num">03-A / 当前开发环境 · 2026-11-13</span>当前工作区、Linux 169 与 Windows 167 的关系</h2>
+<p><strong>当前工作区负责开发与发布，169 负责统一调度并兼任 Linux 执行节点，167 负责 Windows 任务执行。</strong>三者组成一套开发环境。控制中心只有一套，位于 169；工作区和 167 都通过它查看、提交或领取任务。</p>
+<div class="architecture" role="img" aria-label="当前工作区通过 SSH 发布代码至169和167，通过HTTPS访问169的控制中心；169上的Linux Worker及167上的Windows Worker主动访问控制API领取各自队列任务并在本机执行。">
+<div class="arch-top"><strong>当前工作区 · 开发机</strong><br>修改源码 / 编写适配器 / 构建中文界面 / 测试 / 发布<br><small>浏览器通过 HTTPS 8443 管理任务；部署工具通过 SSH 22 发布文件和管理开发服务</small></div>
+<div class="arrow">↓ 发布到两台服务器；通过 169 管理任务</div>
+<div class="lane linux"><b>Linux 169 · 控制中心 + Linux 执行节点</b><p>Nginx HTTPS → Prefect API / 中文管理界面 → PostgreSQL 编排数据<br>Linux Worker：dev-linux / node-169 → 本机子进程执行 Linux 任务</p><small>控制中心和 Linux Worker 当前共用一台物理服务器，属于两个独立逻辑角色。</small></div>
+<div class="arrow">↑ 167 Worker 主动连接 169 的 HTTPS API：领取 Windows 任务、报告状态与日志 ↓</div>
+<div class="lane windows"><b>Windows 167 · Windows 执行节点</b><p>Windows Worker：dev-windows / node-167 → 本机子进程执行 Windows 任务</p><small>不部署第二套控制中心或 Prefect 数据库；任务在 167 本机执行，使用本机解释器、文件目录及后续接入的浏览器。</small></div>
+<div class="arch-bottom">执行位置由工作池 / 队列及 Worker 订阅决定；浏览器、进程和下载文件位于执行任务的服务器。</div>
+</div>
+
+<h3>三者分别放什么、做什么</h3>
+<div class="table-wrap"><table><thead><tr><th>环境</th><th>当前职责与已部署内容</th><th>实际位置</th><th>边界</th></tr></thead><tbody>
+<tr><td>当前工作区<br>开发环境</td><td>维护项目源码、部署脚本、测试工具和方案文档；保存 chenxc2014/prefect 仓库源码及中文 UI 定制；构建并发布到服务器；通过浏览器/API 进行管理和联调。</td><td><code>D:\01_source\05_ai\doc\网爬平台框架</code><br><code>vendor/prefect</code>：框架源码<br><code>flows、runtime、tools、deploy</code>：项目代码<br><code>doc</code>：文档与验证结果</td><td>未注册为常驻采集节点。现有旧爬虫源码位于另一个目录 <code>D:\01_source\04_python\cnb\fetch-crawler</code>，尚未自动同步或接管。</td></tr>
+<tr><td>Linux 169<br>192.168.1.169</td><td>运行 Prefect 3.9.2 控制中心、PostgreSQL 16.15、Nginx HTTPS 网关、中文 UI；同时运行独立 Linux Worker，当前并发上限 2。</td><td><code>/opt/crawler-dev/releases/dev-v1</code>：项目执行代码<br><code>/opt/crawler-dev/venv</code>：独立 Python 环境<br><code>/var/lib/crawler-dev/runs</code>：本机任务产物<br><code>/etc/crawler-dev</code>：服务配置</td><td>控制中心保存部署、排队和运行记录；Linux 任务由本机 Worker 执行。当前采用 systemd 原生部署，未使用 Compose 容器。</td></tr>
+<tr><td>Windows 167<br>192.168.1.167</td><td>通过计划任务 <code>CrawlerDev-Worker</code> 以 SYSTEM 运行独立 Windows Worker，主动连接 169；当前并发上限 2。</td><td><code>D:\CrawlerDev\releases\dev-v1</code>：项目执行代码<br><code>D:\CrawlerDev\runs</code>：本机任务产物<br><code>D:\CrawlerDev\logs\worker.log</code>：Worker 日志</td><td>只执行分配到 Windows 队列的任务。当前非交互 Worker 已验证合成任务，尚未验证真实桌面操作、网站登录及完整旧业务链路。</td></tr>
+</tbody></table></div>
+<p class="small">169 的中文前端资源单独发布到 <code>/var/lib/crawler-dev/ui-releases</code>，具体启用版本见 <code>/etc/crawler-dev/ui-release.json</code>；167 无需安装或构建管理界面。前文“控制节点只处理编排”是生产角色拆分建议，当前开发阶段在 169 上合并控制中心与 Linux 执行角色。</p>
+
+<h3>一次任务如何流转</h3>
+<ol>
+<li><strong>开发与发布：</strong>在工作区修改、验证代码，再将执行代码发布到需要运行它的节点。修改工作区文件不会自动更新服务器，登记 Prefect 部署也不会自动复制代码。</li>
+<li><strong>提交运行：</strong>开发者从浏览器或 API 向 169 创建运行；后续也可由控制中心按已配置的调度计划创建运行。当前已有两个测试部署：<code>crawler-dev-probe/linux-169</code> 与 <code>crawler-dev-probe/windows-167</code>。</li>
+<li><strong>按队列领取：</strong>Linux 部署进入 <code>dev-linux / node-169</code>，由 169 Worker 领取；Windows 部署进入 <code>dev-windows / node-167</code>，由 167 Worker 领取。Worker 主动访问控制 API，无需开发机逐次通过 SSH 启动任务。</li>
+<li><strong>在节点执行：</strong>被选中的 Worker 启动任务进程，执行本机已发布代码。当前合成验证还通过独立子进程验证超时回收与目录隔离；真实爬虫接入后，登录、查询、下载及后处理也应在该执行节点完成。</li>
+<li><strong>状态回传：</strong>运行状态和配置上报的日志回到 169，在同一个中文管理界面查看；下载文件仍保存在执行节点。后续需另行实现统一产物上传、业务入库及结果对账。</li>
+</ol>
+<div class="note"><strong>例子：</strong>在开发机浏览器点击 Windows 测试部署的“运行”，请求先到 169，再由 167 Worker 领取并在 167 生成文件。169 负责记录和展示结果，文件不会因此自动复制到 169 或开发机。Linux 测试部署则在 169 本机执行。</div>
+
+<h3>连接方式与数据存放</h3>
+<div class="table-wrap"><table><thead><tr><th>连接 / 数据</th><th>当前实际关系</th><th>用途或限制</th></tr></thead><tbody>
+<tr><td>工作区 → 169 / 167<br>SSH 22</td><td>使用已配置的免密 SSH 发布文件、管理开发服务、读取诊断信息。</td><td>这是开发运维通道，不是每个采集任务的运行调度通道；私钥保留在开发机。</td></tr>
+<tr><td>开发机浏览器 / API → 169<br>HTTPS 8443</td><td><a href="https://192.168.1.169:8443/">中文管理界面</a>与 <code>/api</code>。</td><td>用于任务管理与观测；沿用已有认证和开发 CA。</td></tr>
+<tr><td>167 Worker → 169<br>HTTPS 8443</td><td>领取 Windows 运行、报告心跳和状态、发送运行日志。</td><td>无需直接访问 PostgreSQL；当前固定范围路由不会自动把 Windows 任务转给 Linux。</td></tr>
+<tr><td>169 Worker → 本机 API</td><td>与 Windows Worker 使用同一套编排控制中心。</td><td>两个 Worker 独立运行；各自上限 2，合成联调已验证跨机并发，实际爬虫并发仍须按浏览器资源重新测定。</td></tr>
+<tr><td>编排元数据</td><td>保存在 169 的 PostgreSQL；4200、5432 仅本机监听。</td><td>不代表已接入原业务数据库；不把大文件存入 Prefect 元数据库。</td></tr>
+<tr><td>文件、备份与业务结果</td><td>任务文件留在各自节点；开发数据库备份目前位于 169 本机。</td><td>当前无自动跨机文件同步、异机备份或统一业务产物存储；业务回写链路尚待开发。</td></tr>
+</tbody></table></div>
+
+<h3>日常改动应该发布到哪里</h3>
+<ul>
+<li><strong>仅修改中文界面：</strong>工作区构建 UI，只发布到 169 的前端资源目录，167 无需更新。</li>
+<li><strong>修改通用 Flow、执行器或隔离逻辑：</strong>验证后发布到 169 与 167 的相应执行代码目录，按改动需要重启 Worker；修改常驻进程配置时必须重启相应进程才能生效。</li>
+<li><strong>修改某系统专用采集代码：</strong>发布到负责对应站点的执行节点；该节点必须具备所需解释器、浏览器、驱动、网络及文件访问权限。</li>
+<li><strong>修改文档：</strong>保存在工作区，无需重启服务器。当前 <code>push</code> 工具只同步 <code>flows、runtime、tools、deploy</code>，不包含 <code>vendor</code>、<code>doc</code> 或旧 <code>fetch-crawler</code> 目录；UI 使用独立发布流程。</li>
+</ul>
+<p>当前 <code>dev-v1</code> 是开发联调用目录；覆盖同步应在无运行中任务时进行。正式发布应使用不可变的新版本目录并支持回退，避免执行中加载不同版本文件。具体命令见 <a href="开发环境部署记录.html">开发环境部署记录</a>。</p>
+
+<h3>任一环境停止，会影响什么</h3>
+<div class="table-wrap"><table><thead><tr><th>情况</th><th>影响</th></tr></thead><tbody>
+<tr><td>开发机关机 / 关闭当前工作区</td><td>已经发布的服务和任务仍在 169、167 独立运行；无法从该开发机发布或管理。任务若依赖开发机临时启动的测试服务则另当别论，正常服务器任务不应有此依赖。</td></tr>
+<tr><td>167 Worker 停止或 167 离线</td><td>Windows 队列的新任务等待，Linux 队列可继续。已经运行的 Windows 任务须核实进程与产物，当前没有验证自动迁移到其他节点。</td></tr>
+<tr><td>只停止 169 的 Linux Worker</td><td>Linux 队列的新任务等待；只要控制中心及数据库正常，167 仍可领取并执行 Windows 任务。</td></tr>
+<tr><td>169 整机或控制中心不可用</td><td>管理界面与两类节点的调度、状态回传受影响。节点上已启动的进程可能继续执行，但控制状态可能无法及时更新，恢复后须对账；当前单控制中心没有自动高可用或自动接管保证。</td></tr>
+</tbody></table></div>
+<div class="note warn"><strong>当前完成的是开发基础设施闭环：</strong>两类节点已验证测试任务并发、目录隔离及超时回收，中文管理界面已发布。原爬虫生产任务仍由原体系执行；旧入口适配、业务任务领取防重、真实网站采集、统一产物与业务回写尚未完成。后续扩容时可把 Linux Worker 从 169 拆到独立 Linux 服务器，保留 169 作为控制中心，再增加连接同一 API 的执行节点。</div>
+</section>
+
+<section id="deployment-directories">
+<h2><span class="num">03-B / 实际部署目录 · 2026-11-13 核实</span>工作区与两台服务器的目录说明</h2>
+<p>本节依据当前工作区文件、169 的实际目录和 systemd 配置、167 的实际目录和计划任务配置整理。<strong>这里记录已经部署的开发环境</strong>；第 09 节的工程规划、第 10～11 节的部署模板仍用于后续建设，不能据此认为同名组件已全部上线。</p>
+
+<h3>一、当前工作区：开发、构建与发布源头</h3>
+<p>根目录：<code>D:\01_source\05_ai\doc\网爬平台框架</code>。工作区根目前不是 Git 仓库，只有 <code>vendor/prefect</code> 是已关联远端的 Git 仓库；外围执行代码、部署脚本和文档未包含在此前的 Prefect 汉化代码推送中，后续需单独纳入项目版本管理。</p>
+<div class="table-wrap"><table><thead><tr><th>目录 / 文件</th><th>当前作用</th><th>发布与维护方式</th></tr></thead><tbody>
+<tr><td><code>vendor/prefect/</code></td><td>Prefect 框架 Git 源码仓库。origin 为 chenxc2014/prefect，upstream 为官方仓库；中文分支为 <code>ui-v2/chinese-localization</code>。</td><td>在此修改并提交框架源码；不是服务器当前 Python 包的安装目录。源码改动需构建、发布后才生效。</td></tr>
+<tr><td><code>vendor/prefect/ui-v2/</code></td><td>React 管理界面；<code>localization/</code> 存放中文词典与构建插件，<code>src/i18n/</code> 管理语言选择与翻译，<code>dist/</code> 为构建产物，<code>node_modules/</code> 为本地前端依赖。</td><td>构建后的 dist 通过独立 UI 发布流程上传到 169；不上传整个仓库或 node_modules，167 不需要前端资源。</td></tr>
+<tr><td><code>flows/</code></td><td>Prefect 工作流入口。当前 <code>probe.py</code> 定义测试 Flow，检查系统约束、创建运行目录、启动独立执行子进程并回收。</td><td>随执行代码发布到 169、167；未来接入实际业务工作流。</td></tr>
+<tr><td><code>runtime/</code></td><td>任务进程内的执行逻辑。当前 probe.py 提供本机模拟分页接口、CSV 下载和结果校验；不访问生产网站。</td><td>随执行代码发布到对应节点。真实旧爬虫适配器仍待开发，不能把该样例当成生产爬虫实现。</td></tr>
+<tr><td><code>tools/</code></td><td>节点与开发工具：setup_node.py 创建工作池/队列并注册测试部署；register.py 封装注册逻辑；worker.py 加载本机配置并启动 Worker；dev_api.py 访问控制 API；verify_remote.py、check_ui.py、ui_preview.py、ui-browser-check.mjs 用于联调和界面验证。</td><td>发布工具会同步该目录，但只有对应启动入口或人工调用的脚本才会运行；浏览器验收工具主要在开发机使用。</td></tr>
+<tr><td><code>deploy/linux/</code><br><code>deploy/windows/</code></td><td>操作系统部署、启动、状态检查、备份及 UI 发布脚本。Linux 含原生部署和早期 Compose 路径，Windows 含独立环境安装和计划任务注册。</td><td>按实际部署路径选择脚本；不能把所有 bootstrap/configure 脚本当作日常启动命令反复执行。</td></tr>
+<tr><td><code>deploy/locks/</code></td><td>两台节点实际 Python 完整依赖快照：linux.lock.txt、windows.lock.txt。</td><td>用于重建和核对节点环境；与本地 Python 环境清单分开保存。</td></tr>
+<tr><td><code>doc/</code></td><td>本实施方案、开发环境部署记录、任务验证与浏览器验收 JSON 报告。</td><td>当前仅本地保存，不属于 push 同步范围；此 HTML 是说明文档，修改它不会修改运行服务。</td></tr>
+<tr><td><code>.venv/</code></td><td>开发机独立 Python 环境，当前 Python 3.11、Prefect 3.9.2。</td><td>不复制到服务器；远端按各自系统创建 Python 3.12 环境。</td></tr>
+<tr><td><code>.local/</code></td><td>本地受限 client.json、开发 CA 公共证书 ca.pem、界面验收截图 screenshots/、待发布的 UI 资源包等。</td><td>配置含认证值，不入 Git；截图和构建包可重新生成。CA 私钥保留在 169，不在本地分发配置中。</td></tr>
+<tr><td><code>.tmp/</code></td><td>本次实施的临时管理与排查脚本、SSH 主机核验资料、文档检查脚本等。<code>.tmp/crawler-dev/manage.py</code> 是当前远端管理入口。</td><td>目前仍有实际命令依赖此目录，不能整目录直接清空；应先把长期使用的工具迁入正式 tools 并更新文档。</td></tr>
+<tr><td><code>.cache/</code><br><code>__pycache__/</code></td><td>.cache/npm 为 npm 下载缓存；各模块下的 __pycache__ 为 Python 字节码缓存。</td><td>属于可再生成缓存，不是业务结果或配置来源；不随应用发布。</td></tr>
+<tr><td><code>framework.lock.json</code><br><code>requirements.txt</code><br><code>requirements-local.lock.txt</code><br><code>.gitignore</code></td><td>分别记录框架来源/基线/中文提交、项目直接 Python 依赖、本地完整依赖快照及本地忽略规则。</td><td>用于版本追溯；依赖清单不等于运行代码，更新清单后仍需安装与验证。</td></tr>
+</tbody></table></div>
+<div class="note">原生产爬虫在 <code>D:\01_source\04_python\cnb\fetch-crawler</code>，与当前工作区相互独立。当前管理工具没有自动复制该目录，也没有把原生产任务接入新平台。</div>
+
+<h3>二、Linux 169：原生控制中心 + Linux Worker</h3>
+<p>系统为 Rocky Linux 9.4；Python 3.12 环境安装 Prefect 3.9.2。当前由 systemd 管理服务，PostgreSQL 16.15 保存编排元数据，Nginx 提供 HTTPS。Docker 已安装，但控制中心未运行 Compose 容器。</p>
+<div class="codebox"><div class="codehead"><span>169 当前服务访问链路</span></div><pre>开发机浏览器 / 167 Worker
+  → HTTPS 192.168.1.169:8443
+  → crawler-dev-gateway（Nginx）
+  → 127.0.0.1:4200（crawler-dev-server / Prefect API 与 UI）
+  → 127.0.0.1:5432（postgresql / crawler_dev 数据库）
+
+crawler-dev-worker
+  → 加载 /etc/crawler-dev/client.json
+  → 连接同一个控制 API，领取 dev-linux / node-169 任务
+  → 在本机独立进程执行，文件写入 /var/lib/crawler-dev/runs</pre></div>
+<div class="table-wrap"><table><thead><tr><th>服务</th><th>启动与工作位置</th><th>日志与当前状态</th></tr></thead><tbody>
+<tr><td><code>crawler-dev-server</code></td><td>以 crawlerdev 运行；启动 <code>/opt/crawler-dev/venv/bin/prefect server start</code>；工作目录 <code>/var/lib/crawler-dev</code>。</td><td>本次核实 active；日志用 <code>journalctl -u crawler-dev-server</code> 查看。</td></tr>
+<tr><td><code>crawler-dev-gateway</code></td><td>启动系统 Nginx，显式指定 <code>-c /opt/crawler-dev/control/nginx.conf</code>。</td><td>本次核实 active；访问/错误日志在 /var/log/nginx。</td></tr>
+<tr><td><code>crawler-dev-worker</code></td><td>以 crawlerdev 运行；工作目录 <code>/opt/crawler-dev/releases/dev-v1</code>；由 venv 的 Python 启动 tools/worker.py。</td><td>本次核实 active；日志用 <code>journalctl -u crawler-dev-worker</code> 查看。</td></tr>
+<tr><td><code>postgresql</code></td><td>以 postgres 运行系统安装的 PostgreSQL；实际 PGDATA 为 <code>/var/lib/pgsql/data</code>。</td><td>本次核实 active；数据库专用账户与认证由配置管理。</td></tr>
+<tr><td><code>crawler-dev-backup.timer</code><br><code>crawler-dev-backup.service</code></td><td>每天 03:15（服务器 Asia/Shanghai）触发项目 backup.sh；service 为一次性备份任务。</td><td>timer 已排期；一次性服务完成后不常驻属于正常行为。</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>实际目录 / 文件</th><th>作用与使用方</th><th>维护要点</th></tr></thead><tbody>
+<tr><td><code>/opt/crawler-dev/</code></td><td>项目安装根；集中放置发布代码、独立 Python 环境、网关配置、受限资料和备份。</td><td>运行数据另放 /var/lib/crawler-dev，避免与代码版本混在一起。</td></tr>
+<tr><td><code>/opt/crawler-dev/releases/dev-v1/</code></td><td>当前执行代码目录，包含 flows、runtime、tools、deploy，与开发机对应目录同步。</td><td>Worker 从这里执行项目代码；不是 Prefect Git 克隆，也不包含 doc、vendor 或旧爬虫源码。</td></tr>
+<tr><td><code>/opt/crawler-dev/venv/</code></td><td>Linux Python 虚拟环境；bin/python、bin/prefect 为实际启动入口，第三方包安装于其 site-packages。</td><td>后端目前来自固定版本发布包；修改本地 vendor 源码不会自动修改这里的包。</td></tr>
+<tr><td><code>/opt/crawler-dev/control/</code></td><td>nginx.conf 为当前网关实际生效配置；compose.yml 与 .env 是早期 Compose 方案留下的文件。</td><td>不能因目录存在 compose.yml 就执行 Compose 接管；当前 .env 不驱动原生 Prefect/PostgreSQL 服务，仍须作为敏感配置保护。</td></tr>
+<tr><td><code>/opt/crawler-dev/private/</code></td><td>管理员受限资料：credentials.json、CA/服务器证书与私钥、签发辅助文件、初始化 client.json、Linux 依赖快照、pg_hba 修改前备份。</td><td>不输出或提交秘密值；ca.pem 为可分发公共证书，ca.key/server.key 为私钥。Worker 实际读取 /etc/crawler-dev/client.json，修改此处初始化副本不会自动更新运行配置。</td></tr>
+<tr><td><code>/etc/crawler-dev/</code></td><td>服务运行配置：server.env 供控制中心使用；client.json 供 Linux Worker 使用；ca.pem 用于 TLS 校验；ui.env 指定当前 UI 资源目录；ui-release.json 记录当前及回退目录。</td><td>server.env/client.json 含认证信息，按原有受限权限维护；修改服务环境后需重启相应服务。</td></tr>
+<tr><td><code>/etc/systemd/system/crawler-dev-*.service</code><br><code>/etc/systemd/system/crawler-dev-backup.timer</code></td><td>项目服务与定时任务定义；server.service.d/ 中的 10-ui-assets.conf 加载 UI 配置，working-directory.conf 固定服务工作目录。</td><td>修改 unit/drop-in 后先 daemon-reload，再按需要重启目标服务；PostgreSQL 的基础 unit 位于 /usr/lib/systemd/system/postgresql.service。</td></tr>
+<tr><td><code>/var/lib/crawler-dev/</code></td><td>crawlerdev 服务账户 HOME 与运行数据根。</td><td>与 releases 分离，发版时不覆盖此目录。</td></tr>
+<tr><td><code>/var/lib/crawler-dev/runs/</code></td><td>Linux 任务独立运行目录；当前每次测试生成一个 UUID 子目录。</td><td>保存请求、下载、校验和进程回收证据；不是代码目录，不能在发布时覆盖或清空。</td></tr>
+<tr><td><code>/var/lib/crawler-dev/prefect-server/</code><br><code>/var/lib/crawler-dev/.prefect/</code></td><td>前者为控制中心设置的 PREFECT_HOME，当前含 memo_store.toml；后者为服务账户默认 Prefect 本地目录，当前含 storage/。</td><td>是 Prefect 本机状态/存储位置，不是 crawler_dev PostgreSQL 数据库目录；清理前需核实引用。</td></tr>
+<tr><td><code>/var/lib/crawler-dev/ui-releases/</code></td><td>独立前端资源版本。当前启用 <code>zh-cn-20261113T025217Z</code>，其 v2/ 为中文构建资源，v1/ 保留旧版资源。</td><td>由 ui.env 选择，不是 Git 仓库；应发布新目录后切换，并保留回退版本。</td></tr>
+<tr><td><code>/var/lib/crawler-dev/ui/</code></td><td>汉化前修复首页时生成的 UI 资源目录，当前作为上一版本保留。</td><td>当前中文 UI 不从此处读取；回退指针仍引用它，暂不删除。</td></tr>
+<tr><td><code>/var/lib/pgsql/data/</code></td><td>PostgreSQL 实际数据目录，包含数据库物理文件和数据库认证配置。</td><td>由 PostgreSQL 管理，不属于项目发布目录；不能直接复制运行中的物理文件代替一致性备份。</td></tr>
+<tr><td><code>/opt/crawler-dev/backups/</code></td><td>数据库逻辑备份及校验文件；当前备份仍在同一台 169。</td><td>采用保留策略和异机备份后再清理旧备份；与代码/缓存分开管理。</td></tr>
+<tr><td><code>/var/log/nginx/</code></td><td>crawler-dev-access.log 和 crawler-dev-error.log 为项目网关访问与错误日志。</td><td>按轮转策略维护；Prefect/Worker 日志主要查看 journald，不在此目录。</td></tr>
+<tr><td><code>/opt/crawler-dev-bootstrap/</code></td><td>通过 SSH 上传的部署/诊断脚本、中文 UI tar.gz 资源包暂存区。</td><td>不是常驻 Worker 工作目录；排查和发布结束后可按版本留存策略清理已无引用文件。</td></tr>
+</tbody></table></div>
+<div class="note"><strong>169 的配置定位：</strong>网关以 systemd 的 ExecStart 指定配置为准，当前不是默认 /etc/nginx/nginx.conf。后端服务读 server.env，中文资源目录由 drop-in 再加载 ui.env；Linux Worker 读 /etc/crawler-dev/client.json。不同文件的修改不会互相自动同步。</div>
+
+<h3>三、Windows 167：独立环境 + 常驻 Worker 计划任务</h3>
+<p>系统为 Windows Server 2016。项目独立安装 Python 3.12.10 和 Prefect 3.9.2，不替换原爬虫的 Python 环境。当前未安装本项目的 Prefect 控制中心、PostgreSQL 或中文前端；通过 HTTPS 连接 169。</p>
+<div class="codebox"><div class="codehead"><span>167 当前启动链路</span></div><pre>计划任务 CrawlerDev-Worker（开机触发，SYSTEM / ServiceAccount）
+  → D:\CrawlerDev\venv\Scripts\python.exe
+  → D:\CrawlerDev\releases\dev-v1\tools\worker.py
+  → 读取 D:\CrawlerDev\private\client.json
+  → 连接 https://192.168.1.169:8443/api
+  → 领取 dev-windows / node-167 任务（当前并发上限 2）
+  → 任务进程在本机执行，产物写入 D:\CrawlerDev\runs
+
+Worker 工作目录：D:\CrawlerDev\releases\dev-v1
+Worker 输出日志：D:\CrawlerDev\logs\worker.log</pre></div>
+<p>本次核实计划任务为 Running，执行程序、参数及工作目录均与上述一致。该计划任务启动的是常驻 Worker；并非每执行一个采集任务都重新创建一个 Windows 计划任务。</p>
+<div class="table-wrap"><table><thead><tr><th>实际目录 / 文件</th><th>作用</th><th>维护要点</th></tr></thead><tbody>
+<tr><td><code>D:\CrawlerDev\</code></td><td>本项目在 167 的独立部署根。</td><td>与既有生产爬虫隔离；不因该目录存在就认为原业务已接入。</td></tr>
+<tr><td><code>Python312\</code></td><td>独立安装的 Python 3.12.10 基础解释器，用来创建虚拟环境。</td><td>不是原业务解释器；不直接搬运到 Linux，不随普通代码发布覆盖。</td></tr>
+<tr><td><code>venv\</code></td><td>本项目 Python 虚拟环境，含 Prefect 及依赖；<code>Scripts\python.exe</code> 为计划任务实际使用入口。</td><td>与 Python312 基础安装配套；更新依赖后核对锁定清单并回归。</td></tr>
+<tr><td><code>releases\dev-v1\</code></td><td>当前发布的 flows、runtime、tools、deploy，供 Worker 加载执行。</td><td>不含 Prefect Git 源码、UI 构建或工作区文档。发布新版本时同步更新 Worker 的工作目录、入口及配置中的 release_root。</td></tr>
+<tr><td><code>private\</code></td><td>受 ACL 保护的配置目录：client.json 含 API 认证、工作池/队列、并发、运行目录和日志路径；ca.pem 为开发 CA 公共证书；windows-requirements.lock 为本机依赖快照。</td><td>仅向授权账户开放；不入 Git。修改 client.json 后重启 Worker 使启动配置生效；此目录不存 CA 私钥。</td></tr>
+<tr><td><code>runs\</code></td><td>Windows 任务独立运行目录，每次测试单独创建 UUID 子目录。</td><td>文件不会自动同步到 169 或开发机；后续真实采集需接入产物归档/上传。</td></tr>
+<tr><td><code>logs\</code></td><td>worker.log 接收 Worker 标准输出与错误输出。</td><td>与具体任务目录中的 stdout.log 区分；后续补充轮转与保留策略。</td></tr>
+<tr><td><code>downloads\</code></td><td>环境安装包暂存区，当前用于 Python 安装包等。</td><td>不是爬虫下载数据目录；任务下载文件应位于 runs 下的隔离目录。</td></tr>
+<tr><td><code>bootstrap\</code></td><td>经 SSH 上传的安装、启动与诊断 PowerShell 脚本。</td><td>计划任务不从这里加载工作流；保留必要部署记录后按策略清理。</td></tr>
+</tbody></table></div>
+<div class="note warn"><strong>Windows 桌面边界：</strong>SYSTEM 的非交互计划任务不等于已登录桌面会话。当前验证的是合成采集任务，桌面截图、鼠标键盘、验证码弹窗等仍需独立会话方案和实测，不能直接据此提高旧桌面爬虫并发。</div>
+
+<h3>四、任务目录、版本目录与配置目录不要混用</h3>
+<p>169 的 <code>/var/lib/crawler-dev/runs/&lt;run_uuid&gt;</code> 与 167 的 <code>D:\CrawlerDev\runs\&lt;run_uuid&gt;</code> 采用相同的测试目录结构。当前 run_uuid 是本次测试生成的标识，与 Prefect flow_run_id 通过 request.json 等文件关联，不应直接认为二者相同。</p>
+<div class="codebox"><div class="codehead"><span>当前合成验证任务目录</span></div><pre>&lt;run_uuid&gt;/
+  request.json       # 本次测试参数与 flow_run_id
+  started.json       # 子进程 PID、启动时间
+  stdout.log         # 本次执行子进程输出
+  supervisor.json    # 子进程退出与回收记录
+  result.json        # 成功路径的结构化结果
+  download/          # 模拟分页数据导出的 CSV
+  captcha/           # 验证码隔离目录，当前样例预留
+  screenshots/       # 截图隔离目录，当前样例预留
+  logs/              # 任务内部日志目录，当前样例预留
+  temp/              # 本次任务临时目录</pre></div>
+<p class="small">失败或超时任务可能没有 result.json 或完整下载文件，这是需要核查的执行结果。以上为当前测试实现；第 07 节的 business_task_id / attempt_id 目录结构是后续业务接入设计。</p>
+<ul>
+<li><strong>改业务执行逻辑：</strong>在工作区 flows/runtime 开发，验证后发布到相应节点的 releases，不在 runs 内直接修代码。</li>
+<li><strong>改连接或节点配置：</strong>169 改 /etc/crawler-dev，167 改 D:\CrawlerDev\private；不把认证值写入源码或文档。</li>
+<li><strong>改中文页面：</strong>工作区 ui-v2 构建并发布到 169 的 ui-releases，保持当前/回退指针；不改 Windows 环境。</li>
+<li><strong>查失败：</strong>先看 169 UI 的 flow_run_id，再关联执行节点的任务目录与 Worker 日志；网关访问问题再查 Nginx 日志。</li>
+<li><strong>清理空间：</strong>先区分缓存、安装包、任务证据、UI 回退资源和数据库备份；按保留策略清理已结束且无引用的文件，不能整目录清空 private、runs、PGDATA 或当前 releases。</li>
+</ul>
+<p><a href="开发环境部署记录.html">实际部署与操作命令</a> · <a href="#environments">三环境职责与任务流转</a> · <a href="#operations">备份与运维设计</a></p>
+</section>
+
+<section id="implementation-a"><h2><span class="num">03-C / 采集平台实施进展 · 2026-11-14</span>多引擎采集工作台与 Prefect 集成</h2>
+<div id="multi-engine-workspace" class="note">
+<h3>2026-11-14 更新：多引擎采集工作台</h3>
+<p>采集管理入口仍为 <a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>。首页已重构为侧栏导航、三个引擎卡片、实际服务状态、活动任务列表与架构说明；发布与运行功能分为独立工作区。</p>
+<div class="table-wrap"><table><thead><tr><th>入口</th><th>设计方式与操作路径</th><th>当前边界</th></tr></thead><tbody>
+<tr><td>Maxun</td><td>首页「进入 Maxun 在线设计器」→ Web 录制与保存机器人 → 回到 Maxun 工作区刷新、绑定参数并发布 → 已发布任务运行。</td><td>地址 <a href="https://192.168.1.169:9443/">https://192.168.1.169:9443/</a>。账号 crawlerdev@crawler.local，密码沿用开发管理账号，不在文档记录明文。服务可用不等于所有网站已完成业务验收。</td></tr>
+<tr><td>EasySpider</td><td>首页「打开客户端启动指引」→ 开发机运行 tools/start-designer.ps1 → 客户端设计、导出 JSON → 平台导入与发布。</td><td>浏览器不能直接启动本机 exe；工作区提供启动命令和上游安装包链接。日常服务器执行不依赖本地客户端常开。</td></tr>
+<tr><td>fetch-crawler</td><td>首页「查看原有爬虫接入」→ 查阅原路径、适配入口、隔离与成功检查要求 → 逐站登记、验证后再注册调度。</td><td>runtime/legacy.py 已提供适配代码，当前没有开放旧业务直接发布运行，没有接管生产队列。</td></tr>
+</tbody></table></div>
+<p><strong>关系：</strong>平台负责版本发布、参数与结果管理；Prefect 负责调度、队列、节点、运行状态和日志；Maxun、EasySpider、原有采集类分别执行网站操作。Maxun 与 EasySpider 模板格式独立，当前不支持自动互转。旧爬虫接入仍需逐站完成隔离与验收。</p>
+<h4>Maxun 无法打开的原因与修复</h4>
+<p>实际检查确认：169 的 9443 已监听，HTTPS 页面返回 200，但防火墙此前仅为 8443 配置了精确来源白名单。此次 deploy/maxun/gateway.py 将同一组来源规则应用到 9443，并同时写入运行时与持久化配置；未扩大到任意来源。首页入口改用部署配置中的固定地址，不再将当前浏览器访问主机机械拼接为 9443 地址；/collector/designer 也改为实际跳转。</p>
+<p>现有允许来源为 192.168.1.74/32 和 192.168.1.167/32，8443 与 9443 一致。若堡垒机实际出口改变，应按准确来源追加两个入口的规则。内部浏览器通过 SSH 隧道及严格校验开发 CA 的代理验证；未从用户堡垒机发起连通性测试。</p>
+<h4>Linux 169 的 Maxun 部署位置</h4>
+<div class="table-wrap"><table><thead><tr><th>目录 / 服务</th><th>用途</th></tr></thead><tbody>
+<tr><td>/opt/crawler-dev/maxun/</td><td>Maxun 部署脚本、解析后 Compose、受限环境变量与镜像补丁；backend 容器只监听本机 18080。</td></tr>
+<tr><td>/opt/crawler-dev/maxun-web/</td><td>经镜像应用层摘要校验提取的 Web 静态资源，由 Nginx 9443 服务。</td></tr>
+<tr><td>/opt/crawler-dev/control/maxun.conf</td><td>独立 HTTPS 入口与 API / WebSocket 代理，主配置仍为 control/nginx.conf。</td></tr>
+<tr><td>/opt/crawler-dev/maxun-browser/</td><td>独立浏览器连接服务；crawler-maxun-browser 使用服务账户与已有 Chrome，监听 Docker 网桥地址。</td></tr>
+<tr><td>/var/lib/pgsql/maxun-data/</td><td>独立 PostgreSQL 集群，crawler-maxun-database；不使用 Prefect 的原数据目录。</td></tr>
+<tr><td>/var/lib/crawler-maxun/objects/</td><td>独立对象存储数据，crawler-maxun-storage；禁止随普通前端发布清理。</td></tr>
+<tr><td>/etc/crawler-dev/maxun.json</td><td>受限集成凭据，由采集服务读取，不进入公开模板。</td></tr>
+<tr><td>crawler-maxun-ocr</td><td>内部图片识别服务，业务网站适用性需逐站验证。</td></tr>
+</tbody></table></div>
+<p>改版前文件备份位于 <code>/opt/crawler-dev/backups/portal-20261114-231017/</code>，包含原 collector.html、collector.py、gateway.py。回退页面及采集 API 后仅重启 crawler-dev-collector；保留已修正的 9443 白名单规则和 Maxun 服务。其他发布时间的 portal-* 目录保存各次发布前文件。</p>
+<p>验收记录：<a href="多引擎工作台界面验收.json">多引擎工作台界面验收</a>。本次未访问或操作 Windows 167，历史双节点验证结果仅作为历史记录；千金商品流向此前的业务验收属于 EasySpider，不代表 Maxun 已完成同站验收。</p>
+</div>
+
+<p><strong>新增采集管理入口：</strong><a href="https://192.168.1.169:8443/collector/">https://192.168.1.169:8443/collector/</a>，使用现有开发平台账号认证。原 Prefect 中文界面仍在根地址，负责查看运行状态、日志和调度。</p>
+<h3>可视化新增网站的操作</h3><ol><li>在工作区执行 <code>powershell -File tools/start-designer.ps1</code>，启动官方 EasySpider v0.6.5 设计客户端。</li><li>在真实网站点选元素，配置登录、输入、点击、循环、分页和提取，保存任务 JSON；所有定位以真实页面为依据。</li><li>打开采集管理入口，导入 JSON。页面会列出流程节点，可修改 XPath、输入值或链接。使用 <code>{{begindate}}</code>、<code>{{enddate}}</code> 声明公开运行参数。</li><li>账号输入使用 <code>{{secret.username}}</code>、<code>{{secret.password}}</code>；运行时填写账号引用，秘密值只在执行节点注入。</li><li>选择 Linux 169 或 Windows 167，设置相对执行目录的产物规则（例如 <code>Data/Task_0/result/files/*.csv</code>）、最少行数和必填列，发布为 SHA-256 标识的不可变版本。</li><li>填写日期等参数并运行。成功后可在管理页下载集中归档文件；每次修改模板都生成新版本，历史版本保持不变。</li></ol>
+<p>客户端实际入口：<code>.local/designer/EasySpider_windows_x64/EasySpider.exe</code>。设计器是桌面交互软件，管理页不是远程桌面录制器；复杂流程在设计器中配置后导入。不要把网页保存为 JSON 的浏览器菜单误当作导出 EasySpider 任务。</p>
+<p><strong>本地设计器启动与端口：</strong>点击“设计/修改任务”→“使用纯净版浏览器设计”后，先进入浏览器中的“任务列表”，再点击“创建新任务”开始设计。客户端本地服务使用 <code>8074</code>，设计器通信使用 <code>8084</code>；同一客户端同时监听这两个端口属于正常状态。提示端口占用时先检查是否有旧客户端仍在运行，不要连续重复打开，也不要结束无关服务。已通过 <code>tools/repair-designer.py</code> 为本地安装入口增加单实例保护、启动中防重复点击及启动失败提示；原入口备份为同目录 <code>main.before-single-instance.js</code>。修复脚本保留启动错误日志，驱动详细日志仅在 <code>config.debug=true</code> 时开启。重新解压官方包后需重新执行修复脚本；新补丁在下次完整启动时生效。</p>
+<p><strong>2026-11-13 闪退排查：</strong>日志曾捕获 <code>SessionNotCreatedError: Chrome instance exited</code>，因此此前仅依据端口占用解释全部故障并不充分。用户另提供 360“进程防护”截图，提示本地客户端创建 BITS 任务，随后确认可以进入设计界面。本轮已记录 Chrome 会话成功创建，用户确认设计页面可用；但没有取得与该提示对应的 BITS 任务目标或完整拦截记录，尚不能判定为误报或确认它与每次退出的因果关系。已检查的入口、服务、更新脚本未发现显式 BITS 调用；Chromium 本身包含 <a href="https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/update_client/background_downloader_win.cc">BITS 后台下载实现</a>，只能作为可能来源的线索。排查未修改安全软件配置或执行放行操作，当前用户会话保持打开。</p>
+<h3>已经部署的组件</h3><div class="table-wrap"><table><thead><tr><th>组件</th><th>实际位置与职责</th></tr></thead><tbody>
+<tr><td>框架源码</td><td>工作区 <code>vendor/easyspider</code>，开发仓库 <a href="https://github.com/chenxc2014/EasySpider.git">chenxc2014/EasySpider</a>（origin）；官方 NaiboWang/EasySpider 保留为 upstream，供后续同步上游。固定基线仍为 v0.6.5 / 191bd6d7547bb397e4c579dd2c70ae835be3f512，保留 AGPL-3.0 许可证。浏览器资源定位仅在每次执行的副本中适配。当前已安装设计客户端仍来自已校验的官方 v0.6.5 发布包；切换源码地址不自动替换软件或升级服务器。</td></tr>
+<tr><td>169 模板管理服务</td><td><code>crawler-dev-collector</code>，仅监听 127.0.0.1:8081；Nginx 的 /collector/ 路由提供 HTTPS 访问。代码 <code>tools/collector.py</code>，界面 <code>deploy/web/collector.html</code>。</td></tr>
+<tr><td>模板与集中产物</td><td><code>/var/lib/crawler-dev/catalog</code> 保存不可变模板；<code>results/&lt;flow_run_id&gt;</code> 保存校验后的归档及清单。下载同样要求认证，当前开发版每次归档上限 10MB。</td></tr>
+<tr><td>169 独立执行器</td><td><code>/opt/crawler-dev/easyspider/source</code>、<code>venv</code>、<code>requirements.lock</code>；运行配置 <code>/etc/crawler-dev/easyspider.json</code>。Chrome、匹配驱动与 Xvfb 用于 Rocky Linux 的真实浏览器执行。</td></tr>
+<tr><td>167 独立执行器</td><td><code>D:\CrawlerDev\easyspider</code> 下 source、venv、chrome-win64、chromedriver-win64、downloads；运行配置 <code>D:\CrawlerDev\private\easyspider.json</code>。使用便携 Chrome，不替换原爬虫浏览器。</td></tr>
+<tr><td>账号配置</td><td>本地录入 <code>.local/site-accounts.json</code>；169 使用 <code>/etc/crawler-dev/accounts.json</code>，167 按需使用 <code>D:\CrawlerDev\private\accounts.json</code>。配置受权限保护，不进入版本库、模板或 Prefect 明文参数。同节点同账号引用采用操作系统锁互斥；跨节点统一账号锁尚待补充。</td></tr>
+<tr><td>编排与适配</td><td><code>flows/collect.py</code>、<code>runtime/catalog.py</code>、<code>runtime/easyspider.py</code>、<code>runtime/locks.py</code>；部署名称 <code>website-collect/linux-169</code>、<code>website-collect/windows-167</code>。</td></tr>
+<tr><td>模拟业务站点</td><td>169 的 <code>crawler-dev-demo</code>、167 的 <code>CrawlerDev-Demo</code>，仅监听各自 127.0.0.1:8766，供浏览器验收，不对外开放。</td></tr>
+</tbody></table></div>
+<h3>验收与实际边界</h3><p>已通过：9 项模板版本、参数边界、秘密注入、账号锁与文件日期校验测试；管理页导入、编辑、发布及运行的浏览器验收；Linux 与 Windows 实际浏览器日期查询、CSV 下载、6 行数据及日期值核对、集中归档哈希与未认证下载拒绝。另有一项明确命名的“缺少文件”故障注入按预期失败，故障记录保持真实状态。</p><p><a href="A方案双节点验收.json">双节点验收结果</a> · <a href="A方案界面验证.json">管理界面验收结果</a></p>
+<div class="note warn"><strong>旧爬虫接管状态：</strong><code>runtime/legacy.py</code> 已提供保留原构造参数及 run/finish 的受控类式入口，默认要求隔离预检通过。尚未自动接管生产队列，也未验证全部旧函数入口、旧后处理或生产业务回写。真实网站成功不能替代对这些能力的单独验收。</div>
+<p><strong>首个真实网站：</strong>千金供应商系统 <code>wx.qjdyf.cn</code> 的“商品流向”，验证日期为 2026-11-12。已核实原项目存在 DataDownloadHNQJNEW、DataDownloadHNQJDYFLS。测试账号在当前页面可用的操作是“配送记录”，已通过 169 原生 EasySpider 模板自动执行：图片验证码识别、账号引用注入、登录、关闭公告、进入商品流向 iframe、填写单日日期、查询和下载 XLSX。导出 3 条数据，日期均为 2026-11-12；与独立浏览器人工取证文件逐字段比较一致。<a href="千金商品流向自动采集.json">真实网站自动验收结果</a>。</p>
+<h3>真实网站的日常运行</h3><p>打开采集管理入口，在“千金供应商 · 商品流向（配送记录）”活动模板中填写 <code>begindate</code>、<code>enddate</code>，账号引用填写 <code>qjdyf-test</code> 后运行。首次仅按已经验收的单日范围使用。下载文件需要管理平台认证；无需再次输入网站密码。当前尚未开启定时采集。</p><p>日期控件需选择“直接设置日期值”，防止日历按键事件修改日期；执行器已统一适配浏览器级下载目录，覆盖跨域 iframe。一般网站可继续使用模拟按键模式。初次未落地文件的失败运行保留，用于追溯修复，活动模板已切换到验收通过版本。</p><h3>维护与回退</h3><p>同名同节点模板默认展示最近发布的活动版本，历史不可变版本仍可按 ID 查询。新模板不修改已发布版本。执行文件保存在各节点 runs/collect-&lt;uuid&gt; 下，归档失败会使工作流失败，不伪报成功。当前服务为单开发管理员入口，模板可含上游自定义脚本，仅向受信任开发人员开放；尚无完整多角色权限或生产级租约防重。</p><p>回退 A 方案时，先停止新的采集投递，核实已运行任务，再停止 crawler-dev-collector 与模拟站点；恢复 <code>/opt/crawler-dev/control/nginx.before-collector.conf</code> 并校验/重启网关，可移除采集入口。保留执行记录和产物。原 Prefect 服务及旧生产爬虫不需要删除或回滚数据库。</p></section>
+<section id="capacity">
+<h2><span class="num">04 / 部署准备</span>环境、容量与版本冻结</h2>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>首期建议起点</th><th>投产前验证</th></tr></thead><tbody>
+<tr><td>控制节点</td><td>Linux x86_64；4 vCPU / 8 GB；100 GB SSD。</td><td>按任务频率、日志量、保留周期压测；此配置不是吞吐承诺。</td></tr>
+<tr><td>Linux 浏览器节点</td><td>8 vCPU / 16 GB；先开 2 个独立采集任务。</td><td>测量浏览器峰值 RSS、CPU、磁盘及下载占用，再逐步提高到 4 等目标。</td></tr>
+<tr><td>Windows 节点</td><td>试点从 1 个任务开始，目录与会话隔离通过后提高并发。</td><td>纯 WebDriver 与桌面任务分别测；桌面自动化每交互会话默认 1。</td></tr>
+<tr><td>新编排环境</td><td>建议 Python 3.12；Prefect 3.9.2 作为本次候选冻结版本。</td><td>该版本有官方发布记录，但尚未在本项目验证；锁定 pip 依赖、镜像 digest，禁止 latest。</td></tr>
+<tr><td>旧爬虫环境</td><td>保留生产验证过的 Python/依赖/浏览器/驱动组合。</td><td>不复制另一机器的 venv 作为可移植安装包；准备匹配 OS/架构的离线 wheel 与驱动归档。</td></tr>
+<tr><td>Windows 系统</td><td>新增节点以受所选 Python 支持的现代 Windows Server 为基线。</td><td>具体版本必须盘点。旧系统若无法安装新 Worker，则升级/迁移执行节点；远程旧执行代理属于另一个需验证的适配方案。</td></tr>
+<tr><td>时间与网络</td><td>NTP；业务时间 Asia/Shanghai；日志时间带时区。</td><td>验证控制 API、SQL Server、文件共享、验证码服务、目标网站及所需代理线路。</td></tr>
+</tbody></table></div>
+<p><strong>容量计算：</strong>并发上限取 min〔内存可用预算 / 单任务峰值内存，CPU 可承受数量，浏览器许可/会话数量，账号与站点上限〕。独立预留系统、Worker、文件后处理和异常浏览器的资源。</p>
+<h3>配置交接表（部署前填实值）</h3>
+<div class="table-wrap"><table><thead><tr><th>配置项</th><th>本方案示例</th><th>配置所有者</th></tr></thead><tbody>
+<tr><td>统一 API/UI</td><td>https://crawler-control.example.internal；API 后缀 /api。</td><td>运维：内网 DNS、证书、访问范围。</td></tr>
+<tr><td>业务数据库连接</td><td>使用配置引用，不在页面或任务参数中写真实凭据。</td><td>DBA：权限、连接方式、事务与存储过程。</td></tr>
+<tr><td>控制数据库</td><td>独立 PostgreSQL 数据库；与现有 SQL Server 业务库分开。</td><td>运维：备份、容量和恢复。</td></tr>
+<tr><td>代码/产物版本</td><td>crawler-platform-v1、legacy-commit-sha、image digest。</td><td>开发：构建产物和版本清单。</td></tr>
+<tr><td>并发初始值</td><td>Linux 2、Windows 1、同账号 1；上线后按数据调优。</td><td>实施负责人：经压测后签定。</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="routing">
+<h2><span class="num">05 / 分配规则</span>节点、队列与并发控制</h2>
+<p>首期采用两个 Process 工作池：<code>linux-process</code>、<code>windows-process</code>。每个池按网络区域、执行能力和固定主机划分队列。不要仅用 Worker 名称实现主机绑定。</p>
+<div class="table-wrap"><table><thead><tr><th>队列示例</th><th>允许订阅的节点</th><th>用途</th></tr></thead><tbody>
+<tr><td>linux-process / general-zone-a</td><td>Linux zone-a 且具备任务所需浏览器与网络能力的节点</td><td>通用任务共享；按相同能力扩容。</td></tr>
+<tr><td>linux-process / node-linux-01</td><td>仅 linux-01</td><td>指定出口、专用软件、原范围绑定。</td></tr>
+<tr><td>windows-process / node-win-01</td><td>仅 win-01</td><td>现有 crawl_code 范围的兼容执行。</td></tr>
+<tr><td>windows-process / desktop-win-01-s1</td><td>仅 win-01 的指定交互会话</td><td>鼠标/键盘/桌面截图任务；首期队列并发为 1。</td></tr>
+</tbody></table></div>
+<div class="note warn"><strong>订阅规则必须显式：</strong>Worker 使用 <code>--work-queue</code> 指定队列；省略队列会订阅池内全部队列，可能破坏固定范围和桌面会话隔离。两个 Worker 的 --limit 不会自动形成整机总上限；多 Worker 时还需主机级信号量或合理分配额度。</div>
+<h3>路由算法（自研模块）</h3>
+<ol><li>查站点注册表，判定入口、OS、浏览器、网络区域、桌面需求。</li><li>若有固定主机要求，查专用队列；无可用主机则排队/告警，不自动跨范围执行。</li><li>无固定要求时，选择能满足全部能力的共享队列；Linux-ready 任务优先进入 Linux 池。</li><li>进入执行前获取账号互斥与必要站点并发额度；无法获取则有界等待或重新排队，不占着全部浏览器资源空等。</li><li>记录 routing_reason、node_id、能力快照和规则版本，便于解释“为什么在这台机运行”。</li></ol>
+<p>并发锁由所有新执行节点共同遵守；迁移窗口中，未接入新锁的旧执行器通过网站/账号所有权排除，不能认为新锁会自动约束旧程序。锁需有租约与续约；续约失败时执行器停止启动新副作用步骤，并进入核对，避免锁过期后双执行。</p>
+</section>
+
+<section id="tasks">
+<h2><span class="num">06 / 可靠执行</span>任务协议、领取与状态模型</h2>
+<h3>业务任务与 Prefect 运行记录分开管理</h3>
+<p><code>business_task_id</code> 标识业务请求；<code>attempt_id</code> 标识一次执行尝试；<code>prefect_flow_run_id</code> 关联编排。业务逻辑键覆盖网站、账号引用、业务类型、日期/库存快照范围、筛选参数和请求版本。允许合法重采，但必须明确是新请求还是失败重试。</p>
+<div class="codebox"><div class="codehead"><span>任务载荷示例 · 不携带网站密码</span></div><pre data-lang="json">{
+  "schema_version": 1,
+  "business_task_id": "crawl-20261112-00001",
+  "attempt_id": "attempt-00001",
+  "source_task_id": "原任务主键",
+  "site_id": "site-example",
+  "entry_type": "class_batch",
+  "account_ref": "credential/site-example/account-a",
+  "business_type": "sales",
+  "begin_date": "2026-11-01",
+  "end_date": "2026-11-11",
+  "filters_ref": "config/snapshot-00001",
+  "required_os": "windows",
+  "target_pool": "windows-process",
+  "target_queue": "node-win-01",
+  "code_version": "legacy-commit-sha",
+  "deadline_seconds": 1800
+}</pre></div>
+<h3>建议新增的数据实体（设计名，尚未建表）</h3>
+<div class="table-wrap"><table><thead><tr><th>实体</th><th>关键字段</th><th>约束</th></tr></thead><tbody>
+<tr><td>crawl_site_registry</td><td>site_id、入口/版本、能力、队列、ownership、account_ref</td><td>同一业务范围只能有一个有效调度所有者。</td></tr>
+<tr><td>crawl_job</td><td>业务主键、源任务号、请求快照、状态、最终结果引用</td><td>业务请求唯一；不以 Prefect 状态直接覆盖业务事实。</td></tr>
+<tr><td>crawl_attempt</td><td>attempt_id、node_id、版本、阶段、心跳、lease/fencing token</td><td>同一任务只允许一个有效执行租约；历史不可覆盖。</td></tr>
+<tr><td>crawl_outbox</td><td>投递状态、幂等键、flow_run_id、下次重试时间</td><td>与业务领取记录在可用的同一事务边界内提交。</td></tr>
+<tr><td>crawl_artifact / import_receipt</td><td>文件地址、SHA-256、行数、列、业务导入批次和状态</td><td>同一文件/业务批次重复提交不会重复入库。</td></tr>
+</tbody></table></div>
+<p>首期建议桥接相关表与源任务放在同一 SQL Server 业务库的独立命名空间，便于原子事务；最终命名及建表由 DBA 按实际规范审核。Prefect 自身使用 PostgreSQL，不向其内部表写业务数据。</p>
+<h3>领取 → 投递 → 执行的完整过程</h3>
+<ol><li>桥接按 ownership 读取允许迁移的业务范围。原程序对同范围必须停止领取；读取存储过程是否有副作用须先核实。</li><li>事务内使用条件更新/行锁领取源任务，写入 crawl_job 与 outbox。现有 ISCL 的含义由实际流程映射，不能直接照搬为“已成功”。</li><li>投递器读取 outbox，以稳定幂等键调用所选版本 Prefect 的创建运行接口，记录 flow_run_id。网络超时后先核对投递结果，再重试。</li><li>执行器二次检查任务终态和有效租约，获取资源锁，创建 attempt 与隔离目录；重复运行拿不到有效租约即退出，不进行业务写入。</li><li>执行完整旧链路；下载与后处理生成 manifest/receipt；更新业务结果，并确认平台状态。</li><li>对账器周期检查“源任务已领但未投递”“运行结束但业务未回写”“失联但可能仍有子进程”等情况，分类恢复。</li></ol>
+<div class="note"><strong>投递和副作用都要幂等：</strong>数据库事务无法与远程 API 形成天然原子事务。outbox 解决可恢复投递；唯一业务键、有效执行租约、导入回执解决重复执行。不能承诺调度层提供业务“恰好一次”。</div>
+<h3>状态与错误分类</h3>
+<p><code>待领取 → 已领取 → 已投递 → 执行中 → 已采集 → 已校验 → 处理中 → 已完成</code>；异常分支为 <code>等待重试 / 待人工处理 / 已取消 / 结果未确认</code>。状态必须带阶段和尝试号；“已采集”不等于“已完成”。</p>
+<div class="table-wrap"><table><thead><tr><th>情况</th><th>建议策略</th><th>业务确认</th></tr></thead><tbody>
+<tr><td>网站短时不可达、请求超时</td><td>在总预算内有限退避重试。</td><td>旧代码已有内部重试；平台重试需计算总次数，避免叠乘。</td></tr>
+<tr><td>账号密码错误、配置缺失、权限不足</td><td>进入待人工处理，不持续重登。</td><td>返回码 15 等需结合具体站点定义核实。</td></tr>
+<tr><td>页面变更、字段缺失、文件解析失败</td><td>保留证据并停止自动入库。</td><td>不得写成空数据成功。</td></tr>
+<tr><td>无数据</td><td>仅在查询成功且空结果证据明确时完成。</td><td>区分正常空集和采集失败。</td></tr>
+<tr><td>采集完成但上传/导入失败</td><td>从已校验产物恢复处理。</td><td>有阶段回执才允许跳过采集，不能仅凭文件存在。</td></tr>
+<tr><td>节点失联或强制取消</td><td>先隔离并核对旧执行进程、租约和副作用，再重派。</td><td>心跳丢失不等于旧进程已终止。</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="legacy">
+<h2><span class="num">07 / 兼容开发</span>旧爬虫接入与资源隔离</h2>
+<h3>两条入口都要承接</h3>
+<div class="table-wrap"><table><thead><tr><th>入口</th><th>适配策略</th><th>必须保持的行为</th></tr></thead><tbody>
+<tr><td>class_batch</td><td>构建所需 data 和原构造参数，经现有 batch_func、批次执行和相应处理方法完成。</td><td>账号/会话批次、getFlowB 映射、finish、df 复用、各类处理结果。</td></tr>
+<tr><td>legacy_function</td><td>重建旧入口需要的记录和独立连接/游标，调用 FetchresultDown.a()。</td><td>其内部下载、处理与业务回写；不得把活动 cursor 序列化给另一进程。</td></tr>
+</tbody></table></div>
+<p>执行器是有限任务入口，处理完指定任务或确定批次后退出；不把现有永久轮询 <code>FetchresultQueue.run()</code> 套成一个永不结束的业务 Flow。批次分组建议为“同网站 + 同账号 + 相同会话上下文”，具体继承原逻辑。</p>
+<h3>路径隔离：变量名称保持，实际值按 attempt 配置</h3>
+<div class="codebox"><div class="codehead"><span>建议运行目录</span></div><pre>/var/lib/crawler/runs/&lt;business_task_id&gt;/&lt;attempt_id&gt;/
+  input/request.json
+  download/
+  captcha/screenImg.png
+  screenshots/
+  logs/
+  browser-profile/
+  temp/
+  output/manifest.json
+  output/result.json
+
+D:\Crawler\runs\&lt;business_task_id&gt;\&lt;attempt_id&gt;\
+  （相同逻辑结构；不能继续共用固定 DownloadTemp）</pre></div>
+<ol><li>审计 ProFile、CommonImports、ExcelRemove、Excelsave、ScreenImg、旧入口和网站文件中的绝对路径、复制/删除逻辑、固定文件名。</li><li>新增统一 RuntimePaths 配置。旧文件仍引用 <code>fileDownloadPath</code>、<code>code_path</code> 等原变量；启动时由运行环境覆盖实际路径，无覆盖时保留原默认行为。</li><li>路径配置必须在导入爬虫模块前完成；大量 <code>from ProFile import ...</code> 已绑定值时，仅在运行中修改 ProFile 不会同步到所有模块。</li><li>优先在 ProFile 增加受控环境变量配置入口，并修正少量硬编码后处理路径；逐项验证上传、归档和清理都指向当前 attempt。</li><li>清理动作只能作用于当前任务根目录及其已验证子目录；不能递归删除整台服务器共用下载根目录。</li><li>若暂时完全不能改路径，则使用隔离虚拟机/独立文件系统实例作为并发槽位；复制源码目录或只增加进程均不能隔离绝对路径。</li></ol>
+<h3>执行器监督与结果契约</h3>
+<p>现代 Flow 通过参数数组、<code>shell=False</code> 启动指定解释器；传入任务引用或受限请求文件，不将密码放在命令行。执行器必须产生结构化 result.json，至少包含业务状态、尝试号、阶段、旧返回码、文件清单和导入回执。</p>
+<div class="codebox"><div class="codehead"><span>执行器逻辑契约 · 待开发，不是已存在的实现</span></div><pre>校验任务/版本/节点能力
+→ 原子获取有效执行租约与账号/桌面额度
+→ 创建运行目录并注入路径配置
+→ 导入旧模块，加载必要配置与凭据
+→ 调用 class_batch 或 legacy_function 完整链路
+→ 核对业务结果、文件完整性及处理回执
+→ 原子写 result.json，更新业务终态
+→ 释放本次浏览器、子进程树、连接与锁
+
+监督进程：
+  到期/取消 → 请求优雅停止 → 宽限期 → 终止所属进程树
+  Windows 使用 Job Object 等进程树约束；Linux 使用进程组/cgroup
+  禁止按 chrome.exe 等全机进程名清理</pre></div>
+<p>仅有 <code>subprocess.run(timeout=...)</code> 不足以覆盖取消和所有浏览器后代进程。必须有监督器、退出确认及异常回收。桌面任务绑定可用交互会话，作为 Windows 服务运行的 Session 0 不能默认当作可操作桌面。</p>
+<h3>文件检查与完成判据</h3>
+<p>继续使用现有 <code>check_file_is_in_path</code> 及其后处理链路。在外层补充等待临时下载后缀消失、文件可打开/完整解析、字段与日期校验、SHA-256、产物回执。增加重试前必须查清装饰器是否已经传输了文件，避免重复副作用。</p>
+</section>
+
+<section id="linux-migration">
+<h2><span class="num">08 / Linux 优先</span>旧功能迁移与新任务开发</h2>
+<div class="table-wrap"><table><thead><tr><th>类别</th><th>迁移顺序</th><th>工作内容</th><th>放行条件</th></tr></thead><tbody>
+<tr><td>HTTP/API 采集</td><td>第一批</td><td>拆除无关 Windows 导入；验证 Token/Cookie、分页、字段、日期与文件生成。</td><td>相同条件与原结果行数/关键字段等价。</td></tr>
+<tr><td>标准 Selenium 网页</td><td>第二批</td><td>Linux 浏览器/驱动匹配；下载、字体、时区、iframe、新窗口及 headless 差异测试。</td><td>登录、销售/入库/库存、导出与后处理全链路通过。</td></tr>
+<tr><td>复杂验证码或视觉控件</td><td>第三批</td><td>复用现有识别接口；评估 DOM 截图代替桌面截图，必要时独立虚拟显示。</td><td>实际验证码流程稳定，屏幕/坐标依赖已隔离。</td></tr>
+<tr><td>Windows 专用组件/桌面程序</td><td>保留兼容池</td><td>先稳定接入；评估是否存在跨平台替代方案。</td><td>替代实现验证前继续路由 Windows，不降低功能范围。</td></tr>
+</tbody></table></div>
+<p>优先分离的模块：操作系统工具、截图实现、路径配置、浏览器工厂、ODBC 连接配置、共享文件访问。保留公共函数签名，内部按平台选择实现。Linux 需要明确 SQL Server ODBC 驱动及 TLS 参数，不能直接照搬 Windows 的 <code>DRIVER={SQL Server}</code> 连接串。</p>
+<p>Linux 无显示服务器时，纯浏览器任务优先 headless；确实需要可视化的 Linux 任务使用独立显示实例。Xvfb 不能让 Windows 专用组件在 Linux 原样工作。当前旧 Python 依赖与现代 Linux 的安装兼容性应建立独立镜像验证，不直接把旧 requirements.txt 装入所有新节点。</p>
+<div class="note"><strong>双跑规则：</strong>相同日期和筛选范围做结果对比，但影子运行只保留下载与校验产物，不重复生产入库/上传。需实现输出目的地控制或使用隔离业务测试库；原装饰器存在副作用，未隔离前禁止直接双跑。</div>
+</section>
+
+<section id="deliverables">
+<h2><span class="num">09 / 开发交付</span>工程目录与开发清单</h2>
+<div class="codebox"><div class="codehead"><span>建议独立工程 crawler-platform · 不与旧环境混装</span></div><pre>crawler-platform/
+  flows/                 # 编排：冒烟、采集、后处理、对账
+  bridge/                # 任务领取、发件箱投递与归属切换
+  routing/               # 站点注册、能力检查与队列选择
+  supervisor/            # 启动、心跳、取消、进程树清理
+  adapters/              # 现代环境调用协议
+  legacy_runner/         # 与旧 Python 兼容的有限任务入口
+  contracts/             # 请求、结果与 manifest 版本协议
+  migrations/            # 业务桥接表和唯一约束迁移脚本
+  deploy/
+    control/             # Compose、HTTPS 网关配置与 env 模板
+    linux/               # systemd 与离线安装清单
+    windows/             # Worker 脚本、服务/交互会话配置
+  tools/                 # 注册部署、预检、发布、备份与恢复
+  tests/                 # 故障、防重、取消、隔离和数据核对
+  docs/                  # 站点/节点台账、发布清单、值班手册
+  requirements.lock      # 现代环境完整锁定清单
+  release-manifest.json  # 平台、适配器、旧代码、驱动/镜像版本</pre></div>
+<div class="table-wrap"><table><thead><tr><th>工作包</th><th>负责人角色</th><th>可验收产物</th></tr></thead><tbody>
+<tr><td>任务桥接与数据模型</td><td>后端 + DBA</td><td>迁移脚本、领取事务、outbox、租约、防重与对账测试。</td></tr>
+<tr><td>旧爬虫适配</td><td>爬虫开发</td><td>两种入口、路径隔离、结果码映射、完整后处理回归。</td></tr>
+<tr><td>节点监督与平台部署</td><td>后端 + 运维</td><td>Linux/Windows Worker、取消超时、进程回收、发布/恢复脚本。</td></tr>
+<tr><td>Linux 迁移</td><td>爬虫开发 + 测试</td><td>迁移清单、依赖镜像、逐站等价性报告。</td></tr>
+<tr><td>业务验收</td><td>测试 + 业务负责人</td><td>原始文件、数据对账、各阶段回执及灰度签字。</td></tr>
+</tbody></table></div>
+<p><strong>需实现的命令接口：</strong><code>python -m tools.preflight</code>、<code>tools.register_business_deployments</code>、<code>bridge.run</code>、<code>tools.reconcile</code>、<code>tools.release</code>。这些是交付要求，不是现在可直接执行的现有命令；开发时每个命令必须提供 --help、明确退出码和实际配置示例。</p>
+</section>
+
+<section id="control-deploy">
+<h2><span class="num">10 / 操作手册 A</span>Linux 控制中心部署</h2>
+<p><span class="pill">可用于测试环境的配置模板</span> 先完成 DNS、TLS 证书、Docker Engine、Compose v2 和受限运维账户准备。以下选择单实例 Prefect 内置后台服务 + PostgreSQL，简化首期部署。Redis 和拆分后台服务在扩容时按官方方案引入；不将 Redis 作为业务唯一真相。</p>
+<h3>A1．准备配置和固定版本</h3>
+<p>在控制节点建立 <code>/opt/crawler/control</code>，创建 <code>.env</code> 与 <code>compose.yml</code>。示例域名需替换；凭据由运维注入。数据库示例密码使用高熵十六进制值，避免未经 URL 编码的特殊字符破坏连接串。</p>
+<div class="codebox"><div class="codehead"><span>.env · 模板，必须填写后使用</span></div><pre>PREFECT_IMAGE=prefecthq/prefect:3.9.2-python3.12
+POSTGRES_IMAGE=postgres:16
+POSTGRES_PASSWORD=REPLACE_WITH_RANDOM_HEX
+PREFECT_SERVER_API_AUTH_STRING=ops:REPLACE_WITH_RANDOM_HEX
+PREFECT_PUBLIC_API_URL=https://crawler-control.example.internal/api</pre></div>
+<p class="small">镜像 tag 是候选值。先执行 pull/检查实际可用性，再记录 RepoDigest 并将上述镜像值替换为已验证 digest；控制端和 Worker 的 Prefect 版本保持一致。未拉取/验证成功不得继续投产。</p>
+<div class="codebox"><div class="codehead"><span>compose.yml · 首期单控制节点基线</span></div><pre data-lang="yaml">services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?请配置 PostgreSQL 镜像}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: prefect
+      POSTGRES_USER: prefect
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请配置数据库密码}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prefect -d prefect"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  prefect:
+    image: ${PREFECT_IMAGE:?请配置固定版本镜像}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PREFECT_SERVER_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:${POSTGRES_PASSWORD}@postgres:5432/prefect
+      PREFECT_SERVER_API_HOST: 0.0.0.0
+      PREFECT_SERVER_UI_API_URL: ${PREFECT_PUBLIC_API_URL}
+      PREFECT_SERVER_API_AUTH_STRING: ${PREFECT_SERVER_API_AUTH_STRING}
+    command: ["prefect", "server", "start", "--host", "0.0.0.0"]
+    ports:
+      - "127.0.0.1:4200:4200"
+volumes:
+  postgres_data:</pre></div>
+<h3>A2．启动与检查</h3>
+<div class="codebox"><div class="codehead"><span>Linux Bash · 在 /opt/crawler/control 执行</span></div><pre>chmod 600 .env
+docker compose config --quiet
+docker compose pull
+docker compose up -d
+docker compose ps
+docker compose logs --tail 100 prefect
+docker compose images</pre></div>
+<p>首次启动允许数据库初始化；检查无迁移失败和持续重启。确认数据库仅在容器内网可达。不要把包含密码的 compose 展开结果、env 或完整连接串粘入日志与工单。</p>
+<h3>A3．接入 HTTPS 网关</h3>
+<p>使用已有网关或主机 Nginx，将域名根路径代理到本机 4200。证书路径需使用运维签发的真实文件。下面片段放入已有 Nginx 的 server 配置位置；若网关在容器/另一主机，127.0.0.1 上游需要按实际网络调整。</p>
+<div class="codebox"><div class="codehead"><span>Nginx 站点片段 · 依赖已有证书与 Nginx</span></div><pre>server {
+    listen 443 ssl;
+    server_name crawler-control.example.internal;
+    ssl_certificate /etc/nginx/tls/crawler-control.crt;
+    ssl_certificate_key /etc/nginx/tls/crawler-control.key;
+    location / {
+        proxy_pass http://127.0.0.1:4200;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300s;
+    }
+}</pre></div>
+<p>配置校验后重载现有网关。使用受信证书访问 UI 和 API；服务端 Basic Auth 与客户端 <code>PREFECT_API_AUTH_STRING</code> 保持一致。自托管首期不依赖 Cloud API Key，不默认具备企业 SSO/RBAC；若要求细粒度权限，单独设计网关/身份集成。</p>
+<p><strong>本步验收：</strong>HTTPS 可达、UI/API 地址一致、带正确认证能访问、错误认证被拒绝、数据库重启后运行记录仍在。备份恢复演练完成后才接入生产业务。</p>
+</section>
+
+<section id="worker-deploy">
+<h2><span class="num">11 / 操作手册 B</span>Linux 与 Windows 执行节点部署</h2>
+<h3>B1．Linux Process Worker</h3>
+<p>由运维创建专用低权限账户 <code>crawler</code>，预装 Python 3.12/venv，为其授权 <code>/opt/crawler</code>、<code>/var/lib/crawler</code>、<code>/var/log/crawler</code>。网络受限时使用经过验证的内部包源或离线包，不在生产临时拉取未冻结依赖。</p>
+<div class="codebox"><div class="codehead"><span>Linux Bash · 以 crawler 账户执行</span></div><pre>python3.12 -m venv /opt/crawler/venv-orchestrator
+/opt/crawler/venv-orchestrator/bin/python -m pip install "prefect==3.9.2"
+/opt/crawler/venv-orchestrator/bin/prefect version
+
+export PREFECT_API_URL='https://crawler-control.example.internal/api'
+export PREFECT_API_AUTH_STRING='ops:REPLACE_WITH_ACTUAL_VALUE'
+
+/opt/crawler/venv-orchestrator/bin/prefect work-pool create linux-process --type process
+/opt/crawler/venv-orchestrator/bin/prefect work-queue create general-zone-a --pool linux-process
+/opt/crawler/venv-orchestrator/bin/prefect work-queue create node-linux-01 --pool linux-process
+/opt/crawler/venv-orchestrator/bin/prefect worker start --pool linux-process --work-queue general-zone-a --work-queue node-linux-01 --name linux-01 --limit 2</pre></div>
+<p>工作池/队列由部署管理员集中创建一次；已存在时 inspect 核对，不要重复创建。认证值由受限配置注入；示例 export 只用于说明，生产避免将真实凭据写入 shell 历史。安装成功后生成并归档完整依赖锁定清单，后续节点按同一清单安装。</p>
+<h3>B2．Linux 常驻服务</h3>
+<p>把 API 地址和认证放入 <code>/etc/crawler/worker.env</code>，仅 root 可读；文件格式为 KEY=value。systemd 会读取后注入服务。示例工作目录需先部署下一节的 release 文件。</p>
+<div class="codebox"><div class="codehead"><span>/etc/systemd/system/crawler-worker.service</span></div><pre>[Unit]
+Description=网爬平台 Linux 执行节点
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=crawler
+Group=crawler
+WorkingDirectory=/opt/crawler/releases/platform-v1
+EnvironmentFile=/etc/crawler/worker.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/crawler/venv-orchestrator/bin/prefect worker start --pool linux-process --work-queue general-zone-a --work-queue node-linux-01 --name linux-01 --limit 2
+Restart=on-failure
+RestartSec=10
+KillMode=control-group
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target</pre></div>
+<div class="codebox"><div class="codehead"><span>Linux Bash · 由运维执行</span></div><pre>sudo systemctl daemon-reload
+sudo systemctl enable --now crawler-worker
+sudo systemctl status crawler-worker --no-pager
+sudo journalctl -u crawler-worker -n 100 --no-pager</pre></div>
+<p>维护停机先排空队列和运行任务，再停止服务。systemd 的强制停止可能连带结束所属任务；TimeoutStopSec 不是业务任务时限。</p>
+<h3>B3．Windows Process Worker</h3>
+<p>在试点 Windows Server 安装受支持的 Python 3.12，独立创建编排环境；旧爬虫解释器和安装目录保持独立。下列 <code>C:\Python312\python.exe</code> 为示例，需替换为已盘点路径。</p>
+<div class="codebox"><div class="codehead"><span>Windows PowerShell · 编排环境</span></div><pre>&amp; 'C:\Python312\python.exe' -m venv 'D:\Crawler\venv-orchestrator'
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\python.exe' -m pip install 'prefect==3.9.2'
+
+$env:PREFECT_API_URL = 'https://crawler-control.example.internal/api'
+$env:PREFECT_API_AUTH_STRING = 'ops:REPLACE_WITH_ACTUAL_VALUE'
+
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\prefect.exe' work-pool create windows-process --type process
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\prefect.exe' work-queue create node-win-01 --pool windows-process
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\prefect.exe' worker start --pool windows-process --work-queue node-win-01 --name win-01 --limit 1</pre></div>
+<p>纯 WebDriver 节点验证非交互运行后，用组织已有 Windows 服务包装器注册自启动、失败重启和日志轮转；服务账户需具备目录、业务库和文件共享权限。桌面任务另建 <code>desktop-win-01-s1</code> 队列，在指定已登录交互会话中启动独立 Worker，并限制并发 1；不能依赖服务包装器自动提供桌面。</p>
+<p>Windows 服务启动脚本读取受 ACL 保护的配置；把工作目录固定到已发布 release。新平台接管范围内停用旧自动 git pull/守护重启逻辑，保留范围外旧程序原运行方式。重启、注销、锁屏及远程桌面断开后的行为均纳入测试。</p>
+<h3>B4．节点能力预检（待开发 tools.preflight）</h3>
+<p>启动浏览器后访问测试页、保存下载样本、读写任务目录、解析测试表格、连接业务库、访问产物共享路径、核验验证码服务和时区。预检输出结构化结果；不满足能力的节点不订阅对应队列。每个 Worker 进程与浏览器实例的资源计入整机预算。</p>
+</section>
+
+<section id="smoke">
+<h2><span class="num">12 / 可执行验证</span>先完成最小调度闭环</h2>
+<p>下面两个 Python 文件是独立冒烟样例，不依赖旧爬虫。它们用于验证 API、认证、代码可见性、队列绑定和单机并发。所有目标节点先部署相同代码；路径按操作系统分别注册，避免 Linux 路径交给 Windows。</p>
+<h3>C1．创建 flows/smoke.py</h3>
+<div class="codebox"><div class="codehead"><span>flows/smoke.py · 现代 Python 环境</span></div><pre data-lang="python">import os
+import platform
+import socket
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from uuid import uuid4
+
+from prefect import flow, get_run_logger
+
+
+@flow(name="crawler-smoke", retries=0)
+def smoke(hold_seconds: int = 10) -&gt; dict:
+    if not 0 &lt;= hold_seconds &lt;= 120:
+        raise ValueError("等待时长必须在 0 到 120 秒之间")
+    root = Path(os.environ["CRAWLER_RUN_ROOT"])
+    run_dir = root / "smoke" / str(uuid4())
+    run_dir.mkdir(parents=True, exist_ok=False)
+    started = datetime.now(timezone.utc).isoformat()
+    (run_dir / "probe.txt").write_text(started, encoding="utf-8")
+    get_run_logger().info("节点=%s，进程=%s", socket.gethostname(), os.getpid())
+    time.sleep(hold_seconds)
+    return {
+        "hostname": socket.gethostname(),
+        "os": platform.system(),
+        "pid": os.getpid(),
+        "started_at": started,
+        "finished_at": datetime.now(timezone.utc).isoformat(),
+        "run_dir": str(run_dir),
+    }</pre></div>
+<h3>C2．创建 register_smoke.py 并注册部署</h3>
+<div class="codebox"><div class="codehead"><span>register_smoke.py · 在各类目标环境分别注册</span></div><pre data-lang="python">import os
+from pathlib import Path
+
+from prefect import flow
+
+
+if __name__ == "__main__":
+    release_root = Path(__file__).resolve().parent
+    flow.from_source(
+        source=str(release_root),
+        entrypoint="flows/smoke.py:smoke",
+    ).deploy(
+        name=os.environ["CRAWLER_DEPLOYMENT_NAME"],
+        work_pool_name=os.environ["CRAWLER_WORK_POOL"],
+        work_queue_name=os.environ["CRAWLER_WORK_QUEUE"],
+        build=False,
+        push=False,
+    )</pre></div>
+<p>Linux 节点上的 release 绝对路径必须一致；Windows 节点使用其自己的 release 路径与部署名。注册器所在机器需要能连接 API。私有代码不通过运行期的浮动分支拉取，首期采用预部署的固定本地 release。</p>
+<div class="codebox"><div class="codehead"><span>Linux Bash · 在包含上述文件的发布目录执行</span></div><pre>export CRAWLER_DEPLOYMENT_NAME='smoke-linux-01'
+export CRAWLER_WORK_POOL='linux-process'
+export CRAWLER_WORK_QUEUE='node-linux-01'
+export CRAWLER_RUN_ROOT='/var/lib/crawler/runs'
+/opt/crawler/venv-orchestrator/bin/python register_smoke.py
+/opt/crawler/venv-orchestrator/bin/prefect deployment run 'crawler-smoke/smoke-linux-01'</pre></div>
+<p><strong>注意环境继承：</strong><code>CRAWLER_RUN_ROOT</code> 同时要写入 Worker 的 EnvironmentFile；仅在注册器终端 export 不会自动修改常驻 Worker 环境。Windows 在其 Worker 启动环境设置对应运行根目录。</p>
+<div class="codebox"><div class="codehead"><span>Windows PowerShell · 在本机发布目录执行</span></div><pre>$env:CRAWLER_DEPLOYMENT_NAME = 'smoke-win-01'
+$env:CRAWLER_WORK_POOL = 'windows-process'
+$env:CRAWLER_WORK_QUEUE = 'node-win-01'
+$env:CRAWLER_RUN_ROOT = 'D:\Crawler\runs'
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\python.exe' '.\register_smoke.py'
+&amp; 'D:\Crawler\venv-orchestrator\Scripts\prefect.exe' deployment run 'crawler-smoke/smoke-win-01'</pre></div>
+<h3>C3．验证四项结果</h3>
+<ol><li>UI 能看到运行由 Scheduled 进入 Running，再到 Completed；输出主机和 OS 符合指定队列。</li><li>连续投递 6 个 Linux 冒烟任务：同时运行数量不超过 Worker 的 2，实际开始/结束时间证明存在重叠。</li><li>新增 linux-02，注册专用队列验证固定分配；再将两个节点订阅 general-zone-a，验证共享队列可由两机消费。</li><li>Windows 任务只在 Windows 执行，每次生成不同目录；暂停对应 Worker 后任务保持等待，不落到其他能力不符的节点。</li></ol>
+<p class="small">冒烟通过仅证明调度通道可用，不证明旧爬虫兼容、任务幂等、数据完整或故障恢复已经完成。</p>
+</section>
+
+<section id="business-deploy">
+<h2><span class="num">13 / 业务上线</span>旧任务接入与版本发布</h2>
+<div class="steps">
+<div class="step"><h3>完成适配器与隔离回归</h3><p>交付第 06—09 节模块，分别测试两种入口及完整后处理。每个任务生成 input、日志、manifest、result 和业务回执；旧 Python 执行器不导入 Prefect。</p></div>
+<div class="step"><h3>预发布不可变版本</h3><p>构建平台与旧代码归档，记录提交号和哈希。部署到所有允许执行该版本的节点，安装其专用依赖环境；禁止修改正在运行 release。旧源码的自动 git pull 仅在接管范围内关闭。</p></div>
+<div class="step"><h3>注册业务 Deployment</h3><p>由待开发 register_business_deployments 按“平台/网络区域/版本/专用能力”创建有限数量的部署。Flow 参数原则上仅 business_task_id 和 attempt_id，其他配置从业务快照加载；不为每个任务临时创建 Deployment。</p></div>
+<div class="step"><h3>运行隔离业务样本</h3><p>先连测试库与测试产物目录，用实际登录和日期条件验证；对比原系统的行数、关键字段、金额/数量汇总、文件和状态。不得把业务失败码作为 Flow Completed。</p></div>
+<div class="step"><h3>启用桥接投递与对账</h3><p>只开放试点 ownership 范围；单活桥接读取源任务，经 outbox 投递并监督完成。对账器独立运行，能修复桥接重启后的“已领取未投递”。生产桥接不使用示例 cron 另造重复任务。</p></div>
+<div class="step"><h3>发布与排空</h3><p>为新任务启用新版本部署，旧运行继续使用旧版本直至结束。版本回退切换路由目标，新任务进入上一版本；旧产物与业务租约按回执核对，不直接重置数据库状态。</p></div>
+</div>
+<h3>Linux Docker Worker 的后续引入</h3>
+<p>进程模式达到首期验收后，再为 Linux-ready 任务创建 Docker 工作池。固定 prefect-docker 集成版本，构建包含平台、执行器、浏览器、字体和系统依赖的镜像，按 digest 发布；每运行独立容器并挂载自己的工作目录。验证 API 容器内访问地址、运行 UID、文件所有权、共享内存、取消后的容器/浏览器回收和产物上传，再迁移流量。Windows 桌面任务不随此步骤容器化。</p>
+</section>
+
+<section id="rollout">
+<h2><span class="num">14 / 项目实施</span>分阶段执行与灰度切换</h2>
+<p>建议配备平台开发、爬虫开发、运维/DBA与测试角色。首期代表站点试点预计 4—6 周，是工作量估计，不包含全部活跃站点的 Linux 迁移；依赖问题、网站复杂度和人员投入会影响周期。</p>
+<div class="table-wrap"><table><thead><tr><th>阶段</th><th>建议时间</th><th>主要动作</th><th>阶段产物 / 放行门槛</th></tr></thead><tbody>
+<tr><td>P0 基线盘点</td><td>第 1 周前半</td><td>冻结源码、环境、站点台账；读取存储过程；定义任务/状态/数据对比口径。</td><td>覆盖实际活跃范围；两种入口和特殊流程样本齐全。</td></tr>
+<tr><td>P1 基础设施</td><td>第 1 周后半</td><td>Linux 控制中心、两类 Worker、认证、固定与共享队列、备份。</td><td>第 12 节通过；从备份恢复控制数据库成功。</td></tr>
+<tr><td>P2 兼容执行</td><td>第 2—3 周</td><td>执行器、路径配置、业务结果、后处理幂等、监督器。</td><td>Windows 旧功能全链路样本通过；同机多任务无污染。</td></tr>
+<tr><td>P3 桥接与可靠性</td><td>第 3—4 周</td><td>领取/outbox/租约/路由/账号互斥/对账；故障注入。</td><td>重复投递、节点失联、取消、回写失败均可解释并恢复。</td></tr>
+<tr><td>P4 Linux 试迁</td><td>第 4—5 周</td><td>选 API、标准网页、分页/导出等代表站点迁移，隔离影子运行。</td><td>至少连续 3 个完整业务周期数据核对一致；月度任务需专门模拟周期。</td></tr>
+<tr><td>P5 生产灰度</td><td>第 5—6 周</td><td>小范围 ownership 切换，逐级扩展；回退演练和运维交接。</td><td>建议连续 7 天稳定观察，覆盖任务类型和故障恢复；业务负责人验收。</td></tr>
+</tbody></table></div>
+<h3>灰度切换的操作顺序</h3>
+<ol><li>选择固定网站/账号范围，备份现有配置、任务领取范围和对应代码，保留回退版本。</li><li>将该范围设为“切换中”：停止旧程序领取新任务，但允许已运行任务结束。原有 crawl_code 过滤如何实现，必须以存储过程实际能力为准。</li><li>核对旧任务、浏览器、文件后处理、导入批次全部终结；不能只看旧队列为空。</li><li>原子切换 ownership 到新平台，记录切换时间与范围，再启用新桥接。</li><li>从 1 个站点/账号开始，扩大到一组，再到该范围全量；以成功率、数据一致性、耗时和异常情况作为门槛。</li><li>每次扩大前完成未确认任务核对。试点稳定后复制到其他节点，不同时迁移所有站点和全部运行环境。</li></ol>
+<div class="note warn">如果原存储过程不能精确排除灰度范围，先修改并回归领取逻辑，或按完整 crawl_code/整台旧执行实例切换。不能仅在新桥接中加过滤，却让旧程序继续领取同一范围。</div>
+</section>
+
+<section id="acceptance">
+<h2><span class="num">15 / 验证标准</span>测试与验收矩阵</h2>
+<div class="table-wrap"><table><thead><tr><th>编号</th><th>场景 / 执行动作</th><th>通过标准</th><th>留存证据</th></tr></thead><tbody>
+<tr><td>T01</td><td>类式与函数式旧入口；销售、入库、库存、配置及批次复用。</td><td>全部已纳入试点的原功能可执行；后处理和业务结果正确。</td><td>任务号、代码版本、原结果和新回执。</td></tr>
+<tr><td>T02</td><td>同机 3 个不同账号任务交叉执行、下载相同文件名。</td><td>目录、验证码、日志、浏览器会话隔离；无误删/误归档。</td><td>目录树、文件哈希、进程和时序。</td></tr>
+<tr><td>T03</td><td>同账号跨两机同时投递。</td><td>至多一个有效采集会话；另一任务等待/排队，不互踢。</td><td>锁、租约、登录记录。</td></tr>
+<tr><td>T04</td><td>固定主机、共享队列、Linux/Windows 约束。</td><td>固定任务仅目标节点执行；通用任务可跨合格节点；不符合能力的节点不执行。</td><td>路由原因、Worker、OS。</td></tr>
+<tr><td>T05</td><td>重复投递、API 响应超时后重投、桥接重启。</td><td>同一业务请求没有重复上传/入库；已领取任务不会永久丢失。</td><td>outbox、运行关联、唯一键与导入回执。</td></tr>
+<tr><td>T06</td><td>下载中杀浏览器、执行中杀子进程、取消 Flow。</td><td>所属进程树有界结束；只清理本任务目录；不影响其他任务。</td><td>终止前后 PID、取消状态、目录。</td></tr>
+<tr><td>T07</td><td>节点断网、控制中心重启、租约续约失败。</td><td>不会因心跳过期立即双执行；恢复或人工核对路径明确。</td><td>恢复时序、租约、孤儿进程检查。</td></tr>
+<tr><td>T08</td><td>登录失败、验证码失败、空集、导出超时、缺字段。</td><td>按类型处理；真实失败不记成功；空集有明确证据。</td><td>脱敏日志、截图、返回码映射。</td></tr>
+<tr><td>T09</td><td>超过一页、日期边界、组织筛选、全量导出限制。</td><td>范围准确、分页完整；关键字段及数量/金额汇总与基线一致。</td><td>查询条件快照、源总数、文件/接口对账。</td></tr>
+<tr><td>T10</td><td>上传成功后回写失败、导入超时后重试。</td><td>先查回执；不重复采集或重复入库；结果未确认状态可恢复。</td><td>产物及导入批次唯一记录。</td></tr>
+<tr><td>T11</td><td>Windows 重启、锁屏、RDP 断开；Linux 无显示运行。</td><td>任务路由与会话约束有效；不支持的状态明确排队或失败。</td><td>节点能力预检及恢复记录。</td></tr>
+<tr><td>T12</td><td>冻结并发压测、持续运行、版本切换、备份恢复和回退。</td><td>无持续资源增长；无串任务；恢复后数据/状态一致；发布可回退。</td><td>峰值资源曲线、恢复与回退报告。</td></tr>
+</tbody></table></div>
+<p><strong>放量条件：</strong>试点范围功能用例和完整性用例全部通过；重复执行与隔离问题为零；未确认业务结果已清零；性能与稳定性达到既有基线或经业务确认的目标。网站自身故障与平台故障分开统计。初始目标：同机并发不超过配置、异常进程在终止宽限期后可回收；具体 SLO 在 P0 基于生产耗时分布确定。</p>
+</section>
+
+<section id="operations">
+<h2><span class="num">16 / 持续运行</span>监控、备份、容量与恢复</h2>
+<h3>值班需要看到的指标</h3>
+<ul><li><strong>业务：</strong>待领取量、最老任务年龄、按站点/账号/类型成功率、未确认结果、重复导入拦截、数据行数异常。</li><li><strong>编排：</strong>队列等待、运行数、延迟、Worker 心跳、outbox 积压、租约续约失败、重试预算。</li><li><strong>节点：</strong>内存、CPU、磁盘、浏览器/驱动进程数量、临时目录增长、共享存储可达性。</li><li><strong>处理：</strong>下载、上传、解析、导入、回写各阶段耗时与失败率；日志关联 job/attempt/flow_run/node/version。</li></ul>
+<p>先使用 Prefect UI 加结构化业务日志和已有监控。告警阈值示例：Worker 连续多次心跳缺失、outbox 超过约定等待、磁盘使用率 80%、同站点连续 3 次平台类失败。最终阈值按采集周期和噪声调整。网页密码、Token、Cookie、含凭据连接串不进入 Prefect 参数和普通日志。</p>
+<h3>备份与恢复演练</h3>
+<div class="table-wrap"><table><thead><tr><th>对象</th><th>首期策略</th><th>恢复验证</th></tr></thead><tbody>
+<tr><td>Prefect PostgreSQL</td><td>每日一致性备份；需要更小 RPO 时启用 WAL/PITR；备份到控制机外。</td><td>新环境还原后可查工作池、部署、运行记录；确认定时任务不会误触发。</td></tr>
+<tr><td>业务桥接表/结果表</td><td>随业务 SQL Server 备份，并与业务系统恢复策略一致。</td><td>还原后先暂停投递，核对业务终态、outbox、租约与外部产物。</td></tr>
+<tr><td>代码与配置</td><td>Git 提交、release、依赖锁、镜像 digest、加密配置和证书分别保管。</td><td>新节点按记录重建并通过预检，不能依赖故障机本地环境。</td></tr>
+<tr><td>原始文件与回执</td><td>按业务要求设保留期；可先设原始文件 90 天、运行日志 30 天作为待确认起点。</td><td>可根据业务任务号找回 manifest 和文件，复算哈希。</td></tr>
+</tbody></table></div>
+<div class="codebox"><div class="codehead"><span>Linux Bash · 控制数据库备份示例；备份目录需已创建</span></div><pre>docker compose exec -T postgres pg_dump -U prefect -d prefect -Fc -f /tmp/prefect.dump
+docker compose cp postgres:/tmp/prefect.dump /var/backups/crawler/prefect.dump
+sha256sum /var/backups/crawler/prefect.dump</pre></div>
+<p>备份文件使用带时间的唯一文件名轮换，复制到异机并验证恢复；上面固定名称仅为示例。恢复目标建议首期 RPO ≤ 24 小时、RTO ≤ 4 小时，必须由演练证明并经业务确认。每日备份并不自动达到更短 RPO；多 Worker 也不消除控制中心单点。</p>
+<h3>日常维护顺序</h3>
+<p>标记节点维护 → 停止向其专用队列投递/暂停队列 → 等待在途任务及后处理完成 → 停止 Worker → 发布/维护 → 能力预检 → 启动 → 小样本验证 → 恢复流量。暂停队列不会停止已运行任务；控制中心升级前备份数据库并在恢复副本中验证迁移。</p>
+</section>
+
+<section id="rollback">
+<h2><span class="num">17 / 回退方案</span>上线异常与故障处理</h2>
+<h3>灰度范围回退步骤</h3>
+<ol><li>停止桥接向异常范围创建新运行，暂停对应专用业务队列；共享队列按站点路由关闭，避免影响其他任务。</li><li>列出运行中/已采集/处理中任务，优先排空；必须取消时先完成所属进程树终止确认。</li><li>核对源系统、outbox、外部上传与导入回执。对结果未确认的任务先查实际数据，不能一律把 ISCL 改回 0。</li><li>确认新平台不再持有该范围的有效执行租约，更新 ownership 到旧系统；只重放确认未完成的业务请求。</li><li>恢复旧领取范围和已冻结版本，执行一个小样本核对，再恢复正常调度。</li><li>保留新运行日志和产物，记录问题范围与根因；无需删除新平台数据库或运行目录。</li></ol>
+<div class="table-wrap"><table><thead><tr><th>故障</th><th>第一动作</th><th>恢复要点</th></tr></thead><tbody>
+<tr><td>控制中心不可用</td><td>桥接停止新投递；节点不擅自重复获取任务。</td><td>核对仍在运行的子进程与产物；控制恢复后先对账再放量。</td></tr>
+<tr><td>某节点失联</td><td>隔离节点分配，保留业务任务状态。</td><td>确认旧执行已停止或输出已被隔离；再以新 attempt 重派到同能力节点。</td></tr>
+<tr><td>站点布局改变</td><td>暂停该站点自动重试，保留截图/DOM/网络证据。</td><td>在测试环境修复定位并回归，发布新版本；其他站点继续运行。</td></tr>
+<tr><td>新版本数据异常</td><td>停止该版本新任务，暂缓产物导入。</td><td>新任务路由回上一版本；已入库数据按业务批次处理，不自动删库。</td></tr>
+<tr><td>控制数据库升级不兼容</td><td>停止升级后的投递。</td><td>用备份恢复匹配旧版本的新实例并核对外部副作用；不能直接启动旧镜像连接已升级数据库。</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="ai">
+<h2><span class="num">18 / 后续优化</span>网站自动分析与代码生成的接入位置</h2>
+<p>生产运行闭环稳定后，再建设 Playwright 网站探索与证据采集工具。它属于开发工具层，不替代 Prefect 生产调度，也不要求旧站点改用 Playwright。</p>
+<div class="table-wrap"><table><thead><tr><th>能力</th><th>输入 / 输出</th><th>实施约束</th></tr></thead><tbody>
+<tr><td>项目能力索引</td><td>公共类/方法、参数、同类站点样例 → 可复用清单。</td><td>生成前先检索现有能力，保持构造函数与下载规范。</td></tr>
+<tr><td>真实页面探索</td><td>网站、授权账号引用、目标范围 → 登录/菜单/查询/分页/导出证据。</td><td>所有 XPath/CSS 有真实页面来源、iframe/窗口上下文和验证结果。</td></tr>
+<tr><td>采集方案选择</td><td>DOM、XHR/Fetch、导出样本 → 完整性评估。</td><td>核对分页、日期、组织范围与全量导出，不以“返回 JSON”视作完整数据。</td></tr>
+<tr><td>受约束代码生成</td><td>证据与复用清单 → DataDownloadXXX 或新采集适配器。</td><td>Playwright 临时引用不能写入生产 Selenium；在真实执行环境复验定位。</td></tr>
+<tr><td>注册与发布</td><td>代码审查、隔离业务回归 → 站点能力声明和版本 release。</td><td>通过前述验收与灰度流程后再进入正式任务池。</td></tr>
+</tbody></table></div>
+<p>后续优化顺序建议为：Linux 站点覆盖率 → 容器隔离 → 开发证据工具 → 代码生成 → 变化检测与辅助修复。自动化生成的代码继续执行相同发布和验收标准。</p>
+</section>
+
+<section id="checklist">
+<h2><span class="num">19 / 执行看板</span>实施检查清单</h2>
+<p>此清单可在当前浏览器本地勾选保存，不上传、不代表系统实际执行结果；正式验收以任务、日志和签字记录为准。</p>
+<div class="check-meta"><span id="check-count" aria-live="polite">已完成 0 项</span><button class="reset" id="reset-checks">清除本地勾选</button></div><div class="progress" aria-hidden="true"><span id="check-progress"></span></div>
+<div class="checklist">
+<label><input type="checkbox" data-check="baseline"><span>完成活跃站点、两种执行入口、服务器和全部依赖版本盘点。</span></label>
+<label><input type="checkbox" data-check="database"><span>核实存储过程、任务领取、状态回写、后处理和并发事务语义。</span></label>
+<label><input type="checkbox" data-check="control"><span>Linux 控制中心、认证、数据库持久化与恢复演练通过。</span></label>
+<label><input type="checkbox" data-check="workers"><span>Linux/Windows Worker 与固定/共享队列冒烟通过。</span></label>
+<label><input type="checkbox" data-check="adapter"><span>类式和旧函数式适配器均覆盖采集、下载、处理、入库与回写。</span></label>
+<label><input type="checkbox" data-check="isolation"><span>下载、验证码、截图、日志、浏览器和临时文件完成隔离验证。</span></label>
+<label><input type="checkbox" data-check="outbox"><span>ownership、outbox、执行租约、账号互斥和业务幂等通过故障测试。</span></label>
+<label><input type="checkbox" data-check="supervision"><span>超时/取消可以清理所属进程树，失联场景不会双执行。</span></label>
+<label><input type="checkbox" data-check="result"><span>旧返回码、空数据、文件与导入回执已正确映射，未确认结果可对账。</span></label>
+<label><input type="checkbox" data-check="linux"><span>代表性站点迁移 Linux，影子结果一致且无重复生产副作用。</span></label>
+<label><input type="checkbox" data-check="release"><span>版本固定、节点预检、日志关联、监控和备份均已交付。</span></label>
+<label><input type="checkbox" data-check="cutover"><span>完成范围排空、灰度接管和回退演练，业务确认后放量。</span></label>
+</div>
+</section>
+
+<section id="sources">
+<h2><span class="num">20 / 依据与交接</span>资料依据、已知边界与待确认项</h2>
+<h3>官方资料</h3>
+<ol class="source-list">
+<li><a href="https://github.com/PrefectHQ/prefect" target="_blank" rel="noopener noreferrer">Prefect 官方上游仓库</a>：开源项目及版本入口；<a href="https://github.com/PrefectHQ/prefect/releases/tag/3.9.2" target="_blank" rel="noopener noreferrer">3.9.2 发布记录</a>，发布日期 2026-11-06。本方案仅将其列作候选冻结版本。</li>
+<li><a href="https://www.prefect.io/docs/v3/how-to-guides/self-hosted/docker-compose" target="_blank" rel="noopener noreferrer">自托管 Docker Compose</a>：PostgreSQL、Server、后台服务及可选 Redis 的部署说明。本方案首期使用简化的单 Server 部署，后续扩容需按选定版本重新核实。</li>
+<li><a href="https://www.prefect.io/docs/v3/concepts/workers" target="_blank" rel="noopener noreferrer">Workers</a>与<a href="https://www.prefect.io/docs/v3/concepts/work-pools" target="_blank" rel="noopener noreferrer">工作池</a>：进程/容器执行、队列订阅及 Worker 并发上限。</li>
+<li><a href="https://github.com/PrefectHQ/prefect/blob/main/docs/v3/how-to-guides/self-hosted/server-windows.mdx" target="_blank" rel="noopener noreferrer">Windows 部署说明</a>：Windows Server/Worker 的部署路径；具体 OS/Python 组合仍需现场验证。</li>
+<li><a href="https://www.prefect.io/docs/v3/how-to-guides/deployments/deploy-via-python" target="_blank" rel="noopener noreferrer">Python 注册部署</a>与<a href="https://www.prefect.io/docs/v3/how-to-guides/deployment_infra/run-flows-in-local-processes" target="_blank" rel="noopener noreferrer">本地进程执行</a>：Flow、代码来源及 Deployment 注册。</li>
+<li><a href="https://www.prefect.io/docs/v3/advanced/security-settings" target="_blank" rel="noopener noreferrer">自托管认证设置</a>：服务端与客户端认证配置；<a href="https://www.prefect.io/docs/v3/how-to-guides/workflows/global-concurrency-limits" target="_blank" rel="noopener noreferrer">全局并发限制</a>：跨运行资源限制机制。</li>
+<li><a href="https://reference.prefect.io/prefect/cli/work_queue/" target="_blank" rel="noopener noreferrer">队列 CLI 参考</a>：创建、暂停、恢复及并发限制。文档可能跟随主分支更新，投产需与冻结版本 --help/源码核对。</li>
+<li><a href="https://github.com/microsoft/playwright-mcp" target="_blank" rel="noopener noreferrer">Playwright MCP</a>：后续网站探索与代码开发工具入口。</li>
+</ol>
+<h3>本地源码取证</h3>
+<p>基线目录 <code>D:\01_source\04_python\cnb\fetch-crawler</code>。本次只读分析了 FetchresultQueue.py、FetchresultBatch.py、FetchresultDown.py、ProFile.py、ExcelRemove.py、Excelsave.py、ScreenImg.py、browser_lifecycle.py、CommonImports.py、CommonCheckCode.py、WindowsCommon.py 和部分网站样例；未连接生产数据库，未读取存储过程正文，未执行生产爬虫。</p>
+<h3>进入 P0 时必须填实的事项</h3>
+<ul><li>生产 Windows Server 的具体版本、新增 Linux 发行版与架构、各节点网络区域和实际资源。</li><li>活跃任务数量、站点/账号归属、周期与峰值；需保留登录的批次边界。</li><li>Pro_Flow_Queue 的领取副作用、ISCL 与其他业务字段的真实含义、事务和回写方。</li><li>完整返回码字典，包括源码中出现的 0、1、10、15、20、2002 等；不凭编号猜测业务含义。</li><li>后处理是否可幂等、现有入库唯一键、文件传输回执、原始文件保留要求。</li><li>试点网站、影子环境、业务验收负责人、RPO/RTO 和回退触发条件。</li></ul>
+<div class="note"><strong>交付结论：</strong>先交付“可监督、可隔离、可核对的旧任务执行平台”，确保原功能延续和单机/多机执行可靠；随后扩大 Linux 覆盖率，再增加网站分析与代码生成。框架能力、待开发模块和现场待验证项按本页分别落实。</div>
+</section>
+<footer class="footer">爬虫任务编排与执行平台 · 实施与部署方案 v1.0　｜　单文件 HTML，无外部脚本/字体依赖　｜　编制与资料核查：2026-11-12</footer>
+</main>
+</div>
+<script>
+(() => {
+  'use strict';
+  document.getElementById('print-button').addEventListener('click', () => window.print());
+  document.getElementById('check-button').addEventListener('click', () => document.getElementById('checklist').scrollIntoView({behavior:'smooth'}));
+  const sidebar = document.querySelector('.sidebar');
+  const mobileToc = document.querySelector('.mobile-toc');
+  mobileToc.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    mobileToc.setAttribute('aria-expanded', String(open));
+    mobileToc.textContent = open ? '收起文档目录 ▴' : '展开文档目录 ▾';
+  });
+  document.querySelectorAll('.codebox').forEach(box => {
+    const header = box.querySelector('.codehead');
+    const pre = box.querySelector('pre');
+    const button = document.createElement('button');
+    button.className = 'copy';
+    button.textContent = '复制';
+    button.setAttribute('aria-label', '复制此代码片段');
+    header.appendChild(button);
+    button.addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard) throw new Error('剪贴板接口不可用');
+        await navigator.clipboard.writeText(pre.textContent);
+        button.textContent = '已复制';
+      } catch (_) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = '已选中，请手动复制';
+      }
+      window.setTimeout(() => { button.textContent = '复制'; }, 2500);
+    });
+  });
+  const checks = [...document.querySelectorAll('[data-check]')];
+  const key = 'crawler-deployment-plan-v1-checks';
+  let stored = {};
+  try { stored = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (_) {}
+  checks.forEach(input => { input.checked = stored[input.dataset.check] === true; });
+  const update = () => {
+    const done = checks.filter(input => input.checked).length;
+    document.getElementById('check-count').textContent = `已完成 ${done} / ${checks.length} 项（仅本地记录）`;
+    document.getElementById('check-progress').style.width = `${done / checks.length * 100}%`;
+    try { localStorage.setItem(key, JSON.stringify(Object.fromEntries(checks.map(input => [input.dataset.check, input.checked])))); } catch (_) {}
+  };
+  checks.forEach(input => input.addEventListener('change', update));
+  document.getElementById('reset-checks').addEventListener('click', () => { checks.forEach(input => { input.checked = false; }); update(); });
+  update();
+  const links = [...document.querySelectorAll('.toc a')];
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`));
+      });
+    }, {rootMargin:'-5% 0px -70% 0px', threshold:0});
+    document.querySelectorAll('main section').forEach(section => observer.observe(section));
+  }
+})();
+</script>
+</body>
+</html>

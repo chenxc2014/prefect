@@ -1,0 +1,32 @@
+{
+  "file": ".local\\sites\\qjdyf\\商品流向_20261112_人工取证.xlsx",
+  "size": 3858,
+  "sha256": "b04e9409c240ab9540df59b8d38bdefafddc218ca2f3e88e1a3119de54f2e7e4",
+  "sheets": [
+    {
+      "path": "xl/worksheets/sheet1.xml",
+      "row_count": 4,
+      "header": [
+        "时间",
+        "公司编号",
+        "公司名称",
+        "购进单位",
+        "购进单位名称",
+        "商品编码",
+        "商品名称",
+        "规格",
+        "数量",
+        "单位",
+        "生产企业",
+        "地址"
+      ],
+      "data_rows": 3
+    }
+  ],
+  "validation": {
+    "row_count": 3,
+    "dates": [
+      "2026-11-12"
+    ]
+  }
+}

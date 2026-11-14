@@ -1,0 +1,42 @@
+{
+  "framework": "Prefect",
+  "repository": "https://github.com/chenxc2014/prefect.git",
+  "upstream_repository": "https://github.com/PrefectHQ/prefect.git",
+  "tag": "3.9.2",
+  "commit": "b0479c0c26045b06321191bbad0cdfbb334d7380",
+  "source_path": "vendor/prefect",
+  "runtime_install": "prefect==3.9.2",
+  "upstream_modified": true,
+  "custom_ui": {
+    "version": "3.9.2-zh.1",
+    "source_path": "vendor/prefect/ui-v2",
+    "branch": "ui-v2/chinese-localization",
+    "commit": "69c06336f9e604c7aa1f799dcaec33da5c0f56d7",
+    "default_locale": "zh-CN",
+    "backend_modified": false
+  },
+  "verified_date": "2026-11-13",
+  "development_control": "native-systemd-postgresql",
+  "linux_node": "192.168.1.169",
+  "windows_node": "192.168.1.167",
+  "online_engine": {
+    "name": "Maxun",
+    "repository": "https://github.com/getmaxun/maxun.git",
+    "tag": "v0.1.0",
+    "commit": "e95c4e25796881e30207f1f72dc91e638dcc7e94",
+    "source_path": "vendor/maxun",
+    "execution_mode": "docker-backend-with-native-browser-service",
+    "designer_url": "https://192.168.1.169:9443/"
+  },
+  "visual_engine": {
+    "name": "EasySpider",
+    "repository": "https://github.com/chenxc2014/EasySpider.git",
+    "upstream_repository": "https://github.com/NaiboWang/EasySpider.git",
+    "tag": "v0.6.5",
+    "commit": "191bd6d7547bb397e4c579dd2c70ae835be3f512",
+    "source_path": "vendor/easyspider",
+    "license": "AGPL-3.0",
+    "execution_mode": "isolated-python-subprocess",
+    "portal": "https://192.168.1.169:8443/collector/"
+  }
+}

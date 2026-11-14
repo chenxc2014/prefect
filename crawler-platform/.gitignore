@@ -1,0 +1,17 @@
+# 仅提交应用源码与脱敏验证记录。
+.local/
+vendor/
+.venv/
+.cache/
+__pycache__/
+*.pyc
+*.log
+.env
+*.pem
+*.key
+*.7z
+*.zip
+*.xlsx
+.tmp/ssh169_known_hosts
+.tmp/portal-script.js
+.tmp/plan-browser.js

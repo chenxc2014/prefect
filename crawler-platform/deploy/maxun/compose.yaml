@@ -1,0 +1,52 @@
+name: crawler-maxun
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: maxun
+      POSTGRES_USER: maxun
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U maxun -d maxun']
+      interval: 5s
+      retries: 20
+  browser:
+    image: getmaxun/maxun-browser:v0.0.2
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      BROWSER_WS_PORT: 3001
+      BROWSER_HEALTH_PORT: 3002
+      BROWSER_WS_HOST: browser
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    shm_size: 1gb
+    mem_limit: 3g
+  backend:
+    image: getmaxun/maxun-backend:v0.1.0
+    restart: unless-stopped
+    env_file: .env
+    ports: ['127.0.0.1:18080:8080']
+    environment:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      CI: 'true'
+      CONTAINER: 'true'
+    shm_size: 1gb
+    mem_limit: 5g
+    extra_hosts: ['host.docker.internal:host-gateway']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      browser:
+        condition: service_started
+  frontend:
+    image: getmaxun/maxun-frontend:v0.1.0
+    restart: unless-stopped
+    ports: ['127.0.0.1:15173:5173']
+    environment:
+      FRONTEND_PORT: 5173
+      BACKEND_URL: https://192.168.1.169:9443
+    depends_on: [backend]
+volumes:
+  postgres_data:

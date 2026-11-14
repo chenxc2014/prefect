@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "node": "linux-169",
+      "date": "2026-11-01",
+      "id": "2969c3cf-39cb-4802-af8c-d7db9f9c19e8",
+      "expected": "COMPLETED",
+      "status": {
+        "id": "2969c3cf-39cb-4802-af8c-d7db9f9c19e8",
+        "state": "COMPLETED",
+        "message": null,
+        "artifacts": [
+          {
+            "name": "esfile_sales.csv_5e2035e2-6471-43d3-98eb-eb0bda40f113_sales.csv",
+            "sha256": "6d19009e1f35857de1ea2016805ec4fc273fc4fb103bd9cc5cedab5fb6cbe618",
+            "size": 112,
+            "url": "/collector/api/results/2969c3cf-39cb-4802-af8c-d7db9f9c19e8/0"
+          }
+        ]
+      }
+    },
+    {
+      "node": "linux-169",
+      "date": "2026-11-02",
+      "id": "5d4ecc36-f87c-4c7b-b65d-3b4b1d74889c",
+      "expected": "COMPLETED",
+      "status": {
+        "id": "5d4ecc36-f87c-4c7b-b65d-3b4b1d74889c",
+        "state": "COMPLETED",
+        "message": null,
+        "artifacts": [
+          {
+            "name": "esfile_sales.csv_df23c69e-7cf6-4241-bf9d-6b4bf9ab62f2_sales.csv",
+            "sha256": "23d125d1ea7d9eaa5713b4c07f68fda24d23b0f46ebf68edc4f78833bff7f167",
+            "size": 112,
+            "url": "/collector/api/results/5d4ecc36-f87c-4c7b-b65d-3b4b1d74889c/0"
+          }
+        ]
+      }
+    },
+    {
+      "node": "windows-167",
+      "date": "2026-11-03",
+      "id": "991b31d3-bb6b-4ea8-bd05-c4ee7013b5a4",
+      "expected": "COMPLETED",
+      "status": {
+        "id": "991b31d3-bb6b-4ea8-bd05-c4ee7013b5a4",
+        "state": "COMPLETED",
+        "message": null,
+        "artifacts": [
+          {
+            "name": "esfile_sales.csv_247a0392-32e6-44ac-9059-f953be9476c5_sales.csv",
+            "sha256": "5d41d78616d039e6d2ac3c3e4d45ec6b12f2ffcc0caf7267432a57acb34739d0",
+            "size": 112,
+            "url": "/collector/api/results/991b31d3-bb6b-4ea8-bd05-c4ee7013b5a4/0"
+          }
+        ]
+      }
+    },
+    {
+      "node": "linux-169",
+      "id": "a75e66d3-78b7-472f-8c51-aa18a01867ab",
+      "expected": "FAILED",
+      "status": {
+        "id": "a75e66d3-78b7-472f-8c51-aa18a01867ab",
+        "state": "FAILED",
+        "message": "Flow run encountered an exception: RuntimeError: 缺少成功产物：Data/Task_0/不存在的产物.csv",
+        "artifacts": []
+      }
+    }
+  ],
+  "checks": [
+    "双节点浏览器真实执行",
+    "日期参数与CSV字段一致",
+    "集中归档与哈希验证",
+    "未认证下载拒绝",
+    "缺失产物正确失败"
+  ]
+}

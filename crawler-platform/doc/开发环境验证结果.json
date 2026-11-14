@@ -1,0 +1,418 @@
+{
+  "checked_at": "2026-11-13T02:07:50.549136+00:00",
+  "cases": [
+    {
+      "name": "20261113-020621-linux-169-0",
+      "deployment": "linux-169",
+      "parameters": {
+        "required_os": "Linux",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "564fb5ab-d322-4792-9e01-bd0a93fc5a80",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-linux-169-1",
+      "deployment": "linux-169",
+      "parameters": {
+        "required_os": "Linux",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "a7013638-7c15-40f8-b6dd-83841259edbb",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-linux-169-2",
+      "deployment": "linux-169",
+      "parameters": {
+        "required_os": "Linux",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-linux-169-3",
+      "deployment": "linux-169",
+      "parameters": {
+        "required_os": "Linux",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "cc721e1e-bb7d-4b04-ba31-8293370c6fff",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-windows-167-0",
+      "deployment": "windows-167",
+      "parameters": {
+        "required_os": "Windows",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "8fc1d543-1f71-4fef-bc95-cc59913e8a11",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-windows-167-1",
+      "deployment": "windows-167",
+      "parameters": {
+        "required_os": "Windows",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "8ae36086-a495-46a1-8982-be808df80ce6",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-windows-167-2",
+      "deployment": "windows-167",
+      "parameters": {
+        "required_os": "Windows",
+        "hold_seconds": 20
+      },
+      "expected": "COMPLETED",
+      "flow_run_id": "3673c447-095b-471a-9e86-6031ff8a387f",
+      "actual": "COMPLETED",
+      "state_message": null
+    },
+    {
+      "name": "20261113-020621-failure",
+      "deployment": "linux-169",
+      "parameters": {
+        "required_os": "Linux",
+        "hold_seconds": 0,
+        "fail": true
+      },
+      "expected": "FAILED",
+      "flow_run_id": "61355e5e-19ce-4115-839e-2cc7d24b74d7",
+      "actual": "FAILED",
+      "state_message": "Flow run encountered an exception: RuntimeError: 验证执行器失败，退出码=1，run_id=303cafcc-8c65-4135-b165-07af8c4ca032"
+    },
+    {
+      "name": "20261113-020621-timeout",
+      "deployment": "windows-167",
+      "parameters": {
+        "required_os": "Windows",
+        "hold_seconds": 30,
+        "timeout_seconds": 2
+      },
+      "expected": "FAILED",
+      "flow_run_id": "3c7c538d-c0bd-43e3-a277-49a76cb17861",
+      "actual": "FAILED",
+      "state_message": "Flow run encountered an exception: TimeoutExpired: Command '['D:\\\\CrawlerDev\\\\venv\\\\Scripts\\\\python.exe', 'D:\\\\CrawlerDev\\\\releases\\\\dev-v1\\\\runtime\\\\probe.py', 'D:\\\\CrawlerDev\\\\runs\\\\b0b01d18-a8e3-40b3-b2ef-50705e7473af']' timed out after 2 seconds"
+    }
+  ],
+  "checks": {
+    "authenticated_https": true,
+    "expected_terminal_states": true,
+    "all_success_artifacts_present": true,
+    "os_routing_correct": true,
+    "unique_run_directories": true,
+    "csv_complete_and_hash_verified": true,
+    "child_processes_reaped": true,
+    "single_host_concurrency": true,
+    "cross_host_overlap": true
+  },
+  "artifacts": {
+    "564fb5ab-d322-4792-9e01-bd0a93fc5a80": {
+      "host": "169",
+      "request": {
+        "run_id": "5d3847b0-3664-491d-b933-7a44d33881ca",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "564fb5ab-d322-4792-9e01-bd0a93fc5a80"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "5d3847b0-3664-491d-b933-7a44d33881ca",
+        "hostname": "scraping-platform",
+        "flow_run_id": "564fb5ab-d322-4792-9e01-bd0a93fc5a80",
+        "os": "Linux",
+        "pid": 20152,
+        "run_dir": "/var/lib/crawler-dev/runs/5d3847b0-3664-491d-b933-7a44d33881ca",
+        "started_at": "2026-11-13T02:06:34.700538+00:00",
+        "finished_at": "2026-11-13T02:06:54.740298+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "564fb5ab-d322-4792-9e01-bd0a93fc5a80",
+        "child_pid": 20152,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "564fb5ab-d322-4792-9e01-bd0a93fc5a80",
+        "pid": 20152,
+        "started_at": "2026-11-13T02:06:34.700538+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "a7013638-7c15-40f8-b6dd-83841259edbb": {
+      "host": "169",
+      "request": {
+        "run_id": "2e179753-55a8-43b7-b704-46babab67b30",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "a7013638-7c15-40f8-b6dd-83841259edbb"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "2e179753-55a8-43b7-b704-46babab67b30",
+        "hostname": "scraping-platform",
+        "flow_run_id": "a7013638-7c15-40f8-b6dd-83841259edbb",
+        "os": "Linux",
+        "pid": 20163,
+        "run_dir": "/var/lib/crawler-dev/runs/2e179753-55a8-43b7-b704-46babab67b30",
+        "started_at": "2026-11-13T02:06:35.778818+00:00",
+        "finished_at": "2026-11-13T02:06:55.812494+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "a7013638-7c15-40f8-b6dd-83841259edbb",
+        "child_pid": 20163,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "a7013638-7c15-40f8-b6dd-83841259edbb",
+        "pid": 20163,
+        "started_at": "2026-11-13T02:06:35.778818+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c": {
+      "host": "169",
+      "request": {
+        "run_id": "5a825e1b-c97d-48a9-9902-0a6e4ea7f565",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "5a825e1b-c97d-48a9-9902-0a6e4ea7f565",
+        "hostname": "scraping-platform",
+        "flow_run_id": "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c",
+        "os": "Linux",
+        "pid": 20194,
+        "run_dir": "/var/lib/crawler-dev/runs/5a825e1b-c97d-48a9-9902-0a6e4ea7f565",
+        "started_at": "2026-11-13T02:07:10.641432+00:00",
+        "finished_at": "2026-11-13T02:07:30.664806+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c",
+        "child_pid": 20194,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "3e5ac494-e803-45d1-bf26-9a9bfbd2ba1c",
+        "pid": 20194,
+        "started_at": "2026-11-13T02:07:10.641432+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "cc721e1e-bb7d-4b04-ba31-8293370c6fff": {
+      "host": "169",
+      "request": {
+        "run_id": "1d0ba4db-4f0e-44e1-9d22-afd8afee6b2b",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "cc721e1e-bb7d-4b04-ba31-8293370c6fff"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "1d0ba4db-4f0e-44e1-9d22-afd8afee6b2b",
+        "hostname": "scraping-platform",
+        "flow_run_id": "cc721e1e-bb7d-4b04-ba31-8293370c6fff",
+        "os": "Linux",
+        "pid": 20206,
+        "run_dir": "/var/lib/crawler-dev/runs/1d0ba4db-4f0e-44e1-9d22-afd8afee6b2b",
+        "started_at": "2026-11-13T02:07:11.285414+00:00",
+        "finished_at": "2026-11-13T02:07:31.381524+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "cc721e1e-bb7d-4b04-ba31-8293370c6fff",
+        "child_pid": 20206,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "cc721e1e-bb7d-4b04-ba31-8293370c6fff",
+        "pid": 20206,
+        "started_at": "2026-11-13T02:07:11.285414+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "8fc1d543-1f71-4fef-bc95-cc59913e8a11": {
+      "host": "167",
+      "request": {
+        "run_id": "071236d4-640c-4332-8d6f-8aa62710f8e2",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "8fc1d543-1f71-4fef-bc95-cc59913e8a11"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "071236d4-640c-4332-8d6f-8aa62710f8e2",
+        "hostname": "WIN-CAPN7NUHHPC",
+        "flow_run_id": "8fc1d543-1f71-4fef-bc95-cc59913e8a11",
+        "os": "Windows",
+        "pid": 5800,
+        "run_dir": "D:\\CrawlerDev\\runs\\071236d4-640c-4332-8d6f-8aa62710f8e2",
+        "started_at": "2026-11-13T02:06:43.217193+00:00",
+        "finished_at": "2026-11-13T02:07:03.365119+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "8fc1d543-1f71-4fef-bc95-cc59913e8a11",
+        "child_pid": 5408,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "8fc1d543-1f71-4fef-bc95-cc59913e8a11",
+        "pid": 5800,
+        "started_at": "2026-11-13T02:06:43.217193+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "8ae36086-a495-46a1-8982-be808df80ce6": {
+      "host": "167",
+      "request": {
+        "run_id": "3fe470fc-9d5c-48d5-9a84-3a21823a240d",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "8ae36086-a495-46a1-8982-be808df80ce6"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "3fe470fc-9d5c-48d5-9a84-3a21823a240d",
+        "hostname": "WIN-CAPN7NUHHPC",
+        "flow_run_id": "8ae36086-a495-46a1-8982-be808df80ce6",
+        "os": "Windows",
+        "pid": 7436,
+        "run_dir": "D:\\CrawlerDev\\runs\\3fe470fc-9d5c-48d5-9a84-3a21823a240d",
+        "started_at": "2026-11-13T02:06:43.199213+00:00",
+        "finished_at": "2026-11-13T02:07:03.363555+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "8ae36086-a495-46a1-8982-be808df80ce6",
+        "child_pid": 2744,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "8ae36086-a495-46a1-8982-be808df80ce6",
+        "pid": 7436,
+        "started_at": "2026-11-13T02:06:43.199213+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "3673c447-095b-471a-9e86-6031ff8a387f": {
+      "host": "167",
+      "request": {
+        "run_id": "96101fb5-a1e6-4b23-b6d1-621167d5f800",
+        "hold_seconds": 20,
+        "fail": false,
+        "flow_run_id": "3673c447-095b-471a-9e86-6031ff8a387f"
+      },
+      "result": {
+        "status": "completed",
+        "kind": "synthetic-probe",
+        "run_id": "96101fb5-a1e6-4b23-b6d1-621167d5f800",
+        "hostname": "WIN-CAPN7NUHHPC",
+        "flow_run_id": "3673c447-095b-471a-9e86-6031ff8a387f",
+        "os": "Windows",
+        "pid": 7060,
+        "run_dir": "D:\\CrawlerDev\\runs\\96101fb5-a1e6-4b23-b6d1-621167d5f800",
+        "started_at": "2026-11-13T02:07:23.988234+00:00",
+        "finished_at": "2026-11-13T02:07:44.111134+00:00",
+        "row_count": 6,
+        "sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+      },
+      "supervisor": {
+        "flow_run_id": "3673c447-095b-471a-9e86-6031ff8a387f",
+        "child_pid": 3508,
+        "child_returncode": 0,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "3673c447-095b-471a-9e86-6031ff8a387f",
+        "pid": 7060,
+        "started_at": "2026-11-13T02:07:23.988234+00:00"
+      },
+      "actual_sha256": "7ac4ad12c44b1490747698d536af53b3fa161a3f03cd53d5143caa841bf9921f"
+    },
+    "61355e5e-19ce-4115-839e-2cc7d24b74d7": {
+      "host": "169",
+      "request": {
+        "run_id": "303cafcc-8c65-4135-b165-07af8c4ca032",
+        "hold_seconds": 0,
+        "fail": true,
+        "flow_run_id": "61355e5e-19ce-4115-839e-2cc7d24b74d7"
+      },
+      "supervisor": {
+        "flow_run_id": "61355e5e-19ce-4115-839e-2cc7d24b74d7",
+        "child_pid": 20227,
+        "child_returncode": 1,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "61355e5e-19ce-4115-839e-2cc7d24b74d7",
+        "pid": 20227,
+        "started_at": "2026-11-13T02:07:37.943024+00:00"
+      }
+    },
+    "3c7c538d-c0bd-43e3-a277-49a76cb17861": {
+      "host": "167",
+      "request": {
+        "run_id": "b0b01d18-a8e3-40b3-b2ef-50705e7473af",
+        "hold_seconds": 30,
+        "fail": false,
+        "flow_run_id": "3c7c538d-c0bd-43e3-a277-49a76cb17861"
+      },
+      "supervisor": {
+        "flow_run_id": "3c7c538d-c0bd-43e3-a277-49a76cb17861",
+        "child_pid": 7396,
+        "child_returncode": 1,
+        "child_reaped": true
+      },
+      "started": {
+        "flow_run_id": "3c7c538d-c0bd-43e3-a277-49a76cb17861",
+        "pid": 4100,
+        "started_at": "2026-11-13T02:07:23.965764+00:00"
+      }
+    }
+  },
+  "max_concurrency": {
+    "Linux": 2,
+    "Windows": 2
+  },
+  "passed": true
+}

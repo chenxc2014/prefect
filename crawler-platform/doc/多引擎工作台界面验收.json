@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-14T15:17:18.799Z",
+  "method": "经 SSH 隧道与校验 CA 的 HTTPS 代理访问实际部署",
+  "checks": [
+    "三个引擎卡片、实时调度与设计服务状态、固定 Maxun 地址",
+    "六个功能页面导航、架构说明及原有爬虫真实接入状态",
+    "真实 Maxun 机器人 API 与发布工作区",
+    "从新首页点击入口打开真实 Maxun 登录并进入机器人页面",
+    "EasySpider 原生模板导入、发布、引擎筛选、Prefect Linux 执行及真实文件下载：6 行，2026-11-12",
+    "1920 / 1280 / 768 / 390 像素布局无横向溢出，页面脚本无异常"
+  ],
+  "windows_167_accessed": false,
+  "run_id": "289ad4c2-b025-42a3-8e93-d88c1522478f",
+  "passed": true,
+  "additional_checks": [
+    "最终 HTML ID 唯一、导航与页面一致、脚本语法通过",
+    "状态 API 未认证为 401，认证后返回实际服务状态",
+    "设计器入口为 307 跳转至固定部署地址",
+    "Maxun 登录、新建及远程录制器显示模拟查询页已通过独立浏览器验证",
+    "9443 与 8443 使用相同精确来源白名单，运行时和持久化规则均已核对"
+  ],
+  "screenshots": [
+    ".local/screenshots/collector-redesign-desktop.png",
+    ".local/screenshots/collector-redesign-mobile.png",
+    ".local/screenshots/collector-redesign-architecture.png",
+    ".local/screenshots/collector-redesign-maxun.png",
+    ".local/screenshots/collector-redesign-run.png"
+  ],
+  "limits": [
+    "未从用户堡垒机直接验证访问链路",
+    "未访问 Windows 167",
+    "本次没有执行旧生产任务，未完成 Maxun 千金站点业务验收"
+  ]
+}
