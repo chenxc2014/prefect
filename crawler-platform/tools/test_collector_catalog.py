@@ -49,6 +49,34 @@ class CollectorCatalogTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         maxun.assert_not_called()
 
+    def test_maxun_publish_registers_source_and_fixed_robot(self):
+        import copy
+        from uuid import uuid4
+        from runtime.maxun_relations import MaxunRelations
+        from tools.test_maxun import robot
+        source = robot()
+        published = copy.deepcopy(source)
+        published['recording_meta']['id'] = str(uuid4())
+
+        class Client:
+            def robot(self, identifier):
+                return copy.deepcopy(published if identifier == published['recording_meta']['id'] else source)
+
+            def duplicate(self, original, name):
+                return copy.deepcopy(published)
+
+            def request(self, path, data=None, method=None):
+                return {}
+
+        payload = {'robot_id': source['recording_meta']['id'], 'purpose': 'business', 'task_name': '业务任务', 'name': '本地发布测试'}
+        with patch('runtime.maxun.MaxunClient', return_value=Client()):
+            response = self.post('/api/maxun/publish', payload)
+        self.assertEqual(response.status_code, 200)
+        reference = MaxunRelations(self.collector.catalog.root / '.maxun-relations').records('publications')[0]
+        self.assertEqual(reference['template_id'], response.json()['id'])
+        self.assertEqual(reference['source_robot_id'], source['recording_meta']['id'])
+        self.assertEqual(reference['published_robot_id'], published['recording_meta']['id'])
+
 
 if __name__ == '__main__':
     unittest.main()

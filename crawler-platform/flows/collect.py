@@ -28,7 +28,9 @@ def collect(template_id: str, parameters: dict | None = None, required_os: str =
         raise RuntimeError('模板内容与固定版本不一致')
     if document.get('engine')=='maxun':
         from runtime.maxun import execute as execute_engine
+        from prefect.context import get_run_context
         config={'timeout':900}
+        config.update(template_id=template_id, prefect_run_id=str(get_run_context().flow_run.id))
     else:
         execute_engine=execute
         if not Path(location).exists():raise RuntimeError('该节点尚未配置 EasySpider 执行环境')

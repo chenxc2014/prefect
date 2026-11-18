@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-11-18T12:10:12.574Z",
+  "checks": [
+    "平台任务卡准确定位来源设计稿、固定发布副本和6次执行，平台2成功4失败与Maxun流程状态分别展示",
+    "从平台跳入Maxun对应业务分组，默认折叠执行副本，原始机器人列表保留",
+    "Maxun业务分组可反向准确定位采集平台的对应版本",
+    "编辑设计稿准确打开原始机器人，未编辑或保存任何内容",
+    "发布流程链接打开对应固定副本摘要，展示区域只读",
+    "执行历史提供Prefect与Maxun各自运行入口，Maxun链接定位到具体执行详情",
+    "平台每条历史记录也能经统一登录直接打开对应Maxun单次执行",
+    "业务关联、独立机器人、全部原始记录三种视图可切换，原有8条记录完整保留",
+    "桌面、平板、手机无横向溢出，未登录拒绝读取关联，验收未改变任务版本或机器人"
+  ],
+  "versions_published": 0,
+  "collection_runs_submitted": 0,
+  "robots_modified": 0,
+  "windows_167_accessed": false,
+  "template_id": "0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00",
+  "robot_count": 8,
+  "roles": {
+    "drafts": 1,
+    "publications": 1,
+    "executions": 6
+  },
+  "passed": true
+}

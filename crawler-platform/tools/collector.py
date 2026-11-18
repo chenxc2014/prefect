@@ -71,6 +71,32 @@ def template(identifier: str):
         raise HTTPException(404, '模板版本不存在')
 
 
+@app.get('/api/maxun/relations', dependencies=[Depends(authenticate)])
+async def maxun_relations():
+    import asyncio
+    from prefect.client.orchestration import get_client
+    from prefect.client.schemas.filters import FlowFilter
+    from prefect.client.schemas.sorting import FlowRunSort
+    from runtime.maxun import MaxunClient
+    from runtime.maxun_relations import build_snapshot
+
+    async def read():
+        runs = []
+        async with get_client() as client:
+            for offset in range(0, 10000, 200):
+                page = await client.read_flow_runs(flow_filter=FlowFilter(name={'any_': ['website-collect']}), sort=FlowRunSort.EXPECTED_START_TIME_DESC, limit=200, offset=offset)
+                runs.extend(page)
+                if len(page) < 200:
+                    break
+            else:
+                raise RuntimeError('执行历史超过当前查询范围')
+        return await asyncio.to_thread(build_snapshot, catalog, MaxunClient(), runs)
+    try:
+        return await asyncio.wait_for(read(), timeout=30)
+    except Exception:
+        raise HTTPException(503, 'Maxun 与采集任务的关联暂时无法读取，请稍后刷新')
+
+
 @app.post('/api/templates/{identifier}/runs', dependencies=[Depends(authenticate)])
 async def run(identifier: str, parameters: dict):
     from prefect.client.orchestration import get_client
@@ -266,6 +292,8 @@ def maxun_publish(payload: dict):
         frozen=client.robot(frozen['recording_meta']['id'])
         document['task']={'robot_id':frozen['recording_meta']['id'],'workflow_sha256':fingerprint(frozen)}
         identifier=catalog.publish(document)
+        from runtime.maxun_relations import MaxunRelations
+        MaxunRelations(catalog.root / '.maxun-relations').publication(identifier, meta['id'], frozen['recording_meta']['id'], fingerprint(robot))
         return {'id':identifier,'engine':'maxun'}
     except (ValueError,KeyError,IndexError,TypeError) as error:
         raise HTTPException(400,str(error))

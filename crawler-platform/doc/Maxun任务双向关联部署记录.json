@@ -1,0 +1,72 @@
+{
+  "deployed_at": "2026-11-18T20:03:51.482983",
+  "branch": "crawler-platform/development",
+  "node": "linux-169",
+  "backup": "/opt/crawler-dev/backups/maxun-relations-20261118-200345",
+  "windows_167_accessed": false,
+  "files": [
+    {
+      "path": "runtime/maxun.py",
+      "sha256": "2d89b5ede5d8b9172b61c8304fca0506f8d2df48cbd4fdf63d5ca69832206da6",
+      "matches": true
+    },
+    {
+      "path": "runtime/maxun_relations.py",
+      "sha256": "65e6e9533492c5dfe03ae646d726d5de66422e0ed1da253408e713f8d31d58e4",
+      "matches": true
+    },
+    {
+      "path": "flows/collect.py",
+      "sha256": "b569d105ecb0df016dac8b39cee20cf893d9a43166c3d12cfdb5a94a1be9b9a0",
+      "matches": true
+    },
+    {
+      "path": "tools/collector.py",
+      "sha256": "f011dca773647df8af66f9a8317d9b53a424bd51a650f156e71251c01c2070a0",
+      "matches": true
+    },
+    {
+      "path": "tools/portal_auth.py",
+      "sha256": "51d7bbab89d940bc2019a28c70a9cb977d592ba9194c252da8b009667f30be10",
+      "matches": true
+    },
+    {
+      "path": "tools/backfill_maxun_relations.py",
+      "sha256": "7ae634839b74954936a91c53aca028479479219be306880760389c8ac9b75841",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/collector.html",
+      "sha256": "922dab913a4a30e964ea225905e1c89ecd3ca2fe039e7b09c9436726ae2524bd",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/maxun-task-links.js",
+      "sha256": "072c916b1c7b9725deb76a65540ecae0f6b4c89b5d6f8054a4ddb699e5dc91de",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/suite-theme.css",
+      "sha256": "666a8c7b68389fb13e8ffe805850f51626ad145219457f6750272e7adbc2b5a4",
+      "matches": true
+    },
+    {
+      "path": "deploy/linux/install-sso.py",
+      "sha256": "56da371fa187ad49d9aea9eae0e150e04d25350906f6484de14d8f98b447c862",
+      "matches": true
+    },
+    {
+      "path": "deploy/maxun-relations-backfill.json",
+      "sha256": "b28eec8a3437b0000b87de268a40ae2aedbf24199e38290965095d1243a0aa9f",
+      "matches": true
+    }
+  ],
+  "unit_and_api_tests_passed": 44,
+  "browser_verification": "doc/Maxun任务双向关联界面验收.json",
+  "backfilled": {
+    "drafts": 1,
+    "publications": 1,
+    "executions": 6,
+    "versions_and_heads_unchanged": true
+  }
+}

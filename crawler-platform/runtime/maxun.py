@@ -86,12 +86,20 @@ def execute(task, checks, directory, config=None, client=None):
     root=Path(directory).resolve();root.mkdir(parents=True,exist_ok=False);root.chmod(0o700)
     run_robot=client.duplicate(robot,'平台执行 · '+str(uuid4()))
     identifier=run_robot['recording_meta']['id']
+    relation_context = config or {}
+    relations = None
+    if relation_context.get('template_id') and relation_context.get('prefect_run_id'):
+        from runtime.maxun_relations import MaxunRelations
+        relations = MaxunRelations(relation_context.get('relations_root'))
+        relations.execution(relation_context['template_id'], relation_context['prefect_run_id'], identifier, parameters=task.get('parameters'))
     workflow=bind_inputs(run_robot,task.get('bindings',{}),task.get('parameters',{}),client)
     if task.get('secret_bindings'):
         workflow=bind_inputs({'recording':{'workflow':workflow}},task['secret_bindings'],task['secrets'],client)
     if task.get('bindings') or task.get('secret_bindings'):
         client.request('/api/sdk/robots/'+identifier,{'workflow':workflow},method='PUT')
     run_id=client.request('/api/sdk/robots/'+identifier+'/execute',{'wait':False})['data']['runId']
+    if relations:
+        relations.execution(relation_context['template_id'], relation_context['prefect_run_id'], identifier, run_id, task.get('parameters'))
     deadline=time.monotonic()+int((config or {}).get('timeout',900))
     while True:
         result=client.request('/api/sdk/robots/'+identifier+'/runs/'+run_id)['data']
@@ -137,4 +145,4 @@ def execute(task, checks, directory, config=None, client=None):
         for file in files:
             summary=validate_file(file,checks)
             artifacts.append(dict(path=str(file.relative_to(root)),size=file.stat().st_size,sha256=hashlib.sha256(file.read_bytes()).hexdigest(),**summary))
-    return {'status':'completed','maxun_run_id':run_id,'directory':str(root),'artifacts':artifacts}
+    return {'status':'completed','maxun_robot_id':identifier,'maxun_run_id':run_id,'directory':str(root),'artifacts':artifacts}

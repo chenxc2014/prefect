@@ -49,7 +49,13 @@
         "deploy/maxun/recorder-compat.cjs": "27ab3e5856e2a0f2adc477df7698df1aa9ba634fdc861b09db06528b3ea81217",
         "deploy/maxun/browser-actions.cjs": "d4812803556cf8441eb982d812a4cc1a9c785df02f55b235e7986bd81b725999",
         "deploy/maxun/patch-installed.py": "cf3860b8e14f05d20ceb3cd84a792df5476e21072688576703c05e632991b928",
-        "runtime/maxun.py": "de74e620c30528a1a298420960d463ddc4fe12ada43efee150bcecb3c40ee035"
+        "runtime/maxun.py": "2d89b5ede5d8b9172b61c8304fca0506f8d2df48cbd4fdf63d5ca69832206da6"
+      },
+      "task_relationships": {
+        "storage": "runtime/maxun_relations.py",
+        "interface": "deploy/web/maxun-task-links.js",
+        "backfill": "deploy/maxun-relations-backfill.json",
+        "native_maxun_source_modified": false
       }
     }
   },

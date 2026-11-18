@@ -129,6 +129,10 @@ maxun = '''server {
     proxy_pass http://127.0.0.1:8081/api/auth/me;
     proxy_set_header Host $http_host;
   }
+  location = /_platform/relations {
+    proxy_pass http://127.0.0.1:8081/api/maxun/relations;
+    proxy_set_header Host $http_host;
+  }
   location = /_platform/logout {
     proxy_pass http://127.0.0.1:8081/auth/maxun/logout;
     proxy_set_header Host $http_host;

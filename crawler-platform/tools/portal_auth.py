@@ -16,6 +16,23 @@ COOKIE = '__Host-crawler_session'
 LOGIN_COOKIE = '__Host-crawler_login'
 
 
+def maxun_destination(query):
+    """仅允许受控的机器人和任务定位，不接收任意跳转地址。"""
+    from urllib.parse import urlencode
+    from uuid import UUID
+    if query.get('execution'):
+        return '/runs/' + str(UUID(query['execution'])) + '/run/' + str(UUID(query.get('run', ''))), None
+    robot = query.get('robot', '')
+    if robot:
+        return '/robots/' + str(UUID(robot)) + '/edit', str(UUID(robot))
+    template = query.get('template', '')
+    if re.fullmatch('[a-f0-9]{64}', template):
+        section = query.get('section', 'published')
+        section = section if section in ('published', 'history', 'design') else 'published'
+        return '/robots?' + urlencode({'template': template, 'section': section}), None
+    return '/robots', None
+
+
 class PortalAuth:
     def __init__(self, auth_string, directory, config_path='/etc/crawler-dev/sso.json'):
         self.credentials = auth_string
@@ -169,7 +186,19 @@ class PortalAuth:
         def open_maxun(request: WebRequest):
             if not self.session(request):
                 return self.login_redirect('maxun')
-            return self.private(RedirectResponse(self.settings()['maxun_origin'] + '/_platform/enter', status_code=303))
+            from urllib.parse import urlencode
+            try:
+                destination, robot = maxun_destination(request.query_params)
+            except ValueError:
+                raise HTTPException(400, '机器人编号无效')
+            if request.query_params.get('execution'):
+                parts = destination.split('/')
+                query = urlencode({'execution': parts[2], 'run': parts[4]})
+            elif robot:
+                query = urlencode({'robot': robot})
+            else:
+                query = destination.partition('?')[2]
+            return self.private(RedirectResponse(self.settings()['maxun_origin'] + '/_platform/enter' + ('?' + query if query else ''), status_code=303))
 
         @router.get('/auth/maxun/enter')
         def maxun_enter(request: WebRequest):
@@ -177,6 +206,7 @@ class PortalAuth:
                 return self.private(RedirectResponse(self.settings()['platform_origin'] + '/collector/login?next=maxun', status_code=303))
             from urllib.error import HTTPError, URLError
             try:
+                destination, robot_id = maxun_destination(request.query_params)
                 username, password = self.credentials.split(':', 1)
                 payload = json.dumps({'email': username + '@crawler.local', 'password': password}).encode()
                 with urlopen(Request('http://127.0.0.1:18080/auth/login', data=payload, headers={'Content-Type': 'application/json'}), timeout=12) as upstream:
@@ -190,7 +220,8 @@ class PortalAuth:
             except (HTTPError, URLError, OSError, ValueError, KeyError):
                 return self.private(HTMLResponse('<h2>在线设计器暂时无法进入</h2><p>统一登录仍有效，请稍后重试或返回采集管理平台。</p>', status_code=503))
             encoded = json.dumps(user, ensure_ascii=True).replace('<', '\\u003c')
-            page = '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>正在进入在线设计器</title><p>正在进入 Maxun 在线设计器…</p><script>localStorage.setItem("user",' + json.dumps(encoded) + ');localStorage.removeItem("prefect-password");location.replace("/robots");</script></html>'
+            recording = 'sessionStorage.setItem("recordingId",' + json.dumps(json.dumps(robot_id)) + ');' if robot_id else ''
+            page = '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>正在进入在线设计器</title><p>正在进入 Maxun 在线设计器…</p><script>localStorage.setItem("user",' + json.dumps(encoded) + ');localStorage.removeItem("prefect-password");' + recording + 'location.replace(' + json.dumps(destination) + ');</script></html>'
             response = HTMLResponse(page)
             response.set_cookie('token', token, max_age=self.store.ttl, secure=True, httponly=True, samesite='lax', path='/')
             return self.private(response)
@@ -217,4 +248,5 @@ class PortalAuth:
             self.require_browser(request)
             source = (Path(__file__).resolve().parents[1] / 'deploy/web/suite-theme.js').read_text(encoding='utf-8')
             source += '\n' + (Path(__file__).resolve().parents[1] / 'deploy/web/maxun-recorder.js').read_text(encoding='utf-8')
+            source += '\n' + (Path(__file__).resolve().parents[1] / 'deploy/web/maxun-task-links.js').read_text(encoding='utf-8')
             return self.private(Response(source, media_type='application/javascript'))

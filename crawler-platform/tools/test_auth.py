@@ -12,10 +12,19 @@ from unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from runtime.auth import SessionStore
-from tools.portal_auth import PortalAuth, COOKIE, LOGIN_COOKIE
+from tools.portal_auth import PortalAuth, COOKIE, LOGIN_COOKIE, maxun_destination
 
 
 class UnifiedAuthTest(unittest.TestCase):
+    def test_maxun_destination_only_accepts_known_internal_routes(self):
+        identifier = '66af1f99-bd71-4c86-b190-8d96a7b6176d'
+        self.assertEqual(maxun_destination({'robot': identifier}), ('/robots/' + identifier + '/edit', identifier))
+        self.assertEqual(maxun_destination({'execution': identifier, 'run': identifier}), ('/runs/' + identifier + '/run/' + identifier, None))
+        self.assertEqual(maxun_destination({'template': 'a' * 64, 'section': 'https://outside.test'})[0], '/robots?template=' + 'a' * 64 + '&section=published')
+        self.assertEqual(maxun_destination({'template': '../outside'}), ('/robots', None))
+        with self.assertRaises(ValueError):
+            maxun_destination({'robot': '../outside'})
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

@@ -1,0 +1,13 @@
+{
+  "template_id": "0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00",
+  "source_robot_id": "66af1f99-bd71-4c86-b190-8d96a7b6176d",
+  "published_robot_id": "15fe6863-ede5-4349-9c31-c6b4d253eeb3",
+  "executions": [
+    {"robot_id":"dda96731-3060-4398-ab19-7306f5ee3023","maxun_run_id":"0bf89b0e-c6ee-4d81-92e5-dcd3f66eb053","prefect_run_id":"bea0a89a-4590-4d1b-8d83-79ee4121bb01"},
+    {"robot_id":"c1579198-47da-4542-a41d-5c5fe0542c1a","maxun_run_id":"88a9386c-1116-423a-935b-1b90a85a2dd7","prefect_run_id":"a72b3641-64f7-4ef9-9f07-b913cf15190d"},
+    {"robot_id":"71bd49de-a910-4e3d-990e-bfee58a491f4","maxun_run_id":"98cccc5d-5dcc-49be-93cf-6270a639de1d","prefect_run_id":"e06fcc34-90fc-4b6b-9531-e0f403e776c6"},
+    {"robot_id":"9ad4080f-bdc5-4ddc-ace2-1be410beb38d","maxun_run_id":"9a07504f-5a00-4559-9674-5f6cecbb8831","prefect_run_id":"99fe495d-5468-46e9-b46d-40c1149f8179"},
+    {"robot_id":"6f355267-82c4-4f24-af03-7521fccdf285","maxun_run_id":"1e888dca-6124-481f-8af9-cfa89d5c2db8","prefect_run_id":"c312f8df-1409-4838-8bde-6c2e85d16eaa"},
+    {"robot_id":"c1548cd3-5dfe-4f5d-9940-28455a2c6c8f","maxun_run_id":"895cb5fb-d5da-43e4-a8ba-457129c3254e","prefect_run_id":"e97a207b-acc2-4ea4-8aa4-369fe0d4eb68"}
+  ]
+}
