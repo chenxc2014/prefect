@@ -1,0 +1,10 @@
+[
+  {"id":"0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00","purpose":"business","task_name":"千金商品流向"},
+  {"id":"a744036fe20645a3eca0645a21899f17b9d64b663a7aba4bd71c1c5d3ee978df","purpose":"business","task_name":"千金商品流向"},
+  {"id":"ab14b0290642aadeebe47838607860446fb0c562f97b3b6a1893ef2ec3f2d2d7","purpose":"demo","task_name":"模拟销售日期查询与导出"},
+  {"id":"20c8c0d1fb0590530f852c0160d9d066e7caa3d3427a15b4060722c63d36c69f","purpose":"acceptance","task_name":"浏览器验收：日期查询与导出"},
+  {"id":"228079103ae4a626143c4c91c80735b1e76771510882aced311fcee30ea7f625","purpose":"acceptance","task_name":"故障注入验收：缺少文件（预期失败）"},
+  {"id":"b06975bbb70bafd5a54b6701f03216ade68eb690729e02adf665bc7e50764e0a","purpose":"acceptance","task_name":"验收：日期查询与导出"},
+  {"id":"d77304c7c025c214b7905b38d8c3b827bc710bc26f3cbe0159df00b95a125657","purpose":"acceptance","task_name":"验收：日期查询与导出"},
+  {"id":"e89033b354e8b4458b98accde80af6b8d58edb88e982a43b38748c5f6caef2e2","purpose":"acceptance","task_name":"界面升级验收：日期查询与导出"}
+]

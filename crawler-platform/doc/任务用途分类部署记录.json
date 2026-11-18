@@ -1,0 +1,55 @@
+{
+  "deployed_at": "2026-11-18T17:03:57.395749",
+  "backup": "/opt/crawler-dev/backups/task-classification-20261118-170354",
+  "node": "linux-169",
+  "windows_167_accessed": false,
+  "files": [
+    {
+      "path": "runtime/catalog.py",
+      "sha256": "41518ce19658097e3c5ed844e6c06c09e02217dc5ef4e3e133e829afacf5463f",
+      "matches": true
+    },
+    {
+      "path": "runtime/task_status.py",
+      "sha256": "fc8bbdeaf00ead6a1e19d641bdb39a17e560f5b2ca08d46a21c50a21fe24279b",
+      "matches": true
+    },
+    {
+      "path": "tools/collector.py",
+      "sha256": "8767e59b90400f45f2d1ba3959d1ffa7eaafe06cf347b1c49189be8667a1e216",
+      "matches": true
+    },
+    {
+      "path": "tools/classify_catalog.py",
+      "sha256": "5ffa7659afa98f2dd462765b7f69f35cafd57a2c5ed81514d45e6c81d72755f3",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/collector.html",
+      "sha256": "f881c356e4b2d5f84ab59d410b4ff55652c739df920495ca14c3203c99d191f9",
+      "matches": true
+    },
+    {
+      "path": "deploy/catalog-classifications.json",
+      "sha256": "5f39dd4785e8ec648f737bbc565c06f64252c0c09110e81d4678c1e19cc76f0c",
+      "matches": true
+    },
+    {
+      "path": "deploy/examples/demo-template.json",
+      "sha256": "b6543d2344c465a81a3579fd01dfdfb1e1893d3b3acd0d5d64ac1f8327e1f3a2",
+      "matches": true
+    },
+    {
+      "path": "tools/verify_collect.py",
+      "sha256": "6a2d84e0db4177274dc6b27aaed2215c0b6dba07cc46b60fddb72a620f32bd04",
+      "matches": true
+    },
+    {
+      "path": "tools/run_qjdyf.py",
+      "sha256": "0d5773a29320fed10192421783423bdb8f968894b9e3c51462db49a6e13d0b0e",
+      "matches": true
+    }
+  ],
+  "unit_and_api_tests_passed": 37,
+  "browser_verification": "doc/任务用途分类界面验收.json"
+}

@@ -1,6 +1,8 @@
 {
   "engine": "easyspider",
   "name": "模拟销售日期查询与导出",
+  "purpose": "demo",
+  "task_name": "模拟销售日期查询与导出",
   "node": "linux-169",
   "task": {
     "name": "模拟销售日期查询与导出",

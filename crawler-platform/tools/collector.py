@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 from fastapi import Depends, FastAPI, HTTPException, Request as WebRequest
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
-from runtime.catalog import Catalog, materialize
+from runtime.catalog import Catalog, materialize, classification
 from tools.portal_auth import PortalAuth
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,9 +45,22 @@ def templates():
 @app.post('/api/templates', dependencies=[Depends(authenticate)])
 def publish(document: dict):
     try:
+        document = dict(document, **classification(document))
         return {'id': catalog.publish(document)}
     except (ValueError, KeyError, TypeError, IndexError) as error:
         raise HTTPException(400, str(error))
+
+
+@app.get('/api/template-status', dependencies=[Depends(authenticate)])
+async def template_status():
+    import asyncio
+    from prefect.client.orchestration import get_client
+    from runtime.task_status import read_status
+    try:
+        async with get_client() as client:
+            return await asyncio.wait_for(read_status(client, catalog.list()), timeout=20)
+    except Exception:
+        raise HTTPException(503, '运行与调度状态暂时无法读取，请稍后刷新或在 Prefect 查看')
 
 
 @app.get('/api/templates/{identifier}', dependencies=[Depends(authenticate)])
@@ -200,6 +213,7 @@ def maxun_publish(payload: dict):
     from runtime.maxun import MaxunClient,fingerprint,bind_inputs
     from uuid import uuid4
     try:
+        metadata = classification(payload)
         client=MaxunClient()
         robot=client.robot(payload['robot_id'])
         meta=robot['recording_meta']
@@ -214,7 +228,7 @@ def maxun_publish(payload: dict):
         checks=payload.get('checks') or {'required_files':['Data/result.csv'],'min_rows':1,'required_columns':[]}
         # 先验证公开配置，再创建发布副本；录制草稿后续修改不会影响已发布版本。
         from runtime.catalog import validate
-        document={'engine':'maxun','node':'linux-169','name':name+'（Maxun）','task':{'robot_id':meta['id'],'workflow_sha256':fingerprint(robot)},'bindings':bindings,'secret_bindings':secret_bindings,'defaults':defaults,'checks':checks}
+        document={'engine':'maxun','node':'linux-169','name':name+'（Maxun）','task':{'robot_id':meta['id'],'workflow_sha256':fingerprint(robot)},'bindings':bindings,'secret_bindings':secret_bindings,'defaults':defaults,'checks':checks,**metadata}
         validate(document)
         frozen=client.duplicate(robot,'平台发布 · '+name+' · '+str(uuid4())[:8])
         workflow=frozen['recording']['workflow']

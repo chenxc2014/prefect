@@ -16,6 +16,8 @@ try{
  await page.locator('#file').setInputFiles('deploy/examples/demo-task.json');
  await expect(page.locator('#steps .node')).toHaveCount(5);
  await page.locator('#name').fill('浏览器验收：日期查询与导出');
+ await page.locator('#easyspider-purpose').selectOption('acceptance');
+ await page.locator('#easyspider-task-name').fill('浏览器验收：日期查询与导出');
  await page.locator('#patterns').fill('Data/Task_0/result/files/*.csv');
  await page.locator('#minrows').fill('6');
  await page.locator('#columns').fill('id,quantity');

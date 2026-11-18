@@ -57,12 +57,12 @@ def verify_matrix():
     cases=[]
     for node, date in [('linux-169','2026-11-01'),('linux-169','2026-11-02'),('windows-167','2026-11-03')]:
         document=copy.deepcopy(original)
-        document.update(node=node,name='验收：日期查询与导出 · '+node)
+        document.update(node=node,name='验收：日期查询与导出 · '+node,purpose='acceptance',task_name='验收：日期查询与导出')
         identifier=request('/api/templates',document)['id']
         run=request('/api/templates/'+identifier+'/runs',{'begindate':date})
         cases.append(dict(node=node,date=date,id=run['id'],expected='COMPLETED'))
     bad=copy.deepcopy(original)
-    bad.update(name='故障注入验收：缺少文件（预期失败）')
+    bad.update(name='故障注入验收：缺少文件（预期失败）',purpose='acceptance',task_name='故障注入验收：缺少文件（预期失败）')
     bad['checks']['required_files']=['Data/Task_0/不存在的产物.csv']
     identifier=request('/api/templates',bad)['id']
     deployments={d['name']:d for d in api.request('/deployments/filter',{}) if d.get('entrypoint') == 'flows/collect.py:collect'}

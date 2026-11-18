@@ -26,6 +26,7 @@ def run(resume_id=None):
         identifier=hashlib.sha256(canonical(document)).hexdigest()
         result={'id':resume_id,'url':'/v2/runs/flow-run/'+resume_id}
     else:
+        document.update(purpose='business',task_name='千金商品流向')
         identifier=request('templates',document)['id']
         result=request('templates/'+identifier+'/runs',{'begindate':'2026-11-12','enddate':'2026-11-12','account_ref':'qjdyf-test'})
     (root/'doc/千金商品流向自动采集.json').write_text(json.dumps({'template_id':identifier,'run':result,'passed':None},ensure_ascii=False,indent=2),encoding='utf-8')

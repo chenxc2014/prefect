@@ -10,7 +10,22 @@ def canonical(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
 
 
+PURPOSES = {'business': '业务采集', 'demo': '模拟演示', 'acceptance': '测试验收'}
+
+
+def classification(document):
+    purpose = document.get('purpose')
+    task_name = document.get('task_name')
+    if purpose not in PURPOSES:
+        raise ValueError('请选择任务用途：业务采集、模拟演示或测试验收')
+    if not isinstance(task_name, str) or not task_name.strip() or len(task_name.strip()) > 150:
+        raise ValueError('请填写所属任务名称（最多150字），同一业务的不同引擎请使用相同名称')
+    return {'purpose': purpose, 'task_name': task_name.strip()}
+
+
 def validate(document):
+    if 'purpose' in document or 'task_name' in document:
+        classification(document)
     if document.get('engine') == 'maxun':
         from uuid import UUID
         task=document['task']
@@ -128,8 +143,30 @@ class Catalog:
             raise ValueError('模板版本无效')
         return json.loads((self.root / (identifier + '.json')).read_text(encoding='utf-8'))
 
+    def classify(self, identifier, purpose, task_name):
+        """为已有版本补充用途，不修改版本内容、摘要或活动指针。"""
+        self.get(identifier)
+        metadata = classification({'purpose': purpose, 'task_name': task_name})
+        directory = self.root / '.metadata'
+        directory.mkdir(exist_ok=True)
+        temporary = directory / (identifier + '.' + __import__('uuid').uuid4().hex + '.tmp')
+        temporary.write_bytes(canonical(metadata))
+        temporary.replace(directory / (identifier + '.json'))
+
     def list(self):
         heads=self.root/'.heads'
         active={json.loads(p.read_text(encoding='utf-8'))['id'] for p in heads.glob('*.json')} if heads.exists() else None
-        return [dict(id=p.stem, name=d.get('name', ''), engine=d.get('engine','easyspider'), node=d['node'], bindings=d.get('bindings', {}), defaults=d.get('defaults', {}), needs_account=bool(d.get('secret_bindings')))
-                for p in sorted(self.root.glob('*.json')) if active is None or p.stem in active for d in [json.loads(p.read_text(encoding='utf-8'))]]
+        result = []
+        for path in sorted(self.root.glob('*.json')):
+            if active is not None and path.stem not in active:
+                continue
+            document = json.loads(path.read_text(encoding='utf-8'))
+            metadata_path = self.root / '.metadata' / path.name
+            metadata = json.loads(metadata_path.read_text(encoding='utf-8')) if metadata_path.exists() else document
+            if 'purpose' in metadata or 'task_name' in metadata:
+                metadata = classification(metadata)
+            else:
+                metadata = {'purpose': 'unclassified', 'task_name': document.get('name', '')}
+            task_key = hashlib.sha256(canonical([metadata['purpose'], metadata['task_name']])).hexdigest()
+            result.append(dict(id=path.stem, name=document.get('name', ''), engine=document.get('engine','easyspider'), node=document['node'], bindings=document.get('bindings', {}), defaults=document.get('defaults', {}), needs_account=bool(document.get('secret_bindings')), task_key=task_key, **metadata))
+        return result

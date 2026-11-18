@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-11-18T09:05:58.435Z",
+  "checks": [
+    "真实接口保留8个版本：业务2、演示1、验收5；千金两种引擎归为1项业务",
+    "任务列表默认只显示业务，展开同一业务的两种引擎，运行和调度状态独立展示",
+    "用途切换、数量、搜索与引擎筛选正确；故障注入仍显示真实失败结果",
+    "概览用途数字可直接进入对应筛选列表",
+    "两个发布入口必选用途和所属任务，服务端拒绝绕过界面的缺少用途请求",
+    "桌面、平板、手机布局无横向溢出，页面无脚本异常"
+  ],
+  "windows_167_accessed": false,
+  "collection_runs_submitted": 0,
+  "versions_published": 0,
+  "classification_counts": {
+    "business": 2,
+    "demo": 1,
+    "acceptance": 5
+  },
+  "version_ids": [
+    "0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00",
+    "20c8c0d1fb0590530f852c0160d9d066e7caa3d3427a15b4060722c63d36c69f",
+    "228079103ae4a626143c4c91c80735b1e76771510882aced311fcee30ea7f625",
+    "a744036fe20645a3eca0645a21899f17b9d64b663a7aba4bd71c1c5d3ee978df",
+    "ab14b0290642aadeebe47838607860446fb0c562f97b3b6a1893ef2ec3f2d2d7",
+    "b06975bbb70bafd5a54b6701f03216ade68eb690729e02adf665bc7e50764e0a",
+    "d77304c7c025c214b7905b38d8c3b827bc710bc26f3cbe0159df00b95a125657",
+    "e89033b354e8b4458b98accde80af6b8d58edb88e982a43b38748c5f6caef2e2"
+  ],
+  "passed": true
+}
