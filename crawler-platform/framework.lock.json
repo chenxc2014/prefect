@@ -28,7 +28,8 @@
   },
   "online_engine": {
     "name": "Maxun",
-    "repository": "https://github.com/getmaxun/maxun.git",
+    "repository": "https://github.com/chenxc2014/maxun.git",
+    "upstream_repository": "https://github.com/getmaxun/maxun.git",
     "tag": "v0.1.0",
     "commit": "e95c4e25796881e30207f1f72dc91e638dcc7e94",
     "source_path": "vendor/maxun",
