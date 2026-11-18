@@ -184,12 +184,14 @@ def maxun_robots():
     for robot in robots:
         meta=robot['recording_meta']
         if meta.get('type')!='extract' or meta.get('isLLM') or meta['name'].startswith(('平台执行 ·','平台发布 ·')):continue
-        inputs=[]
+        inputs=[];clicks=[]
         for i,pair in enumerate(robot['recording']['workflow']):
             for j,action in enumerate(pair.get('what',[])):
-                if action.get('action')=='type' and len(action.get('args',[]))>1:
+                if action.get('action') in ('type','platformInputDate') and len(action.get('args',[]))>1:
                     inputs.append({'path':f'workflow.{i}.what.{j}.args.1','label':'输入步骤 '+str(len(inputs)+1),'selector':str(action['args'][0])})
-        result.append({'id':meta['id'],'name':meta['name'],'inputs':inputs})
+                elif action.get('action')=='click' and action.get('args'):
+                    clicks.append({'path':f'workflow.{i}.what.{j}','selector':str(action['args'][0])})
+        result.append({'id':meta['id'],'name':meta['name'],'inputs':inputs,'clicks':clicks,'urls':list(dict.fromkeys(pair.get('where',{}).get('url') for pair in robot['recording']['workflow'] if isinstance(pair.get('where',{}).get('url'),str) and pair['where']['url'].startswith(('https://','http://'))))})
     return result
 
 
@@ -203,17 +205,21 @@ def maxun_publish(payload: dict):
         meta=robot['recording_meta']
         if meta.get('type')!='extract' or meta.get('isLLM'):raise ValueError('首期仅支持通过录制模式保存的提取机器人')
         bindings=payload.get('bindings',{})
+        secret_bindings=payload.get('secret_bindings',{})
         defaults=payload.get('defaults',{})
         bind_inputs(robot,bindings,{k:defaults.get(k,'') for k in bindings},client)
+        bind_inputs(robot,secret_bindings,{k:'' for k in secret_bindings},client)
         name=str(payload.get('name') or meta['name']).strip()
         if not name or len(name)>150:raise ValueError('模板名称无效')
         checks=payload.get('checks') or {'required_files':['Data/result.csv'],'min_rows':1,'required_columns':[]}
         # 先验证公开配置，再创建发布副本；录制草稿后续修改不会影响已发布版本。
         from runtime.catalog import validate
-        document={'engine':'maxun','node':'linux-169','name':name+'（Maxun）','task':{'robot_id':meta['id'],'workflow_sha256':fingerprint(robot)},'bindings':bindings,'defaults':defaults,'checks':checks}
+        document={'engine':'maxun','node':'linux-169','name':name+'（Maxun）','task':{'robot_id':meta['id'],'workflow_sha256':fingerprint(robot)},'bindings':bindings,'secret_bindings':secret_bindings,'defaults':defaults,'checks':checks}
         validate(document)
         frozen=client.duplicate(robot,'平台发布 · '+name+' · '+str(uuid4())[:8])
         workflow=frozen['recording']['workflow']
+        # 发布副本清除录制时的真实账号；每次运行由节点受限配置重新加密注入。
+        workflow=bind_inputs({'recording':{'workflow':workflow}},secret_bindings,{k:'' for k in secret_bindings},client)
         import re
         for path in payload.get('captcha_paths',[]):
             match=re.fullmatch(r'workflow\.(\d+)\.what\.(\d+)\.args\.1',path)
@@ -226,6 +232,22 @@ def maxun_publish(payload: dict):
                 for path in paths:
                     i,j=map(int,re.fullmatch(r'workflow\.(\d+)\.what\.(\d+)\.args\.1',path).groups())
                     workflow[i]['what'][j]['action']='platformInputDate'
+        login=payload.get('login')
+        if login:
+            # 登录按钮来自本次真实录制，只替换该动作；错误账号与超时不会盲重试。
+            match=re.fullmatch(r'workflow\.(\d+)\.what\.(\d+)',str(login.get('submit_path','')))
+            if not match:raise ValueError('登录提交步骤路径无效')
+            i,j=map(int,match.groups());action=workflow[i]['what'][j]
+            if action['action']!='click':raise ValueError('登录提交步骤必须是录制的点击动作')
+            options={key:login[key] for key in ('captchaSelector','imageSelector','successUrl','errorSelector')}
+            options.update(submitSelector=action['args'][0],attempts=3)
+            workflow[i]['what'][j]={'action':'platformSubmitLogin','args':[options]}
+        for path in payload.get('download_paths',[]):
+            match=re.fullmatch(r'workflow\.(\d+)\.what\.(\d+)',path)
+            if not match:raise ValueError('下载步骤路径无效')
+            i,j=map(int,match.groups());action=workflow[i]['what'][j]
+            if action['action']!='click':raise ValueError('下载步骤必须是录制的点击动作')
+            workflow[i]['what'][j]={'action':'platformDownload','args':[action['args'][0]]}
         client.request('/api/sdk/robots/'+frozen['recording_meta']['id'],{'workflow':workflow},method='PUT')
         frozen=client.robot(frozen['recording_meta']['id'])
         document['task']={'robot_id':frozen['recording_meta']['id'],'workflow_sha256':fingerprint(frozen)}

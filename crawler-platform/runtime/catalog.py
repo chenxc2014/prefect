@@ -18,8 +18,14 @@ def validate(document):
         if not re.fullmatch('[a-f0-9]{64}',task['workflow_sha256']):raise ValueError('Maxun 流程校验值无效')
         if document.get('node')!='linux-169':raise ValueError('在线设计验证仅开放 Linux 169')
         for key,paths in document.get('bindings',{}).items():
+            if key in ('username','password'):raise ValueError('账号密码必须使用秘密绑定')
             if not re.fullmatch(r'[a-zA-Z][a-zA-Z0-9_]{0,63}',key):raise ValueError('参数名称不合法')
             if not isinstance(paths,list) or not paths or any(not re.fullmatch(r'workflow\.\d+\.what\.\d+\.args\.1',p) for p in paths):raise ValueError('Maxun 参数绑定路径无效')
+        public_paths={p for paths in document.get('bindings',{}).values() for p in paths}
+        for key,paths in document.get('secret_bindings',{}).items():
+            if key not in ('username','password') or not isinstance(paths,list) or not paths:raise ValueError('秘密绑定只支持账号和密码')
+            if any(not re.fullmatch(r'workflow\.\d+\.what\.\d+\.args\.1',p) or p in public_paths for p in paths):raise ValueError('秘密绑定路径无效或与公开参数重叠')
+        if set(document.get('defaults',{}))-set(document.get('bindings',{})):raise ValueError('默认值包含未声明的公开参数')
         patterns=document.get('checks',{}).get('required_files',[])
         if not patterns or any(Path(p).is_absolute() or '..' in Path(p).parts or not p.startswith('Data/') for p in patterns):raise ValueError('必须配置运行目录内的成功产物规则')
         return document
@@ -73,6 +79,13 @@ def materialize(document, parameters):
 
 def bind_account(task, document, account):
     """秘密值仅在执行节点注入，不进入模板版本或 Prefect 参数。"""
+    if document.get('engine')=='maxun':
+        task['secret_bindings']=copy.deepcopy(document.get('secret_bindings',{}))
+        task['secrets']={}
+        for name in task['secret_bindings']:
+            if name not in ('username','password') or not account.get(name):raise ValueError('账号配置不完整')
+            task['secrets'][name]=account[name]
+        return task
     for name, destinations in document.get('secret_bindings', {}).items():
         if name not in ('username', 'password') or name not in account:
             raise ValueError('账号配置不完整')

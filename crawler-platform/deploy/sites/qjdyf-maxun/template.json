@@ -1,0 +1,43 @@
+{
+  "bindings": {
+    "begindate": [
+      "workflow.0.what.0.args.1"
+    ],
+    "enddate": [
+      "workflow.0.what.3.args.1"
+    ]
+  },
+  "checks": {
+    "date_columns": [
+      "时间"
+    ],
+    "min_rows": 1,
+    "required_columns": [
+      "时间",
+      "商品编码",
+      "数量"
+    ],
+    "required_files": [
+      "Data/downloads/*.xlsx"
+    ]
+  },
+  "defaults": {
+    "begindate": "2026-11-12",
+    "enddate": "2026-11-12"
+  },
+  "engine": "maxun",
+  "name": "千金 · 商品流向（Maxun）",
+  "node": "linux-169",
+  "secret_bindings": {
+    "password": [
+      "workflow.8.what.3.args.1"
+    ],
+    "username": [
+      "workflow.8.what.0.args.1"
+    ]
+  },
+  "task": {
+    "robot_id": "15fe6863-ede5-4349-9c31-c6b4d253eeb3",
+    "workflow_sha256": "1aa9134a6c404598ea0534008ce6c94d0ece9211cdf84b414b5dd68b54f2a694"
+  }
+}

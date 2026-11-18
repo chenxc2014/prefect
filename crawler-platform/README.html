@@ -9,5 +9,5 @@
 <p>统一主入口为采集工作台，使用现有 crawlerdev 账号登录后，可免再次输入密码进入 Prefect 与 Maxun；退出统一登录后，各界面回到同一登录页。平台密码不进入 URL 或浏览器 localStorage，Worker 仍使用原接口认证。</p>
 <p>当前界面验收脚本为 <code>.tmp/maxun/verify-sso.mjs</code>，需配置 .local/client.json 与 CA、使用 .tmp/maxun/tunnel.py --verify-only 建立内部验证隧道并启动 .tmp/maxun/proxy.mjs。测试会在 Linux 演示站点执行采集任务；--quick 参数跳过录制与采集，只复验统一登录与退出。当前外网环境禁止连接 Windows 167。</p>
 <p>前端验收及 UI 发布工具引用 <code>vendor/prefect/ui-v2</code>；从此仓库运行时可使用 <code>vendor/prefect</code> 指向上级仓库根目录的本地目录链接。EasySpider 与 Maxun 源码按 framework.lock.json 的仓库和提交单独准备到 vendor 下，源码副本与运行镜像不重复提交。</p>
-<p>Maxun Web 录制服务已部署并验证登录、创建及远程页面显示；EasySpider 已验收真实商品流向采集。原有爬虫仍需逐站隔离接入，Maxun 同站业务验收尚未完成。</p>
+<p>Maxun 已完成千金商品流向 2026-11-12 单日端到端验收：工作台提交、Prefect COMPLETED、认证下载与 3 行数据逐字段对账通过。新增 Canvas / iframe 兼容录制、运行时账号注入、验证码有限重试与原始导出捕获。此前重复导出仍有失败记录，不宣称长期无人值守已稳定；定时未开启。操作见 <a href="doc/千金商品流向Maxun操作说明.html">站点操作说明</a>，证据见 <a href="doc/千金商品流向Maxun验收.json">验收记录</a>。原有爬虫仍需逐站隔离接入。</p>
 <p><a href="doc/爬虫任务编排与执行平台.html">完整实施方案</a> · <a href="doc/开发环境部署记录.html">部署记录</a> · <a href="doc/统一登录部署验收.json">统一登录验收</a></p></html>

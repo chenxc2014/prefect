@@ -1,0 +1,107 @@
+{
+  "date": "2026-11-18",
+  "passed": true,
+  "website": "https://wx.qjdyf.cn/supplier-front-2.0/#/login",
+  "module": "商品对接 → 商品流向",
+  "query_date": [
+    "2026-11-12",
+    "2026-11-12"
+  ],
+  "engine": "maxun",
+  "node": "linux-169",
+  "source_robot_id": "66af1f99-bd71-4c86-b190-8d96a7b6176d",
+  "published_robot_id": "15fe6863-ede5-4349-9c31-c6b4d253eeb3",
+  "template_id": "0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00",
+  "prefect_run_id": "bea0a89a-4590-4d1b-8d83-79ee4121bb01",
+  "maxun_run_id": "0bf89b0e-c6ee-4d81-92e5-dcd3f66eb053",
+  "ui": {
+    "passed": true,
+    "run_id": "bea0a89a-4590-4d1b-8d83-79ee4121bb01",
+    "template_id": "0e84752659d187f41aaf35dfeee44b1f0c3c691484d6e79d599f2ed3ef70ec00",
+    "file_downloaded": true,
+    "browser_errors": []
+  },
+  "artifact": {
+    "name": "2026-11-12-2026-11-12配送信息.xlsx",
+    "size": 3858,
+    "sha256": "8296c88e29a14476a58f27b970d3e452d6f54fd5911880c554dae0a35488fd10",
+    "validation": {
+      "row_count": 3,
+      "dates": [
+        "2026-11-12"
+      ]
+    },
+    "columns": [
+      "时间",
+      "公司编号",
+      "公司名称",
+      "购进单位",
+      "购进单位名称",
+      "商品编码",
+      "商品名称",
+      "规格",
+      "数量",
+      "单位",
+      "生产企业",
+      "地址"
+    ]
+  },
+  "comparison": {
+    "baseline": "此前人工取证文件",
+    "row_count": 3,
+    "all_fields_equal_ignoring_order": true,
+    "ordered_equal": true,
+    "canonical_rows_sha256": "b1a19312c6427b88c044e07350913e6fc1abc3c4ca7fafda5b69e75bb2617ecb"
+  },
+  "download_capture": {
+    "method": "browser-event",
+    "files": [
+      "2026-11-12-2026-11-12配送信息.xlsx"
+    ]
+  },
+  "earlier_completed_prefect_run": "e06fcc34-90fc-4b6b-9531-e0f403e776c6",
+  "failed_attempts": [
+    {
+      "prefect_run_id": "e97a207b-acc2-4ea4-8aa4-369fe0d4eb68",
+      "reason": "未捕获下载，产物校验拒绝通过"
+    },
+    {
+      "prefect_run_id": "c312f8df-1409-4838-8bde-6c2e85d16eaa",
+      "reason": "已导出文件，但中文对象键内部读取返回404"
+    },
+    {
+      "prefect_run_id": "99fe495d-5468-46e9-b46d-40c1149f8179",
+      "reason": "原生下载事件间歇缺失，新增Blob原始字节捕获"
+    },
+    {
+      "prefect_run_id": "a72b3641-64f7-4ef9-9f07-b913cf15190d",
+      "reason": "重复导出未取得文件，运行按失败保留；根因尚未完全确认"
+    }
+  ],
+  "schedules_enabled": false,
+  "windows_167_accessed": false,
+  "limitations": [
+    "仅对2026-11-12单日完成业务对账，其他日期需复核",
+    "图片验证码采用识别和有限重试，不保证所有验证码都能成功",
+    "当前为单开发管理员环境，未完成生产级多用户权限和高可用验收",
+    "重复导出曾出现未返回文件；本次单日通过不代表短时重复导出或长期无人值守稳定性已经验收",
+    "Maxun 原生结果页的中文对象链接仍有编码兼容问题；当前使用已验证的采集管理平台归档下载"
+  ],
+  "download_validation": {
+    "actual_final_method": {
+      "method": "browser-event",
+      "files": [
+        "2026-11-12-2026-11-12配送信息.xlsx"
+      ]
+    },
+    "blob_fallback": "受控浏览器测试通过，覆盖链接点击和分离节点事件",
+    "network_response_fallback": "受控浏览器测试通过，保留响应原始字节",
+    "site_native_response_type": "application/binary;charset=UTF-8",
+    "repeated_export_failures_fully_resolved": false
+  },
+  "recording_log_hardening": {
+    "keystroke_values_removed": true,
+    "compiled_overlay_syntax_checked": true,
+    "business_actions_changed": false
+  }
+}

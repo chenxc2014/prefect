@@ -33,7 +33,24 @@
     "commit": "e95c4e25796881e30207f1f72dc91e638dcc7e94",
     "source_path": "vendor/maxun",
     "execution_mode": "docker-backend-with-native-browser-service",
-    "designer_url": "https://192.168.1.169:9443/"
+    "designer_url": "https://192.168.1.169:9443/",
+    "platform_extensions": {
+      "version": "2026.11.18",
+      "recorder": "deploy/maxun/recorder-compat.cjs",
+      "browser_actions": "deploy/maxun/browser-actions.cjs",
+      "backend_overlay": "deploy/maxun/patch-installed.py",
+      "workflow_adapter": "runtime/maxun.py",
+      "recording_timeout_minutes": 30,
+      "business_acceptance": "doc/千金商品流向Maxun验收.json",
+      "scheduled_collection_enabled": false,
+      "keystroke_values_logged": false,
+      "sha256": {
+        "deploy/maxun/recorder-compat.cjs": "27ab3e5856e2a0f2adc477df7698df1aa9ba634fdc861b09db06528b3ea81217",
+        "deploy/maxun/browser-actions.cjs": "d4812803556cf8441eb982d812a4cc1a9c785df02f55b235e7986bd81b725999",
+        "deploy/maxun/patch-installed.py": "cf3860b8e14f05d20ceb3cd84a792df5476e21072688576703c05e632991b928",
+        "runtime/maxun.py": "de74e620c30528a1a298420960d463ddc4fe12ada43efee150bcecb3c40ee035"
+      }
+    }
   },
   "visual_engine": {
     "name": "EasySpider",

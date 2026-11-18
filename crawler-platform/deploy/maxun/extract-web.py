@@ -38,3 +38,7 @@ branding = root / 'apply-branding.py'
 if branding.exists():
     import runpy
     runpy.run_path(str(branding), run_name='__main__')
+compat=root/'apply-recorder-compat.py'
+if compat.exists():
+    import runpy
+    runpy.run_path(str(compat),run_name='__main__')

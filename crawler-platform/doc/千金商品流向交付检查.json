@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "new_collection_runs_created": 0,
+  "checks": [
+    "统一登录后可读取真实 COMPLETED 状态及归档 Excel，摘要一致",
+    "发布界面可配置账号注入、日期、验证码、真实登录点击及下载步骤",
+    "Maxun 统一登录入口正常，无二次邮箱密码登录",
+    "没有活动录制或执行，可安全应用仅日志文本的补丁",
+    "通用 Linux 采集部署未启用定时计划"
+  ],
+  "document_layout": [
+    {
+      "file": "千金商品流向Maxun操作说明.html",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "file": "千金商品流向Maxun操作说明.html",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "file": "爬虫任务编排与执行平台.html",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "file": "爬虫任务编排与执行平台.html",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "file": "开发环境部署记录.html",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "file": "开发环境部署记录.html",
+      "width": 390,
+      "overflow": false
+    }
+  ]
+}

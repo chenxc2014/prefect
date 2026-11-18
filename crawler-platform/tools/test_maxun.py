@@ -4,8 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 from uuid import uuid4
-from runtime.maxun import MaxunClient,bind_inputs,execute,fingerprint
-from runtime.catalog import materialize,validate
+from runtime.maxun import MaxunClient,bind_inputs,execute,fingerprint,storage_url
+from runtime.catalog import materialize,validate,bind_account
 
 
 def robot():
@@ -14,18 +14,42 @@ def robot():
 
 
 class FakeClient:
-    def __init__(self,source,status='success',output=None):
+    def __init__(self,source,status='success',output=None,log=''):
         self.source=source;self.status=status;self.output=output or {};self.started=False
         self.config={'base_url':'http://127.0.0.1:18080'}
+        self.log=log
     def robot(self,identifier):return copy.deepcopy(self.source)
     def duplicate(self,source,name):return copy.deepcopy(source)
     def request(self,path,data=None,method=None):
         if path.endswith('/execute'):
             self.started=True;return {'data':{'runId':str(uuid4())}}
-        return {'data':{'status':self.status,'serializableOutput':self.output}}
+        return {'data':{'status':self.status,'serializableOutput':self.output,'log':self.log}}
 
 
 class MaxunTest(unittest.TestCase):
+    def test_upstream_success_with_action_error_is_still_failure(self):
+        source=robot();task={'robot_id':source['recording_meta']['id'],'workflow_sha256':fingerprint(source)}
+        client=FakeClient(source,log='Action platformDownload failed: timeout')
+        with tempfile.TemporaryDirectory() as directory,self.assertRaisesRegex(RuntimeError,'动作失败'):
+            execute(task,{'required_files':['Data/result.csv']},Path(directory)/'run',client=client)
+    def test_chinese_object_key_keeps_encoded_percent_in_minio(self):
+        config={'storage_public_url':'https://designer.test/objects','storage_internal_url':'http://minio.test:19000'}
+        self.assertEqual(storage_url('https://designer.test/objects/bucket/run/%E9%85%8D.xlsx',config),'http://minio.test:19000/bucket/run/%25E9%2585%258D.xlsx')
+        self.assertEqual(storage_url('https://designer.test/objects/bucket/run/Screenshot_1',config),'http://minio.test:19000/bucket/run/Screenshot_1')
+        for value in ('https://evil.test/objects/file','https://designer.test/objects-other/file','https://designer.test/objects/file?token=value'):
+            with self.assertRaises(RuntimeError):storage_url(value,config)
+    def test_maxun_secret_binding_does_not_publish_credentials(self):
+        source=robot();document={'engine':'maxun','node':'linux-169','task':{'robot_id':source['recording_meta']['id'],'workflow_sha256':fingerprint(source)},'bindings':{},'defaults':{},'secret_bindings':{'password':['workflow.0.what.0.args.1']},'checks':{'required_files':['Data/result.csv']}}
+        validate(document);before=copy.deepcopy(document)
+        task=bind_account(materialize(document,{}),document,{'password':'private-test-value'})
+        self.assertEqual(task['secrets']['password'],'private-test-value')
+        self.assertEqual(document,before);self.assertNotIn('private-test-value',str(document))
+        document['bindings']={'password':['workflow.0.what.0.args.1']}
+        with self.assertRaises(ValueError):validate(document)
+
+    def test_public_binding_cannot_override_account_binding(self):
+        source=robot();document={'engine':'maxun','node':'linux-169','task':{'robot_id':source['recording_meta']['id'],'workflow_sha256':fingerprint(source)},'bindings':{'x':['workflow.0.what.0.args.1']},'secret_bindings':{'password':['workflow.0.what.0.args.1']},'checks':{'required_files':['Data/result.csv']}}
+        with self.assertRaises(ValueError):validate(document)
     def test_changed_published_workflow_never_starts(self):
         source=robot();task={'robot_id':source['recording_meta']['id'],'workflow_sha256':fingerprint(source)}
         source['recording']['workflow'][0]['what'][0]['args'][0]='#changed'

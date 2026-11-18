@@ -2,6 +2,8 @@
 from pathlib import Path
 import importlib.util
 import sys
+import logging
+import time
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 ROOT = Path(__file__).resolve().parents[2]
@@ -9,9 +11,60 @@ spec = importlib.util.spec_from_file_location('crawler_ssh', ROOT / '.tmp/crawle
 ssh = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ssh)
 action = sys.argv[1]
-client = ssh.connect('169')
+logging.getLogger('paramiko.transport').setLevel(logging.CRITICAL)
+for attempt in range(3):
+    try:
+        client = ssh.connect('169')
+        break
+    except (ssh.paramiko.AuthenticationException,ssh.paramiko.BadHostKeyException):
+        raise
+    except (ssh.paramiko.SSHException,OSError,EOFError):
+        if attempt==2:raise RuntimeError('169 SSH 握手连续中断，请检查外网映射；未更换主机密钥或连接其他节点') from None
+        time.sleep(2+attempt*2)
 try:
-    if action == 'inspect':
+    if action == 'verify-release':
+        import hashlib
+        import json
+        report={'node':'linux-169','windows_167_accessed':False,'files':[]}
+        names=['runtime/catalog.py','runtime/maxun.py','tools/collector.py','tools/portal_auth.py','deploy/web/collector.html','deploy/web/maxun-recorder.js']
+        mappings={name:'/opt/crawler-dev/releases/dev-v1/'+name for name in names}
+        for name in ('browser-actions.cjs','recorder-compat.cjs','patch-installed.py','apply-recorder-compat.py','extract-web.py'):
+            mappings['deploy/maxun/'+name]='/opt/crawler-dev/maxun/'+name
+        with client.open_sftp() as sftp:
+            for name,remote in mappings.items():
+                local=hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
+                with sftp.open(remote,'rb') as handle:deployed=hashlib.sha256(handle.read()).hexdigest()
+                report['files'].append({'path':name,'sha256':local,'matches':local==deployed})
+        report['passed']=all(item['matches'] for item in report['files'])
+        (ROOT/'doc/千金商品流向部署一致性.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+        print(json.dumps({'passed':report['passed'],'checked_files':len(report['files']),'mismatch':[item['path'] for item in report['files'] if not item['matches']]},ensure_ascii=False))
+        sys.exit(0 if report['passed'] else 1)
+    elif action == 'artifact-diagnose':
+        import shlex
+        code='''import json,sys
+from pathlib import Path
+from urllib.request import urlopen
+from urllib.parse import quote,unquote
+sys.path.insert(0,"/opt/crawler-dev/releases/dev-v1")
+from runtime.maxun import MaxunClient
+client=MaxunClient();print({key:client.config.get(key) for key in ("storage_public_url","storage_internal_url")})
+robots=client.request("/api/sdk/robots")["data"]
+for robot in robots:
+ if not robot["recording_meta"]["name"].startswith("平台执行 ·"):continue
+ identifier=robot["recording_meta"]["id"]
+ try:run=client.request("/api/sdk/robots/"+identifier+"/runs/1e888dca-6124-481f-8af9-cfa89d5c2db8")["data"]
+ except RuntimeError:continue
+ for name,item in (run.get("binaryOutput") or {}).items():
+  value=item if isinstance(item,str) else item.get("data","")
+  if not value.startswith("http"):continue
+  relative=value[len(client.config["storage_public_url"]):]
+  for label,suffix in [("原路径",relative),("百分号再次编码",quote(relative,safe="/")),("还原编码",unquote(relative))]:
+   try:
+    with urlopen(client.config["storage_internal_url"]+suffix,timeout=10) as response:print(name,label,response.status,len(response.read()))
+   except Exception as error:print(name,label,type(error).__name__,getattr(error,"code",None))
+'''
+        sys.exit(ssh.execute(client,'python3.12 -c '+shlex.quote(code),timeout=45))
+    elif action == 'inspect':
         command = '''hostname
 free -m
 nproc
@@ -35,7 +88,7 @@ docker ps --format '{{.Names}} {{.Image}}'
         from datetime import datetime
         backup = '/opt/crawler-dev/backups/sso-code-' + datetime.now().strftime('%Y%m%d-%H%M%S')
         ssh.execute(client, 'mkdir -p ' + backup + ' && chmod 700 ' + backup, timeout=20)
-        names = ['runtime/auth.py', 'tools/portal_auth.py', 'tools/collector.py', 'deploy/web/login.html', 'deploy/web/auth-client.js', 'deploy/web/collector.html', 'deploy/web/suite-theme.css', 'deploy/web/suite-theme.js', 'deploy/linux/install-sso.py']
+        names = ['runtime/auth.py', 'tools/portal_auth.py', 'tools/collector.py', 'deploy/web/login.html', 'deploy/web/auth-client.js', 'deploy/web/collector.html', 'deploy/web/suite-theme.css', 'deploy/web/suite-theme.js', 'deploy/web/maxun-recorder.js', 'deploy/linux/install-sso.py']
         with client.open_sftp() as sftp:
             for name in names:
                 remote = '/opt/crawler-dev/releases/dev-v1/' + name

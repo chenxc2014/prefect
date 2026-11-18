@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import time
 from urllib.error import HTTPError
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit,quote
 from urllib.request import Request, urlopen
 from uuid import UUID, uuid4
 
@@ -69,6 +69,15 @@ def bind_inputs(robot, bindings, parameters, client):
     return workflow
 
 
+def storage_url(value,config):
+    public=config.get('storage_public_url','https://192.168.1.169:9443/objects').rstrip('/')
+    if not value.startswith(public+'/') or urlsplit(value).query or urlsplit(value).fragment:
+        raise RuntimeError('Maxun 产物地址不属于已配置对象存储')
+    # Maxun 的对象键已经包含 encodeURIComponent 生成的字面百分号。
+    # 绕过 Nginx 直连 MinIO 时再编码一次，防止中文键被解码成另一个对象名。
+    return config.get('storage_internal_url','http://172.17.0.1:19000').rstrip('/')+quote(value[len(public):],safe='/')
+
+
 def execute(task, checks, directory, config=None, client=None):
     client=client or MaxunClient()
     robot=client.robot(task['robot_id'])
@@ -78,7 +87,9 @@ def execute(task, checks, directory, config=None, client=None):
     run_robot=client.duplicate(robot,'平台执行 · '+str(uuid4()))
     identifier=run_robot['recording_meta']['id']
     workflow=bind_inputs(run_robot,task.get('bindings',{}),task.get('parameters',{}),client)
-    if task.get('bindings'):
+    if task.get('secret_bindings'):
+        workflow=bind_inputs({'recording':{'workflow':workflow}},task['secret_bindings'],task['secrets'],client)
+    if task.get('bindings') or task.get('secret_bindings'):
         client.request('/api/sdk/robots/'+identifier,{'workflow':workflow},method='PUT')
     run_id=client.request('/api/sdk/robots/'+identifier+'/execute',{'wait':False})['data']['runId']
     deadline=time.monotonic()+int((config or {}).get('timeout',900))
@@ -93,6 +104,8 @@ def execute(task, checks, directory, config=None, client=None):
         time.sleep(2)
     if state not in ('success','succeeded','completed'):
         raise RuntimeError('Maxun 运行未成功：'+state+'；运行编号 '+run_id)
+    if re.search(r'Action .+ failed:',str(result.get('log') or '')):
+        raise RuntimeError('Maxun 流程存在动作失败；运行编号 '+run_id)
     data=root/'Data';data.mkdir()
     serializable=result.get('serializableOutput') or {}
     (data/'result.json').write_text(json.dumps(serializable,ensure_ascii=False,indent=2),encoding='utf-8')
@@ -107,10 +120,7 @@ def execute(task, checks, directory, config=None, client=None):
         value=item.get('data') if isinstance(item,dict) else item
         if not isinstance(value,str):continue
         if value.startswith(('http://','https://')):
-            public=client.config.get('storage_public_url','https://192.168.1.169:9443/objects')
-            if not value.startswith(public+'/'):
-                raise RuntimeError('Maxun 产物地址不属于已配置对象存储')
-            internal=client.config.get('storage_internal_url','http://172.17.0.1:19000')+value[len(public):]
+            internal=storage_url(value,client.config)
             with urlopen(internal,timeout=30) as response:
                 content=response.read(10*1024*1024+1)
         else:

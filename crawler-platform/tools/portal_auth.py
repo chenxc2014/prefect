@@ -216,4 +216,5 @@ class PortalAuth:
         def theme_script(request: WebRequest):
             self.require_browser(request)
             source = (Path(__file__).resolve().parents[1] / 'deploy/web/suite-theme.js').read_text(encoding='utf-8')
+            source += '\n' + (Path(__file__).resolve().parents[1] / 'deploy/web/maxun-recorder.js').read_text(encoding='utf-8')
             return self.private(Response(source, media_type='application/javascript'))
