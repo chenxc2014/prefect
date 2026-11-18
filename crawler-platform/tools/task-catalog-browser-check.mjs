@@ -7,6 +7,7 @@ const {chromium,expect}=require('@playwright/test');
 const config=JSON.parse(fs.readFileSync('.local/client.json','utf8'));
 const auth=config.env.PREFECT_API_AUTH_STRING,index=auth.indexOf(':');
 const base='http://127.0.0.1:18843';
+const preview=process.argv.includes('--preview');
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const report={checked_at:new Date().toISOString(),checks:[],windows_167_accessed:false,collection_runs_submitted:0,versions_published:0};
 const check=message=>{report.checks.push(message);console.log(message)};
@@ -19,12 +20,20 @@ try{
  await page.locator('input[name="password"]').fill(auth.slice(index+1));
  await page.getByRole('button',{name:'登录统一工作台',exact:true}).click();
  await page.waitForURL(url=>url.pathname==='/collector/');
+ if(preview){
+  await page.route(base+'/collector/',route=>route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:fs.readFileSync('deploy/web/collector.html','utf8')}));
+  await page.reload();
+ }
  await expect(page.locator('#stat-business-tasks')).toHaveText('1');
  await expect(page.locator('#stat-templates')).toHaveText('2');
  await expect(page.locator('#stat-demo')).toHaveText('1');
  await expect(page.locator('#stat-acceptance')).toHaveText('5');
  await expect(page.locator('#task-status-note')).toContainText('状态更新于',{timeout:25000});
- await expect(page.locator('#stat-current-runs')).toHaveText('正在执行 0 个 · 等待或暂停 0 个');
+ await expect(page.locator('#stat-running')).toHaveText('0');
+ await expect(page.locator('#stat-queued')).toHaveText('0');
+ await expect(page.locator('#stat-prefect')).toHaveText('正常运行');
+ await expect(page.locator('#prefect-service-card')).toHaveAttribute('data-state','ready');
+ await expect(page.locator('#prefect-schedule-note')).toHaveText('尚未配置业务定时采集');
  const templates=await (await context.request.get(base+'/collector/api/templates')).json();
  const statuses=await (await context.request.get(base+'/collector/api/template-status')).json();
  if(templates.length!==8||Object.keys(statuses.templates).length!==8)throw Error('活动版本数量改变或状态缺失');
@@ -32,8 +41,31 @@ try{
  report.classification_counts=Object.fromEntries(['business','demo','acceptance'].map(p=>[p,templates.filter(t=>t.purpose===p).length]));
  report.version_ids=templates.map(t=>t.id);
  check('真实接口保留8个版本：业务2、演示1、验收5；千金两种引擎归为1项业务');
+ await expect(page.locator('.overview-hero h2')).toHaveText('三种采集方式，一个管理入口');
+ await expect(page.locator('.overview-hero #online-designer')).toBeVisible();
+ await expect(page.locator('#recent-templates .overview-task')).toHaveCount(1);
+ await expect(page.locator('#recent-templates .overview-version')).toHaveCount(2);
+ await expect(page.locator('#recent-templates')).toContainText('最近运行：成功');
+ const layout=await page.evaluate(()=>({hero:document.querySelector('.overview-hero').getBoundingClientRect().toJSON(),service:document.querySelector('#prefect-service-card').getBoundingClientRect().toJSON(),tasks:document.querySelector('#overview-published').getBoundingClientRect().toJSON(),design:document.querySelector('#overview-design').getBoundingClientRect().toJSON()}));
+ if(layout.hero.height>210||layout.service.bottom>900||layout.tasks.top>=layout.design.top||layout.tasks.top>700)throw Error('概览未按首屏服务和已发布任务优先布局');
+ report.desktop_layout=layout;
+ await expect(page.locator('#overview-guide')).not.toHaveAttribute('open');
+ check('介绍横幅保留并压缩，独立Prefect服务卡位于首屏，已发布任务先于设计入口展示');
+ await page.locator('[data-overview-purpose="acceptance"]').click();
+ await expect(page.locator('#recent-templates .overview-version')).toHaveCount(5);
+ await expect(page.locator('#recent-templates')).toContainText('最近运行：失败');
+ await page.locator('[data-overview-purpose="all"]').click();
+ await expect(page.locator('#recent-templates .overview-version')).toHaveCount(8);
+ await page.locator('[data-overview-purpose="demo"]').click();
+ await expect(page.locator('#recent-templates .overview-version')).toHaveCount(1);
+ await page.locator('[data-overview-purpose="business"]').click();
+ check('概览内可切换业务、模拟、验收和全部版本，并查看各版本真实运行结果');
  await page.screenshot({path:'.local/screenshots/task-catalog-overview.png',fullPage:true});
- await page.locator('.sidebar [data-view="templates"]').click();
+ await page.locator('#recent-templates .overview-version .btn').first().click();
+ await expect(page.locator('[data-page="templates"]')).toBeVisible();
+ await expect(page.locator('#templates .template-card')).toHaveCount(1);
+ await page.locator('.sidebar [data-view="overview"]').click();
+ await page.locator('.overview-status-grid [data-purpose-filter="business"]').click();
  await expect(page.locator('#templates .task-group')).toHaveCount(1);
  await expect(page.locator('#templates .template-card')).toHaveCount(2);
  await expect(page.locator('#templates')).toContainText('未配置定时调度');
@@ -57,11 +89,11 @@ try{
  await expect(page.locator('#templates .template-card')).toHaveCount(1);
  check('用途切换、数量、搜索与引擎筛选正确；故障注入仍显示真实失败结果');
  await page.locator('.sidebar [data-view="overview"]').click();
- await page.locator('.stats [data-purpose-filter="acceptance"]').click();
+ await page.locator('#overview-published [data-purpose-filter="all"]').click();
  await expect(page.locator('[data-page="templates"]')).toBeVisible();
- await expect(page.locator('.purpose-tabs [data-purpose-filter="acceptance"]')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('#templates .template-card')).toHaveCount(5);
- check('概览用途数字可直接进入对应筛选列表');
+ await expect(page.locator('.purpose-tabs [data-purpose-filter="all"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#templates .template-card')).toHaveCount(8);
+ check('概览可进入全部任务，单个引擎可直接进入对应版本的查看与运行');
  await page.locator('.sidebar [data-view="easyspider"]').click();
  await page.locator('#file').setInputFiles('deploy/examples/demo-task.json');
  await page.locator('#publish').click();
@@ -81,20 +113,54 @@ try{
  }
  check('两个发布入口必选用途和所属任务，服务端拒绝绕过界面的缺少用途请求');
  await page.locator('.sidebar [data-view="overview"]').click();
- await page.locator('.stats [data-purpose-filter="business"]').first().click();
- for(const viewport of [{width:1440,height:1050},{width:768,height:1024},{width:390,height:844}]){
+ await page.locator('.overview-status-grid [data-purpose-filter="business"]').click();
+ for(const viewport of [{width:1920,height:1080},{width:1440,height:900},{width:1280,height:900},{width:1024,height:768},{width:768,height:1024},{width:390,height:844}]){
   await page.setViewportSize(viewport);
   for(const view of ['overview','templates','easyspider','maxun']){
    await page.locator('.sidebar [data-view="'+view+'"]').click();
    if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('页面横向溢出：'+viewport.width+'/'+view);
+   if(view==='overview'&&viewport.width===390){
+    await expect(page.locator('#stat-prefect')).toBeInViewport();
+    await page.screenshot({path:'.local/screenshots/overview-mobile.png',fullPage:true});
+   }
   }
  }
  await page.locator('.sidebar [data-view="templates"]').click();
  await page.screenshot({path:'.local/screenshots/task-catalog-mobile.png',fullPage:true});
  if(errors.length)throw Error('页面脚本错误：'+errors.join(' / '));
  check('桌面、平板、手机布局无横向溢出，页面无脚本异常');
+ await page.locator('.sidebar [data-view="overview"]').click();
+ await page.setViewportSize({width:1440,height:900});
+ const platform=await (await context.request.get(base+'/collector/api/platform')).json();
+ await page.route('**/collector/api/platform',route=>route.fulfill({json:{...platform,prefect:{...platform.prefect,state:'unavailable'}}}));
+ await page.locator('#overview-refresh').click();
+ await expect(page.locator('#stat-prefect')).toHaveText('连接异常');
+ await expect(page.locator('#prefect-service-card')).toHaveAttribute('data-state','unavailable');
+ await page.screenshot({path:'.local/screenshots/overview-service-unavailable.png',fullPage:true});
+ await page.unroute('**/collector/api/platform');
+ await page.route('**/collector/api/platform',route=>route.fulfill({status:503,json:{detail:'浏览器测试：服务状态读取失败'}}));
+ await page.route('**/collector/api/template-status',route=>route.fulfill({status:503,json:{detail:'浏览器测试：运行状态读取失败'}}));
+ await page.locator('#overview-refresh').click();
+ await expect(page.locator('#stat-prefect')).toHaveText('状态未确认');
+ await expect(page.locator('#stat-running')).toHaveText('—');
+ await expect(page.locator('#stat-queued')).toHaveText('—');
+ await expect(page.locator('#prefect-schedule-note')).toHaveText('业务定时采集状态待核对');
+ await page.unroute('**/collector/api/platform');
+ await page.unroute('**/collector/api/template-status');
+ const busy=structuredClone(statuses),businessId=templates.find(t=>t.purpose==='business').id;
+ busy.templates[businessId]={...busy.templates[businessId],running:1,queued:2,schedule:'enabled'};
+ await page.route('**/collector/api/template-status',route=>route.fulfill({json:busy}));
+ await page.locator('#overview-refresh').click();
+ await expect(page.locator('#stat-running')).toHaveText('1');
+ await expect(page.locator('#stat-queued')).toHaveText('2');
+ await expect(page.locator('#prefect-schedule-note')).toHaveText('业务定时采集：已启用 1 个版本');
+ await page.unroute('**/collector/api/template-status');
+ await page.locator('#overview-refresh').click();
+ await expect(page.locator('#stat-prefect')).toHaveText('正常运行');
+ await expect(page.locator('#stat-running')).toHaveText('0');
+ check('仅在测试浏览器中模拟服务异常、读取失败和定时调度启用，界面正确区分异常、未知及执行数量');
  const after=await (await context.request.get(base+'/collector/api/templates')).json();
  if(after.map(t=>t.id).join()!==report.version_ids.join())throw Error('验收改变了现有版本');
  report.passed=true;
- fs.writeFileSync('doc/任务用途分类界面验收.json',JSON.stringify(report,null,2));
+ fs.writeFileSync(preview?'.local/overview-preview-check.json':'doc/概览布局界面验收.json',JSON.stringify(report,null,2));
 }finally{await browser.close()}

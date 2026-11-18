@@ -1,0 +1,23 @@
+{
+  "deployed_at": "2026-11-18T17:47:50.500381",
+  "node": "linux-169",
+  "branch": "crawler-platform/development",
+  "file": "deploy/web/collector.html",
+  "sha256": "68ef4680435abfcf4f454988daa4d979576bfc7fe073ff07e0ed4cc01a490ad9",
+  "matches": true,
+  "backup": "/opt/crawler-dev/backups/overview-layout-20261118-174739",
+  "service_restart_required": false,
+  "task_versions_changed": false,
+  "schedules_changed": false,
+  "windows_167_accessed": false,
+  "verification": "doc/概览布局界面验收.json",
+  "browser_verification_passed": true,
+  "verified_viewport_widths": [
+    1920,
+    1440,
+    1280,
+    1024,
+    768,
+    390
+  ]
+}
