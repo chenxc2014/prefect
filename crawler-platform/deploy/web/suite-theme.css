@@ -96,3 +96,29 @@ html[data-crawler-color="dark"][data-crawler-app="maxun"] .MuiButton-containedPr
 
 /* 平台品牌图片使用原始比例，深色侧栏不叠加底色。 */
 .crawler-brand-icon{width:44px;height:44px;background:none;box-shadow:none}.crawler-brand-icon img{display:block;width:100%;height:100%;object-fit:contain}@media(max-width:900px){.crawler-brand-icon{width:36px;height:36px}}
+
+/* 设计稿维护在原有基本设置页内切换，保存按钮仍由 Maxun 自己处理。 */
+.mx-draft-maintenance,.mx-draft-dialog{--suite-panel:var(--suite-surface);--suite-soft:var(--suite-bg);color:var(--suite-ink);font:13px/1.65 var(--suite-font)}
+.mx-draft-maintenance{width:100%;min-width:0;margin:12px 0 6px}
+.mx-draft-toolbar,.mx-draft-tabs,.mx-draft-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mx-draft-toolbar{justify-content:space-between;border-bottom:1px solid var(--suite-line);padding-bottom:12px}
+.mx-draft-maintenance .mx-rel-button,.mx-draft-dialog .mx-rel-button{box-sizing:border-box;font-size:13px;padding:7px 12px;min-height:36px}
+.mx-draft-tabs [aria-pressed="true"],.mx-draft-retrain>.mx-rel-button{background:var(--suite-primary);border-color:var(--suite-primary);color:white}
+.mx-draft-maintenance .mx-rel-button[disabled],.mx-draft-dialog .mx-rel-button[disabled]{opacity:.55;cursor:wait}
+.mx-draft-maintenance .mx-draft-danger,.mx-draft-dialog .mx-draft-danger{border-color:#e0a5a8;color:#ad3038;background:var(--suite-panel)}
+.mx-draft-maintenance .mx-draft-danger:hover,.mx-draft-dialog .mx-draft-danger:hover{background:#fcebed;color:#a1222b}
+.mx-draft-retrain{padding:20px;margin-top:16px;border:1px solid var(--suite-line);border-radius:10px;background:var(--suite-panel)}
+.mx-draft-retrain h2,.mx-draft-dialog h2{font-size:16px;margin:0 0 8px}
+.mx-draft-retrain p,.mx-draft-dialog p{margin:0 0 14px;overflow-wrap:anywhere}
+.mx-draft-retrain .mx-draft-note,.mx-draft-status{color:var(--suite-muted)}
+.mx-draft-status{margin:10px 0 4px;overflow-wrap:anywhere}.mx-draft-status:empty{display:none}
+.mx-draft-release{padding:10px 14px;margin:0 0 12px;border:1px solid var(--suite-line);border-radius:9px;background:var(--suite-panel)}
+.mx-draft-release-row,.mx-draft-release-row>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mx-draft-release-row{justify-content:space-between;padding:4px 0}
+.mx-draft-feedback:not(:empty){color:var(--suite-muted);margin:0 0 4px}.mx-draft-feedback:empty{display:none}
+.mx-draft-maintenance .mx-draft-version{min-height:0;padding:2px 6px;font-size:11px}.mx-rel-badge.pending{background:#fff2d9;color:#805312}
+.mx-rel-button.mx-draft-publish{background:var(--suite-primary);color:white;border-color:var(--suite-primary)}
+.mx-rel-button.mx-draft-publish:hover{background:#354de0;color:white}.mx-rel-stage .mx-draft-publish{margin-left:5px}
+.mx-draft-config[data-draft-tab="retrain"]>.mx-draft-maintenance~*,.mx-draft-maintenance[hidden],.mx-draft-retrain[hidden]{display:none!important}
+.mx-draft-dialog{box-sizing:border-box;width:min(460px,calc(100% - 32px));padding:24px;border:1px solid var(--suite-line);border-radius:12px;background:var(--suite-panel);box-shadow:0 16px 48px #17244340}
+.mx-draft-dialog::backdrop{background:#101a3670}.mx-draft-dialog .mx-draft-actions{justify-content:flex-end}
+@media(max-width:600px){.mx-draft-config{padding:0 12px}.mx-draft-toolbar{gap:12px}.mx-draft-retrain{padding:16px}.mx-draft-status{font-size:12px}}

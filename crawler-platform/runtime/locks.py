@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 @contextmanager
-def account_lock(root, reference):
+def account_lock(root, reference, conflict='同一节点上的该账号已有任务运行，请稍后提交'):
     if not reference:
         yield
         return
@@ -26,7 +26,7 @@ def account_lock(root, reference):
                 import fcntl
                 fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError:
-            raise RuntimeError('同一节点上的该账号已有任务运行，请稍后提交') from None
+            raise RuntimeError(conflict) from None
         try:
             yield
         finally:

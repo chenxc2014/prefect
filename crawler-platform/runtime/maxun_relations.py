@@ -45,6 +45,11 @@ class MaxunRelations:
     def records(self, category):
         return [json.loads(path.read_text(encoding='utf-8')) for path in sorted((self.root / category).glob('*.json'))]
 
+    def draft_versions(self, catalog, source_id):
+        drafts = {item['template_id']: item for item in self.records('publications')
+                  if item['source_robot_id'] == source_id}
+        return [(info, drafts[info['id']]) for info in catalog.list() if info['id'] in drafts]
+
 
 def build_snapshot(catalog, client, flow_runs, store=None):
     """仅返回展示必需的数据，不返回输入密文、账号、Cookie 或完整日志。"""
@@ -92,10 +97,17 @@ def build_snapshot(catalog, client, flow_runs, store=None):
         source_id = reference.get('source_robot_id')
         if source_id:
             linked.add(source_id)
-            if not any(item['id'] == source_id for item in group['drafts']):
+            previous = next((item for item in group['drafts'] if item['id'] == source_id), None)
+            draft_rank = (template_id in active, reference['linked_at'])
+            if not previous or draft_rank > (previous['active_template_id'] is not None, previous['published_at']):
                 source = by_robot.get(source_id)
                 changed = fingerprint(source) != reference['source_fingerprint'] if source and reference.get('source_fingerprint') else None
-                group['drafts'].append(dict(robot_summary(source_id), changed_since_publish=changed))
+                entry = dict(robot_summary(source_id), changed_since_publish=changed, published_at=reference['linked_at'],
+                             active_template_id=template_id if template_id in active else None)
+                if previous:
+                    group['drafts'][group['drafts'].index(previous)] = entry
+                else:
+                    group['drafts'].append(entry)
 
     for reference in executions:
         group = by_template.get(reference['template_id'])

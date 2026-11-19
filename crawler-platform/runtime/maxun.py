@@ -22,6 +22,12 @@ def fingerprint(robot):
     return hashlib.sha256(canonical({'recording':robot['recording'], 'settings':{k:meta.get(k) for k in ('type','url','formats','isLLM','params')}})).hexdigest()
 
 
+def duplicate_target(robot):
+    return robot['recording_meta'].get('url') or next(
+        action['args'][0] for pair in robot['recording']['workflow'] for action in pair['what']
+        if action['action'] == 'goto')
+
+
 class MaxunClient:
     def __init__(self, config=None):
         self.config=config or json.loads(Path(os.environ.get('CRAWLER_MAXUN_CONFIG','/etc/crawler-dev/maxun.json')).read_text())
@@ -41,7 +47,7 @@ class MaxunClient:
 
     def duplicate(self, robot, name):
         meta=robot['recording_meta']
-        url=meta.get('url') or next(a['args'][0] for pair in robot['recording']['workflow'] for a in pair['what'] if a['action']=='goto')
+        url=duplicate_target(robot)
         result=self.request('/api/sdk/robots/'+meta['id']+'/duplicate',{'targetUrl':url})['data']
         identifier=result['recording_meta']['id']
         self.request('/api/sdk/robots/'+identifier,{'meta':{'name':name}},method='PUT')

@@ -22,6 +22,11 @@
 @media(max-width:520px){.overview-hero{padding:18px}.overview-hero h2{font-size:21px}.overview-hero .eyebrow{font-size:8px;letter-spacing:1px}.overview-hero p{font-size:11px}.overview-hero .hero-actions{gap:8px}.overview-hero .hero-actions .btn{width:auto;font-size:11px;padding:6px 10px}.overview-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-service{display:block;padding:16px}.overview-service h3{font-size:14px}.service-main{margin:12px 0 7px}.service-main strong{font-size:28px}.service-footer{margin-top:11px}.metric-button{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;column-gap:8px;align-items:center}.metric-button .metric-label{grid-column:1;grid-row:1}.metric-button .metric-number{grid-column:2;grid-row:1/3;margin:0}.metric-button>p{grid-column:1;min-height:0;margin-top:6px}.metric-button .metric-link{grid-column:1/-1;margin-top:6px}.overview-section-head{gap:12px;align-items:start;margin-top:20px}.overview-section-head h2{font-size:16px}.overview-section-head p{font-size:11px}.overview-section-head>.btn{flex-shrink:0;font-size:10px}.overview-task{padding:15px}.overview-version{padding:12px}.overview-guide>summary span{display:block;margin:5px 0 0}.overview-purpose-tabs{gap:7px}.overview-purpose-tabs .btn{font-size:11px;padding:6px 9px}}
 .platform-maxun-relation{border:1px solid #dce4f3;background:#f3f6ff;border-radius:8px;padding:13px;margin:12px 0;font-size:11px;overflow-wrap:anywhere}.platform-relation-heading{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.platform-relation-heading>strong{font-size:12px}.platform-relation-business{color:var(--muted);margin:7px 0}.platform-relation-source{display:grid;grid-template-columns:54px minmax(0,1fr);gap:8px;margin:8px 0}.platform-relation-source small{color:var(--muted)}.platform-maxun-relation .inline-actions{gap:8px 14px}.platform-maxun-relation .btn.text{font-size:11px}.platform-relation-history{border-top:1px solid #dde4f2;margin-top:10px;padding-top:9px}.platform-relation-history>summary{cursor:pointer;font-size:11px;font-weight:600}.platform-relation-run{padding:10px 0;border-bottom:1px solid #dde4f2}.platform-relation-run>strong{font-size:11px}.platform-relation-run p{font-size:10px;color:var(--muted);margin:3px 0}.platform-relation-run[data-platform-state=FAILED]>p:nth-of-type(2){color:#ae4654}.platform-relation-history>.help{font-size:10px;margin:7px 0}.platform-relation-history>a{display:inline-block;margin-top:10px}
 .implementations>.template-card:only-child{grid-column:1/-1}
+.release-dialog{width:min(640px,calc(100% - 28px));max-height:calc(100dvh - 28px);padding:24px;border:1px solid var(--line);border-radius:14px;color:var(--ink);box-shadow:0 18px 56px #16214440}
+.release-dialog::backdrop{background:#131d37a6}.release-heading{display:flex;justify-content:space-between;gap:12px;align-items:start}.release-heading h2{font-size:20px}.release-heading .btn{min-width:48px}.release-context{margin:10px 0 16px;color:var(--muted);overflow-wrap:anywhere}
+.release-dialog h3{font-size:15px;margin-bottom:7px}.release-dialog section{margin:16px 0}.release-dialog details{padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:16px 0}.release-dialog details summary{cursor:pointer;font-weight:600}.release-dialog dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;margin:10px 0 0}.release-dialog dd{margin:0;overflow-wrap:anywhere}
+.release-dialog ul{padding-left:22px;margin:6px 0}.release-dialog .inline-actions{flex-wrap:wrap;margin-top:14px}.release-dialog .error{color:#af3039}.release-dialog code{overflow-wrap:anywhere}.release-dialog label{margin-top:12px}.release-ready{margin:10px 0;color:#16715a}.release-pending{grid-column:2;margin:0;color:#815515}.release-dialog .release-trial .params{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+@media(max-width:520px){.release-dialog{padding:16px}.release-dialog .release-trial .params{grid-template-columns:1fr}}
 /* 概览介绍和引擎关系保持可读，小屏幕纵向展示完整链路。 */
 .overview-hero{min-height:290px;padding:32px;gap:32px;isolation:isolate}.overview-hero>div:first-child{flex:1;min-width:0;position:relative;z-index:1}.overview-hero .eyebrow{font-size:11px;letter-spacing:1.8px;margin-bottom:10px}.overview-hero h2{font-size:32px;line-height:1.4;letter-spacing:.5px}.overview-hero p{font-size:14px;line-height:1.9;margin:12px 0 22px;max-width:620px;color:#d1dcf4}.overview-hero .btn{font-size:14px;padding:10px 16px}.hero-diagram{width:520px;flex-shrink:0;display:grid;grid-template-columns:minmax(0,1.2fr) 40px minmax(0,1.1fr) 30px minmax(0,.85fr);align-items:center;position:relative;z-index:1;color:#fff}.hero-engines{display:grid;gap:9px}.hero-engine{min-height:68px;padding:9px 10px;border:1px solid #8c9dcc;border-radius:10px;background:#ffffff0d;text-align:center;display:flex;flex-direction:column;justify-content:center}.hero-diagram strong{font-size:17px;line-height:1.5;font-weight:650}.hero-diagram span{font-size:13px;line-height:1.6;color:#e0e8ff}.hero-connectors{width:40px;height:222px;fill:none;stroke:#a7b8ef;stroke-width:1.7}.hero-orchestrator,.hero-result{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:15px;padding:16px 8px;min-height:140px}.hero-orchestrator{background:#586bd0;border:1px solid #a1b1ff;box-shadow:0 8px 24px #101a3b30}.hero-diagram .icon{width:27px;height:27px;margin-bottom:9px}.hero-orchestrator strong{font-size:21px}.hero-orchestrator small{font-size:12px;color:#e0e8ff;margin-top:6px;white-space:nowrap}.hero-result{background:#ffffff0d;border:1px solid #8c9dcc}.hero-diagram .hero-result-arrow{font-size:26px;color:#b8c7f5;text-align:center}
 @media(min-width:1650px){.overview-hero{padding:34px 36px;gap:48px}.overview-hero h2{font-size:36px}.hero-diagram{width:560px}}
@@ -100,6 +105,11 @@
 <div data-page="architecture" hidden><div class="workspace-head"><div><h2>架构与引擎关系</h2><p>采集平台管理入口，三个引擎执行网站操作，Prefect 统一管理运行生命周期。</p></div></div><section class="panel"><h3>一套工作台，三种执行路径</h3><div class="pipeline"><div class="pipeline-box"><strong>设计 / 接入</strong><p>Maxun：Web 录制机器人<br>EasySpider：客户端导出 JSON<br>fetch-crawler：现有 Python 采集类</p></div><div class="arrow">→</div><div class="pipeline-box orchestrator"><strong>采集管理平台 + Prefect</strong><p>平台：发布版本、填写参数、结果下载<br>Prefect：调度、队列、节点、状态与日志<br>重试及并发限制按任务配置</p></div><div class="arrow">→</div><div class="pipeline-box"><strong>执行节点上的对应引擎</strong><p>Maxun / EasySpider / 原有适配入口<br>各自执行网站操作与数据采集<br>产物校验通过后归档</p></div></div><div class="callout">这是统一管理与调度关系。三个引擎不互相包含、不自动互转模板，也不要求同一个网站同时使用三种引擎。</div><div class="table-scroll"><table class="detail-table"><thead><tr><th>能力</th><th>Maxun</th><th>EasySpider</th><th>fetch-crawler</th><th>Prefect</th></tr></thead><tbody><tr><td>主要职责</td><td>在线设计与采集</td><td>客户端设计与采集</td><td>复用原有业务采集代码</td><td>任务编排与运行监控</td></tr><tr><td>流程产物</td><td>机器人及工作流</td><td>任务 JSON</td><td>Python 类与原参数</td><td>部署与工作流运行</td></tr><tr><td>修改网站步骤</td><td>Web 设计器</td><td>独立客户端设计器</td><td>原有项目代码</td><td>不负责网页步骤设计</td></tr><tr><td>当前接入状态</td><td>服务已部署，逐站验证采集</td><td>支持模板导入与执行</td><td>适配代码已提供，待逐站接入</td><td>统一调度服务已部署</td></tr></tbody></table></div></section><section class="panel" style="margin-top:22px"><h3>当前环境的分工</h3><div class="table-scroll"><table class="detail-table"><tbody><tr><td>当前工作区</td><td>开发、源码与部署脚本、EasySpider 本地设计器；不作为固定的服务器执行节点。</td></tr><tr><td>Linux 169</td><td>采集管理平台、Prefect、Maxun Web 设计器及执行服务、EasySpider Linux 执行环境。</td></tr><tr><td>Windows 167</td><td>预留并保留原 Windows 执行节点。本次不访问、不变更，页面不声明其实时健康状态。</td></tr></tbody></table></div></section></div>
 <footer class="footer"><span>采集管理平台 · 多引擎工作台</span><span id="last-check">开发环境 / Linux 169</span></footer>
 </main><datalist id="task-names"></datalist></div><div class="toast" id="toast" role="status" hidden></div>
+<dialog id="release-dialog" class="release-dialog" aria-labelledby="release-title">
+ <div class="release-heading"><h2 id="release-title">检查并发布</h2><button type="button" class="btn small" id="release-close" autofocus>关闭</button></div>
+ <div id="release-content"></div>
+ <p id="release-message" role="status"></p>
+</dialog>
 <script>
 'use strict';
 const $=id=>document.getElementById(id), names={overview:'平台概览',maxun:'Maxun 在线设计',easyspider:'EasySpider 设计',legacy:'原有爬虫接入',templates:'已发布任务',runs:'本次运行',architecture:'架构与引擎关系'};
@@ -137,6 +147,11 @@ function renderMaxunRelation(t,root){
  const source=element('div','',root);source.className='platform-relation-source';element('small','设计稿',source);if(draft&&!draft.missing)relationLink(draft.name+' ↗','open/maxun?robot='+draft.id,source);else element('span','来源设计稿待登记或无法访问',source);
  const version=element('div','',root);version.className='platform-relation-source';element('small','发布版本',version);relationLink((published?.name||'固定发布副本')+' ↗','open/maxun?template='+t.id+'&section=published',version);
  const actions=element('div','',root);actions.className='inline-actions';if(draft&&!draft.missing)relationLink('打开设计稿 ↗','open/maxun?robot='+draft.id,actions).className='btn text';relationLink('查看发布流程 ↗','open/maxun?template='+t.id+'&section=published',actions).className='btn text';
+ if(draft&&!draft.missing&&draft.changed_since_publish&&published.active){
+  element('p','草稿待发布',source).className='release-pending';
+  const review=element('button','检查并发布',actions);review.className='btn primary small';review.type='button';
+  review.onclick=()=>openDraftRelease(t.id,draft.id);
+ }
  const runs=group.executions.filter(run=>run.template_id===t.id);const history=element('details','',root);history.className='platform-relation-history';history.open=expanded;const failed=runs.filter(run=>['FAILED','CRASHED'].includes(run.platform_state)).length;const succeeded=runs.filter(run=>run.platform_state==='COMPLETED').length;element('summary','执行历史 '+runs.length+' 次 · 平台成功 '+succeeded+' 次 / 失败 '+failed+' 次',history);
  element('p','平台结果包含文件校验；Maxun 状态仅表示浏览器流程结果。',history).className='help';
  const labels={COMPLETED:'成功',FAILED:'失败',CRASHED:'异常',RUNNING:'执行中',SCHEDULED:'待调度',PENDING:'准备执行',CANCELLED:'已取消',PAUSED:'已暂停'};
@@ -183,11 +198,143 @@ function renderOverviewTasks(){
 document.querySelectorAll('[data-overview-purpose]').forEach(button=>button.onclick=()=>{overviewPurpose=button.dataset.overviewPurpose;renderOverviewTasks()});
 async function refreshTaskStatus(){if(statusLoading)return;statusLoading=true;try{const result=await api('template-status');taskStatuses=result.templates;const checked=new Date(result.checked_at).toLocaleTimeString('zh-CN',{hour12:false});$('task-status-note').textContent='状态更新于 '+checked+'，每30秒刷新。';$('overview-status-updated').textContent='运行状态更新于 '+checked+' · 每30秒刷新 · 统计当前活动版本';let running=0,queued=0;for(const s of Object.values(taskStatuses)){running+=s.running;queued+=s.queued}$('stat-running').textContent=running;$('stat-queued').textContent=queued;}catch(error){taskStatuses={};$('task-status-note').textContent=error.message;$('overview-status-updated').textContent='运行状态暂时无法读取，请点击刷新状态重试';$('stat-running').textContent='—';$('stat-queued').textContent='—'}finally{statusLoading=false;renderScheduleSummary();for(const node of document.querySelectorAll('[data-runtime]')){const t=templates.find(t=>t.id===node.dataset.runtime);if(t){node.textContent=runtimeText(t);renderLatest(t,node)}}}}
 function addRun(template,run){$('empty-runs')?.remove();runCount++;$('stat-runs').textContent=runCount;const box=element('article','');box.className='run-card';$('runs').prepend(box);element('strong',template.name,box);const link=element('a','Prefect 运行：'+run.id+' ↗',box);link.href=run.url;link.target='_blank';link.rel='noopener';const state=element('p','等待执行…',box);state.className='state';const timer=setInterval(async()=>{try{const result=await api('runs/'+run.id);const labels={SCHEDULED:'等待调度',PENDING:'准备执行',RUNNING:'正在执行',COMPLETED:'执行完成',FAILED:'执行失败',CRASHED:'执行异常',CANCELLED:'已取消',CANCELLING:'正在取消',PAUSED:'已暂停'};state.textContent=(labels[result.state]||result.state)+' · '+result.state+(result.message?'：'+result.message:'');if(['COMPLETED','FAILED','CRASHED','CANCELLED'].includes(result.state)){clearInterval(timer);state.classList.add(result.state==='COMPLETED'?'completed':'failed');for(const file of result.artifacts||[]){const download=element('a',`下载 ${file.name}（${file.size} 字节）`,box);download.className='btn small download';download.href=file.url}}}catch(error){state.textContent=error.message+'；请在 Prefect 中查看运行状态。';state.classList.add('failed');clearInterval(timer)}},3000);}
+const releaseDialog=$('release-dialog'),releaseContent=$('release-content');
+const parameterLabels={begindate:'开始日期',enddate:'结束日期'};
+const releaseActionLabels={goto:'打开页面',click:'点击',type:'输入文本',press:'按键',waitForSelector:'等待页面元素',waitForTimeout:'等待',platformInputDate:'填写日期',platformCaptcha:'验证码输入',platformSubmitLogin:'登录提交',platformDownload:'下载文件',platformLbxPrepare:'老百姓工作台准备',platformLbxExport:'老百姓配送数据导出',scrapeSchema:'提取数据'};
+let releaseRequest=0;
+function releaseButton(label,parent,action,primary=false){
+ const button=element('button',label,parent);button.type='button';button.className='btn'+(primary?' primary':'');button.onclick=action;
+ return button;
+}
+function releaseBusy(busy){$('release-close').disabled=busy;}
+$('release-close').onclick=()=>releaseDialog.close();
+releaseDialog.addEventListener('cancel',event=>{if($('release-close').disabled)event.preventDefault();});
+releaseDialog.addEventListener('close',()=>{releaseRequest++;});
+function releaseFacts(facts,parent){
+ const list=element('dl','',parent);
+ for(const [name,value]of facts){element('dt',name,list);element('dd',value,list)}
+}
+async function openDraftRelease(identifier,draft){
+ const request=++releaseRequest;
+ const endpoint='maxun/releases/'+encodeURIComponent(identifier);
+ $('release-title').textContent='检查并发布';
+ releaseContent.replaceChildren();
+ message('release-message','正在核对草稿与当前活动版本…');
+ if(!releaseDialog.open)releaseDialog.showModal();
+ try{
+  const preview=await api(endpoint+'?draft='+encodeURIComponent(draft));
+  if(request!==releaseRequest)return;
+  message('release-message','');
+  renderDraftRelease(preview,endpoint,draft);
+ }catch(error){
+  if(request!==releaseRequest)return;
+  message('release-message',error.message,true);
+  releaseButton('重新检查',releaseContent,()=>openDraftRelease(identifier,draft));
+ }
+}
+function renderDraftRelease(preview,endpoint,draft){
+ element('p',preview.task_name+' · '+preview.draft_name,releaseContent).className='release-context';
+ releaseFacts([['当前活动版本',preview.id.slice(0,12)],['发布名称',preview.name]],releaseContent);
+ const review=element('section','',releaseContent);
+ if(preview.issues.length){
+  element('h3','发布前需要处理',review);
+  const list=element('ul','',review);for(const issue of preview.issues)element('li',issue,list);
+ }else if(preview.changed){
+  element('h3','变更摘要',review);
+  element('p','录制步骤 '+preview.changes.before+' → '+preview.changes.after,review);
+  const list=element('ul','',review);
+  if(preview.settings_changed)element('li','目标网址已修改',list);
+  for(const action of preview.changes.actions)element('li',(releaseActionLabels[action.name]||action.name)+' '+action.before+' → '+action.after,list);
+  if(!list.children.length)element('li','草稿内容已更新，操作数量未变。',list);
+  element('p','预检通过。确认后，新版本将成为此任务的活动版本。',review).className='release-ready';
+ }else{
+  element('h3','草稿已与当前版本同步',review);
+  element('p','保存新的流程修改后，可以在这里发布。',review);
+ }
+ const extras=element('details','',releaseContent);
+ element('summary','查看沿用的参数、账号和文件校验',extras);
+ const settings=preview.parameters.map(name=>[parameterLabels[name]||name,preview.defaults[name]||'运行时填写']);
+ settings.push(['采集账号',preview.needs_account?'运行时填写账号引用':'无需账号引用'],
+  ['必需文件',preview.checks.required_files.join('、')],['最少数据行',preview.checks.min_rows??'按执行器规则'],
+  ['必需列',(preview.checks.required_columns||[]).join('、')||'未配置']);
+ if(preview.checks.date_columns?.length)settings.push(['日期校验列',preview.checks.date_columns.join('、')]);
+ releaseFacts(settings,extras);
+ const actions=element('div','',releaseContent);actions.className='inline-actions';
+ const edit=relationLink('打开设计稿 ↗','open/maxun?robot='+encodeURIComponent(draft),actions);edit.className='btn';
+ releaseButton('重新检查',actions,()=>openDraftRelease(preview.id,draft));
+ if(!preview.changed||preview.issues.length)return;
+ const confirm=releaseButton('确认发布新版',actions,async()=>{
+  for(const item of actions.querySelectorAll('button'))item.disabled=true;
+  releaseBusy(true);
+  message('release-message','正在生成并激活发布版本…');
+  try{
+   const result=await api(endpoint,{draft,fingerprint:preview.fingerprint});
+   renderReleased(preview,result.id);
+   if($('template-search').value===preview.id)$('template-search').value=result.id;
+   const url=new URL(location.href);
+   url.searchParams.delete('release');url.searchParams.delete('draft');url.searchParams.set('template',result.id);
+   history.replaceState(history.state,'',url);
+   void load();
+  }catch(error){
+   message('release-message',error.message,true);
+   for(const item of actions.querySelectorAll('button'))item.disabled=false;
+  }finally{releaseBusy(false);}
+ },true);
+ actions.insertBefore(confirm,edit);
+}
+function renderReleased(preview,id){
+ $('release-title').textContent='新版已发布';
+ releaseContent.replaceChildren();
+ message('release-message','');
+ element('p',preview.task_name,releaseContent).className='release-context';
+ releaseFacts([['新活动版本',id]],releaseContent);
+ const actions=element('div','',releaseContent);actions.className='inline-actions';
+ const trial=releaseButton('试跑新版',actions,()=>openReleaseTrial(preview,id,trial),true);
+ trial.focus();
+ relationLink('查看版本历史 ↗','open/maxun?template='+id+'&section=published',actions).className='btn';
+}
+async function openReleaseTrial(preview,id,button){
+ const request=releaseRequest;
+ button.disabled=true;
+ let values={parameters:preview.defaults,account_ref:'',from_success:false};
+ message('release-message','正在读取上次成功的运行参数…');
+ try{values=await api('maxun/releases/'+id+'/trial-defaults')}catch{}
+ if(request!==releaseRequest)return;
+ message('release-message','');
+ const form=element('form','',releaseContent);form.className='release-trial';
+ element('p',values.from_success?'已带入上次成功的运行参数，可在提交前调整。':'已带入当前版本的默认参数，请核对后提交。',form).className='release-context';
+ const fields=element('div','',form);fields.className='params';
+ for(const name of preview.parameters){
+  const label=element('label',parameterLabels[name]||name,fields),input=element('input','',label);
+  input.name=name;input.value=values.parameters[name]??'';input.required=true;
+ }
+ if(preview.needs_account){
+  const label=element('label','账号引用',fields),input=element('input','',label);
+  input.name='account_ref';input.value=values.account_ref;input.required=true;input.autocomplete='off';
+ }
+ const actions=element('div','',form);actions.className='inline-actions';
+ const submit=element('button','提交试跑',actions);submit.type='submit';submit.className='btn primary';
+ form.onsubmit=async event=>{
+  event.preventDefault();submit.disabled=true;releaseBusy(true);
+  message('release-message','正在提交新版试跑…');
+  try{
+   const run=await api('templates/'+id+'/runs',Object.fromEntries(new FormData(form)));
+   addRun(preview,run);form.hidden=true;
+   message('release-message','新版试跑已提交。');
+   relationLink('查看试跑日志 ↗',run.url,actions.parentElement.parentElement).className='btn';
+  }catch(error){message('release-message',error.message,true);submit.disabled=false;}
+  finally{releaseBusy(false);}
+ };
+ (fields.querySelector('input')||submit).focus();
+}
 async function load(){try{
  templates=await api('templates');const business=templates.filter(t=>t.purpose==='business');$('stat-business-tasks').textContent=new Set(business.map(t=>t.task_key)).size;$('stat-templates').textContent=business.length;$('nav-template-count').textContent=templates.length;$('nav-template-count').title='全部用途的活动版本数量';const unclassified=templates.filter(t=>t.purpose==='unclassified').length;$('unclassified-link').hidden=!unclassified;
  $('task-names').replaceChildren();for(const name of [...new Set(templates.map(t=>t.task_name))].sort()){const option=element('option','',$('task-names'));option.value=name}
  if(pendingLinkedTemplate){purposeFilter='all';$('template-search').value=pendingLinkedTemplate;$('engine-filter').value='';pendingLinkedTemplate='';showView('templates')}renderTemplates();renderOverviewTasks();message('template-message','');loadMaxunRelations();await refreshTaskStatus();
  }catch(error){message('template-message',error.message,true);$('recent-templates').textContent='任务列表加载失败，请在「已发布任务」中重试。';$('templates').replaceChildren();element('div','任务列表加载失败，请检查连接后点击刷新。',$('templates')).className='empty';}}
 setInterval(()=>{if(!document.hidden){refreshTaskStatus();refreshHealth()}},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void loadMaxunRelations();});
 $('template-search').oninput=renderTemplates;$('engine-filter').onchange=renderTemplates;$('refresh-templates').onclick=load;load();refreshHealth();
+const releaseQuery=new URLSearchParams(location.search),releaseId=releaseQuery.get('release'),releaseDraft=releaseQuery.get('draft');
+if(releaseId&&releaseDraft)openDraftRelease(releaseId,releaseDraft);
 </script></body></html>

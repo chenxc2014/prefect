@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from runtime.locks import account_lock
 
 
 def canonical(value):
@@ -117,25 +118,26 @@ class Catalog:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def publish(self, document):
+    def publish(self, document, expected=None):
         validate(document)
         body = canonical(document)
         identifier = hashlib.sha256(body).hexdigest()
-        path = self.root / (identifier + '.json')
-        if not path.exists():
-            try:
-                with path.open('xb') as handle:
-                    handle.write(body)
-            except FileExistsError:
-                pass
         heads=self.root/'.heads'
         heads.mkdir(exist_ok=True)
         key=hashlib.sha256((document.get('name','')+'|'+document['node']).encode()).hexdigest()
         pointer=heads/(key+'.json')
-        # 同名同节点的新发布只切换活动指针，旧版本文件继续用于运行追溯。
-        temporary=heads/(key+'.'+__import__('uuid').uuid4().hex+'.tmp')
-        temporary.write_text(json.dumps({'id':identifier}),encoding='utf-8')
-        temporary.replace(pointer)
+        with account_lock(self.root, 'catalog:' + key, '同一任务正在发布，请刷新版本后重试'):
+            if expected is not None and (not pointer.exists() or json.loads(pointer.read_text(encoding='utf-8'))['id'] != expected):
+                raise ValueError('活动版本已更新，请返回任务重新检查并发布')
+            path = self.root / (identifier + '.json')
+            if not path.exists():
+                temporary = self.root / (identifier + '.' + __import__('uuid').uuid4().hex + '.tmp')
+                temporary.write_bytes(body)
+                temporary.replace(path)
+            # 同名同节点的新发布只切换活动指针，旧版本文件继续用于运行追溯。
+            temporary=heads/(key+'.'+__import__('uuid').uuid4().hex+'.tmp')
+            temporary.write_text(json.dumps({'id':identifier}),encoding='utf-8')
+            temporary.replace(pointer)
         return identifier
 
     def get(self, identifier):

@@ -72,13 +72,36 @@ def template(identifier: str):
 
 
 @app.get('/api/maxun/relations', dependencies=[Depends(authenticate)])
-async def maxun_relations():
+async def maxun_relations(draft: str | None = None):
     import asyncio
     from prefect.client.orchestration import get_client
     from prefect.client.schemas.filters import FlowFilter
     from prefect.client.schemas.sorting import FlowRunSort
     from runtime.maxun import MaxunClient
     from runtime.maxun_relations import build_snapshot
+
+    if draft is not None:
+        import re
+        from runtime.maxun import fingerprint
+        from runtime.maxun_relations import MaxunRelations
+
+        def draft_status():
+            if not re.fullmatch(r'[a-f0-9-]{36}', draft):
+                raise HTTPException(400, '设计稿编号无效')
+            store = MaxunRelations(catalog.root / '.maxun-relations')
+            versions = store.draft_versions(catalog, draft)
+            if not versions:
+                return {'versions': []}
+            source = fingerprint(MaxunClient().robot(draft))
+            return {'versions': [dict(id=info['id'], task_name=info['task_name'], name=info['name'],
+                                      published_at=reference['linked_at'],
+                                      changed=source != reference['source_fingerprint'])
+                                 for info, reference in versions]}
+
+        try:
+            return await asyncio.wait_for(asyncio.to_thread(draft_status), timeout=20)
+        except (OSError, RuntimeError, ValueError, TimeoutError):
+            raise HTTPException(503, '无法读取设计稿发布状态，请稍后刷新') from None
 
     async def read():
         runs = []
@@ -303,3 +326,163 @@ def maxun_publish(payload: dict):
         raise HTTPException(400,str(error))
     except (FileNotFoundError,RuntimeError,OSError):
         raise HTTPException(503,'Maxun 发布未完成，请检查服务状态后重试')
+
+
+def release_candidate(identifier, draft_id, client, store):
+    from runtime.maxun import duplicate_target, fingerprint
+    from runtime.maxun_release import prepare, preview_duplicate, summarize
+
+    matches = [(info, relation) for info, relation in store.draft_versions(catalog, draft_id)
+               if info['id'] == identifier and info['engine'] == 'maxun']
+    if not matches:
+        raise HTTPException(409, '设计稿或活动版本已变更，请重新打开当前采集任务')
+    info, relation = matches[0]
+    document = catalog.get(identifier)
+    draft = client.robot(draft_id)
+    meta = draft['recording_meta']
+    frozen = client.robot(document['task']['robot_id'])
+    if fingerprint(frozen) != document['task']['workflow_sha256'] or relation['published_robot_id'] != frozen['recording_meta']['id']:
+        raise HTTPException(409, '当前发布副本与固定版本不一致，请联系管理员核对')
+    source = fingerprint(draft)
+    original = frozen['recording']['workflow']
+    try:
+        target = duplicate_target(draft)
+        prospective = preview_duplicate(draft['recording']['workflow'], target)
+    except StopIteration:
+        target = None
+        prospective = draft['recording']['workflow']
+    updated, bindings, issues = prepare(document, original, prospective)
+    if not target:
+        issues.append('请为设计稿保存有效的起始网址。')
+    if meta.get('type') != 'extract' or meta.get('isLLM') or not updated or not any(pair.get('what') for pair in updated):
+        issues.append('请保存有效的网页提取录制后再发布。')
+    document.update(bindings)
+    if info['purpose'] != 'unclassified':
+        document.update(classification(info))
+    return draft, document, original, {
+        'id': identifier, 'task_name': info['task_name'], 'name': info['name'],
+        'draft_name': meta['name'], 'draft_id': draft_id, 'published_at': relation['linked_at'],
+        'fingerprint': source, 'changed': source != relation['source_fingerprint'],
+        'settings_changed': target != frozen['recording_meta'].get('url'),
+        'issues': issues, 'changes': summarize(original, updated),
+        'defaults': document.get('defaults', {}), 'parameters': list(document['bindings']),
+        'needs_account': bool(document['secret_bindings']), 'checks': document['checks'],
+    }
+
+
+@app.get('/api/maxun/releases/{identifier}', dependencies=[Depends(authenticate)])
+def preview_maxun_release(identifier: str, draft: str):
+    from runtime.maxun import MaxunClient
+    from runtime.maxun_relations import MaxunRelations
+
+    try:
+        return release_candidate(identifier, draft, MaxunClient(), MaxunRelations(catalog.root / '.maxun-relations'))[-1]
+    except (RuntimeError, OSError, ValueError, KeyError, IndexError, AttributeError, TypeError):
+        raise HTTPException(503, '暂时无法检查发布配置，请刷新后重试') from None
+
+
+@app.post('/api/maxun/releases/{identifier}', dependencies=[Depends(authenticate)])
+def publish_maxun_release(identifier: str, payload: dict):
+    import hashlib
+    from uuid import uuid4
+    from runtime.catalog import canonical, validate
+    from runtime.maxun import MaxunClient, bind_inputs, fingerprint
+    from runtime.maxun_relations import MaxunRelations
+    from runtime.maxun_release import prepare
+
+    store = MaxunRelations(catalog.root / '.maxun-relations')
+    client = None
+    frozen_id = None
+    version_id = None
+    try:
+        client = MaxunClient()
+        draft_id = payload['draft']
+        draft, document, original, preview = release_candidate(identifier, draft_id, client, store)
+        if payload.get('fingerprint') != preview['fingerprint']:
+            raise HTTPException(409, '设计稿在检查后又被保存，请重新检查')
+        if not preview['changed'] or preview['issues']:
+            raise HTTPException(409, '设计稿暂无待发布的修改或仍有预检问题，请重新检查')
+        frozen = client.duplicate(draft, '平台发布 · ' + document['name'].removesuffix('（Maxun）') + ' · ' + uuid4().hex[:8])
+        frozen_id = frozen['recording_meta']['id']
+        workflow, actual_bindings, issues = prepare(catalog.get(identifier), original, frozen['recording']['workflow'])
+        if issues or any(actual_bindings[key] != document[key] for key in actual_bindings):
+            raise HTTPException(409, 'Maxun 复制后关键步骤发生变化，请重新核对录制')
+        validate(document)
+        secrets = document['secret_bindings']
+        workflow = bind_inputs({'recording': {'workflow': workflow}}, secrets, dict.fromkeys(secrets, ''), client)
+        client.request('/api/sdk/robots/' + frozen_id, {'workflow': workflow}, method='PUT')
+        frozen = client.robot(frozen_id)
+        if fingerprint(client.robot(draft_id)) != preview['fingerprint']:
+            raise HTTPException(409, '设计稿在发布期间又被保存，请重新检查')
+        document['task'] = {'robot_id': frozen_id, 'workflow_sha256': fingerprint(frozen)}
+        version_id = hashlib.sha256(canonical(document)).hexdigest()
+        store.publication(version_id, draft_id, frozen_id, preview['fingerprint'])
+        catalog.publish(document, expected=identifier)
+        frozen_id = None
+        return {'id': version_id}
+    except (ValueError, KeyError, IndexError, AttributeError, TypeError) as error:
+        detail = str(error) if isinstance(error, ValueError) and str(error).startswith('活动版本') else '发布配置无效，请重新检查'
+        raise HTTPException(409, detail) from None
+    except (RuntimeError, OSError):
+        raise HTTPException(503, '新版本未完成发布，请刷新任务状态后重试') from None
+    finally:
+        if frozen_id:
+            # 已写入版本文件时保留其副本和关联，供管理员追查未激活的版本。
+            if not version_id or not (catalog.root / (version_id + '.json')).exists():
+                try:
+                    client.request('/api/sdk/robots/' + frozen_id, method='DELETE')
+                    if version_id:
+                        (store.root / 'publications' / (version_id + '.json')).unlink(missing_ok=True)
+                except (RuntimeError, OSError):
+                    pass
+
+
+@app.get('/api/maxun/releases/{identifier}/trial-defaults', dependencies=[Depends(authenticate)])
+async def maxun_trial_defaults(identifier: str):
+    import asyncio
+    from uuid import UUID
+    from prefect.client.orchestration import get_client
+    from prefect.client.schemas.filters import FlowRunFilter
+    from prefect.client.schemas.sorting import FlowRunSort
+    from runtime.maxun_relations import MaxunRelations
+
+    try:
+        document = catalog.get(identifier)
+        if document['engine'] != 'maxun':
+            raise ValueError
+    except (ValueError, FileNotFoundError):
+        raise HTTPException(404, 'Maxun 发布版本不存在') from None
+    result = {'parameters': document.get('defaults', {}), 'account_ref': '', 'from_success': False}
+    store = MaxunRelations(catalog.root / '.maxun-relations')
+    references = store.records('publications')
+    current = next((item for item in references if item['template_id'] == identifier), None)
+    if not current:
+        return result
+    versions = set()
+    for item in references:
+        if item['source_robot_id'] == current['source_robot_id']:
+            try:
+                previous = catalog.get(item['template_id'])
+            except FileNotFoundError:
+                continue
+            if (previous['name'], previous['node']) == (document['name'], document['node']):
+                versions.add(item['template_id'])
+    runs = {UUID(item['prefect_run_id']) for item in store.records('executions') if item['template_id'] in versions}
+
+    async def latest():
+        async with get_client() as client:
+            return await client.read_flow_runs(flow_run_filter=FlowRunFilter(
+                id={'any_': list(runs)}, state={'type': {'any_': ['COMPLETED']}}),
+                sort=FlowRunSort.END_TIME_DESC, limit=1)
+
+    if runs:
+        try:
+            recent = await asyncio.wait_for(latest(), timeout=5)
+            if recent and recent[0].parameters.get('template_id') in versions:
+                saved = recent[0].parameters
+                result['parameters'] = dict(result['parameters'], **{
+                    name: value for name, value in saved.get('parameters', {}).items() if name in document.get('bindings', {})})
+                result.update(account_ref=saved.get('account_ref', ''), from_success=True)
+        except Exception:
+            pass
+    return result

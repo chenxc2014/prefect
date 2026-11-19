@@ -5,7 +5,11 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import AsyncMock, patch
+from copy import deepcopy
+from uuid import uuid4
 from fastapi.testclient import TestClient
+from runtime.maxun import fingerprint
+from runtime.maxun_relations import MaxunRelations
 
 
 class CollectorCatalogTest(unittest.TestCase):
@@ -27,6 +31,96 @@ class CollectorCatalogTest(unittest.TestCase):
 
     def post(self, endpoint, payload):
         return self.client.post(endpoint, json=payload, auth=('unit', 'unit-test-password'))
+
+    def test_guided_release_rechecks_draft_and_keeps_the_old_fixed_version(self):
+        from tools.test_maxun import robot
+
+        class Client:
+            def __init__(self, *robots):
+                self.robots = {item['recording_meta']['id']: deepcopy(item) for item in robots}
+                self.duplicates = 0
+
+            def robot(self, identifier):
+                return deepcopy(self.robots[identifier])
+
+            def duplicate(self, original, name):
+                self.duplicates += 1
+                copy = deepcopy(original)
+                identifier = str(uuid4())
+                copy['recording_meta'].update(id=identifier, name=name)
+                self.robots[identifier] = copy
+                return deepcopy(copy)
+
+            def request(self, path, payload, method):
+                self.robots[path.split('/')[-1]]['recording']['workflow'] = deepcopy(payload['workflow'])
+
+            def encrypt(self, value):
+                assert value == ''
+                return '已加密空值'
+
+        frozen, draft = robot(), robot()
+        frozen_id, draft_id = [item['recording_meta']['id'] for item in (frozen, draft)]
+        frozen_steps, draft_steps = [item['recording']['workflow'][0]['what'] for item in (frozen, draft)]
+        password = {'action': 'type', 'args': ['#password', '测试密文', 'password']}
+        frozen_steps[0].update(action='platformInputDate', args=['#date', '密文', 'text'])
+        frozen_steps.append(deepcopy(password))
+        doc = {'engine': 'maxun', 'name': '验收任务（Maxun）', 'purpose': 'acceptance', 'task_name': '验收任务',
+               'node': 'linux-169', 'task': {'robot_id': frozen_id, 'workflow_sha256': fingerprint(frozen)},
+               'bindings': {'begindate': ['workflow.0.what.0.args.1']}, 'defaults': {'begindate': '2026-11-01'},
+               'secret_bindings': {'password': ['workflow.0.what.1.args.1']},
+               'checks': {'required_files': ['Data/result.csv'], 'min_rows': 1}}
+        draft_steps.append(deepcopy(password))
+        catalog = self.collector.catalog
+        version = catalog.publish(doc)
+        store = MaxunRelations(catalog.root / '.maxun-relations')
+        store.publication(version, draft_id, frozen_id, fingerprint(draft))
+        draft_steps.insert(0, {'action': 'waitForTimeout', 'args': [250]})
+        maxun = Client(frozen, draft)
+        endpoint = '/api/maxun/releases/' + version
+        auth = ('unit', 'unit-test-password')
+        with patch('runtime.maxun.MaxunClient', return_value=maxun):
+            preview = self.client.get(endpoint, params={'draft': draft_id}, auth=auth).json()
+            self.assertTrue(preview['changed'])
+            self.assertEqual(preview['issues'], [])
+            self.assertNotIn('测试密文', str(preview))
+            payload = {'draft': draft_id, 'fingerprint': preview['fingerprint']}
+            current_steps = maxun.robots[draft_id]['recording']['workflow'][0]['what']
+            current_steps[0]['args'] = [350]
+            self.assertEqual(self.post(endpoint, payload).status_code, 409)
+            self.assertEqual(maxun.duplicates, 0)
+            current_steps[0]['args'] = [250]
+            duplicate_date = deepcopy(current_steps[1])
+            current_steps.append(duplicate_date)
+            blocked = self.client.get(endpoint, params={'draft': draft_id}, auth=auth).json()
+            self.assertIn('多个匹配', blocked['issues'][0])
+            current_steps.pop()
+            response = self.post(endpoint, payload)
+            self.assertEqual(response.status_code, 200, response.text)
+            renewed_id = response.json()['id']
+            self.assertEqual(self.post(endpoint, payload).status_code, 409)
+            status = self.client.get('/api/maxun/relations', params={'draft': draft_id}, auth=auth).json()
+            self.assertEqual(status['versions'][0]['id'], renewed_id)
+            self.assertFalse(status['versions'][0]['changed'])
+        renewed = catalog.get(renewed_id)
+        self.assertEqual(renewed['bindings']['begindate'], ['workflow.0.what.1.args.1'])
+        self.assertEqual(renewed['secret_bindings']['password'], ['workflow.0.what.2.args.1'])
+        self.assertEqual(renewed['checks'], doc['checks'])
+        self.assertEqual(catalog.get(version), doc)
+        actions = maxun.robot(renewed['task']['robot_id'])['recording']['workflow'][0]['what']
+        self.assertEqual(actions[1]['action'], 'platformInputDate')
+        self.assertEqual(actions[2]['args'][1], '已加密空值')
+
+    def test_guided_release_blocks_missing_site_actions_and_calendar(self):
+        from runtime.maxun_release import prepare
+        where = {'url': 'https://example.com/delivery'}
+        date = {'action': 'platformInputDate', 'args': ['#from', '示例密文', 'lbx-delivery']}
+        export = {'action': 'platformLbxExport', 'args': []}
+        before = [{'where': where, 'what': [date, export]}]
+        current = [{'where': where, 'what': [{'action': 'type', 'args': ['#from', '示例密文', 'text']}]}]
+        _, _, issues = prepare({'bindings': {'begindate': ['workflow.0.what.0.args.1']}}, before, current)
+        self.assertEqual(len(issues), 2)
+        self.assertIn('开始日期', issues[0])
+        self.assertIn('老百姓配送数据导出', issues[1])
 
     def prefect_health(self, health_error=None, database_error=None):
         client = AsyncMock()
