@@ -192,9 +192,13 @@ async def platform_info():
 
     async def prefect_health():
         try:
-            async with get_client() as client:
-                error = await asyncio.wait_for(client.api_healthcheck(), timeout=4)
-            return 'ready' if error is None else 'unavailable'
+            async with asyncio.timeout(4):
+                async with get_client() as client:
+                    if await client.api_healthcheck() is not None:
+                        return 'unavailable'
+                    # /health 仅代表 HTTP 进程存活，运行记录查询才能检验数据库可用性。
+                    await client.read_flow_runs(limit=1)
+            return 'ready'
         except Exception:
             return 'unavailable'
 

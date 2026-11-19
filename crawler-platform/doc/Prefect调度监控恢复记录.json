@@ -1,0 +1,29 @@
+{
+    "date":  "2026-11-19T02:15:22.979932+00:00",
+    "node":  "linux-169",
+    "failure":  "PostgreSQL 共享内存段丢失，运行记录接口返回 503",
+    "missing_segment":  "/PostgreSQL.1543530526",
+    "removal_trigger":  "尚未确认，不推断为登录改动或定时清理",
+    "recovery":  {
+                     "database_query":  "passed",
+                     "flow_runs":  32,
+                     "deployments":  4,
+                     "backup":  "/opt/crawler-dev/backups/postgres-shm-20261119-101518",
+                     "dump_sha256":  "8d2ab1c1927cc2b95a8c42e033e992dad06da39deb5aaff00aed275ee9282460",
+                     "dump_catalog_valid":  true
+                 },
+    "windows_167_accessed":  false,
+    "health_probe":  {
+                         "file":  "tools/collector.py",
+                         "sha256":  "ecc8a58f857b7407dee41869402f01e5d150a9fe8cc795c39fa8bd338b7cf2fc",
+                         "database_query":  "read_flow_runs(limit=1)",
+                         "total_timeout_seconds":  4,
+                         "unit_tests_passed":  23
+                     },
+    "first_database_error":  "2026-11-19 02:14:37 CST",
+    "backup_service_result":  "success",
+    "post_recovery_server_errors":  0,
+    "browser_verification":  "doc/Prefect调度监控浏览器验收.json",
+    "remember_login_regression":  "doc/记住密码浏览器验收.json",
+    "passed":  true
+}

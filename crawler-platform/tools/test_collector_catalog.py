@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 
 
@@ -27,6 +27,31 @@ class CollectorCatalogTest(unittest.TestCase):
 
     def post(self, endpoint, payload):
         return self.client.post(endpoint, json=payload, auth=('unit', 'unit-test-password'))
+
+    def prefect_health(self, health_error=None, database_error=None):
+        client = AsyncMock()
+        client.api_healthcheck.return_value = health_error
+        client.read_flow_runs.return_value = []
+        client.read_flow_runs.side_effect = database_error
+        with patch('prefect.client.orchestration.get_client') as get_client:
+            get_client.return_value.__aenter__.return_value = client
+            response = self.client.get('/api/platform', auth=('unit', 'unit-test-password'))
+        self.assertEqual(response.status_code, 200)
+        return response.json()['prefect']['state'], client
+
+    def test_prefect_is_unavailable_when_database_fails_despite_healthy_process(self):
+        state, client = self.prefect_health(database_error=RuntimeError('Service Unavailable'))
+        self.assertEqual(state, 'unavailable')
+
+    def test_prefect_is_ready_when_database_query_returns_empty_list(self):
+        state, client = self.prefect_health()
+        self.assertEqual(state, 'ready')
+        client.read_flow_runs.assert_awaited_once_with(limit=1)
+
+    def test_prefect_skips_database_query_when_http_healthcheck_fails(self):
+        state, client = self.prefect_health(health_error=RuntimeError('Service Unavailable'))
+        self.assertEqual(state, 'unavailable')
+        client.read_flow_runs.assert_not_awaited()
 
     def test_valid_publish_preserves_classification_in_listing(self):
         self.document.update(purpose='business', task_name='千金商品流向')

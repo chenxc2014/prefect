@@ -117,6 +117,8 @@ try {
   await expect(page.getByRole('heading', {name: '采集管理平台', exact: true})).toBeVisible();
   await page.goto(base + '/collector/login?next=prefect');
   await page.waitForURL(url => url.pathname.startsWith('/v2'));
+  await expect(page.locator('#hide-subflows')).toBeVisible({timeout: 30000});
+  await expect(page.getByText('Something went wrong', {exact: true})).toHaveCount(0);
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
   check('勾选后 Cookie 与服务端均为 30 天；完全关闭并重开同一浏览器后，工作台及 Prefect 继续免登录');
 
