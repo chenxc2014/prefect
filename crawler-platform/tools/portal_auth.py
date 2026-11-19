@@ -14,6 +14,7 @@ from runtime.auth import SessionStore
 
 COOKIE = '__Host-crawler_session'
 LOGIN_COOKIE = '__Host-crawler_login'
+REMEMBER_TTL = 30 * 24 * 3600
 
 
 def maxun_destination(query):
@@ -138,10 +139,12 @@ class PortalAuth:
             self.store.clear_failures(address)
             # 每次登录更新会话，旧浏览器会话在服务端撤销。
             self.store.revoke(request.cookies.get(COOKIE, ''))
-            token, session = self.store.create(self.username)
+            remember = value('remember') == '1'
+            token, session = self.store.create(self.username, ttl=REMEMBER_TTL if remember else None)
             target = self.target(value('next'))
             response = JSONResponse({'next': target}) if 'application/json' in request.headers.get('accept', '') else RedirectResponse(target, status_code=303)
-            response.set_cookie(COOKIE, token, max_age=self.store.ttl, secure=True, httponly=True, samesite='lax', path='/')
+            # 仅在勾选时跨浏览器重启保留登录，浏览器和服务端使用相同的有效期。
+            response.set_cookie(COOKIE, token, max_age=REMEMBER_TTL if remember else None, secure=True, httponly=True, samesite='lax', path='/')
             response.delete_cookie(LOGIN_COOKIE, secure=True, httponly=True, samesite='lax', path='/')
             return self.private(response)
 

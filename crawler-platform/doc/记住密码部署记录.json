@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-19T02:01:32.134647+00:00",
+  "node": "linux-169",
+  "backup": "/opt/crawler-dev/backups/remember-login-20261119-100130",
+  "files": [
+    {
+      "path": "runtime/auth.py",
+      "sha256": "b16ef4f3831ea3d094cb855d7384e28816d42d7e9f11dd4241924bff8ca3b6ee"
+    },
+    {
+      "path": "tools/portal_auth.py",
+      "sha256": "9810d28aaf424349c4a3fb680e8fbac0e1203b0f123f0d8f304afb81a808a37f"
+    },
+    {
+      "path": "deploy/web/login.html",
+      "sha256": "857a49bdeaa10024e69da4c5f7283c82310ee42d45491ac952452855686fd2a3"
+    }
+  ],
+  "remember_days": 30,
+  "normal_session_hours": 8,
+  "cookie": {
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "lax"
+  },
+  "password_stored_in_browser_storage": false,
+  "windows_167_accessed": false,
+  "passed": true
+}

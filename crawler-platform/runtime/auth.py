@@ -33,9 +33,9 @@ class SessionStore:
     def digest(token):
         return hashlib.sha256(token.encode()).hexdigest()
 
-    def create(self, username):
+    def create(self, username, ttl=None):
         token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
-        expires = int(self.clock()) + self.ttl
+        expires = int(self.clock()) + (self.ttl if ttl is None else ttl)
         with self.connect() as db:
             db.execute('DELETE FROM sessions WHERE expires <= ?', (int(self.clock()),))
             db.execute('INSERT INTO sessions VALUES (?, ?, ?, ?)', (self.digest(token), username, csrf, expires))
