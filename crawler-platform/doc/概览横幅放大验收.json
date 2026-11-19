@@ -1,0 +1,80 @@
+{
+  "checked_at": "2026-11-19T02:47:48.609Z",
+  "preview": false,
+  "viewports": [
+    {
+      "width": 1920,
+      "hero_height": 290,
+      "diagram_width": 560,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 1692,
+      "hero_height": 290,
+      "diagram_width": 560,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 1440,
+      "hero_height": 290,
+      "diagram_width": 520,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 1280,
+      "hero_height": 488.53125,
+      "diagram_width": 560,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 1024,
+      "hero_height": 488.53125,
+      "diagram_width": 560,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 768,
+      "hero_height": 488.53125,
+      "diagram_width": 560,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 600,
+      "hero_height": 723.3125,
+      "diagram_width": 448,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 390,
+      "hero_height": 782.296875,
+      "diagram_width": 254,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    },
+    {
+      "width": 320,
+      "hero_height": 898.625,
+      "diagram_width": 184,
+      "minimum_label_font": 12,
+      "overflow": false,
+      "clipped": false
+    }
+  ],
+  "collection_runs_submitted": 0,
+  "passed": true
+}

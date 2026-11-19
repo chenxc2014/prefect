@@ -1,0 +1,42 @@
+{
+  "deployed_at": "2026-11-19T11:07:22.200823",
+  "node": "linux-169",
+  "backup": "/opt/crawler-dev/backups/platform-logo-20261119-110720",
+  "files": [
+    {
+      "path": "deploy/web/collector.html",
+      "sha256": "d7dfc4a9201b4c7ee3e85448bef321344fef7fa3a08322635302d1ef15130533",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/login.html",
+      "sha256": "f13455c98671b107b2589125ae188c5b6dac4a9e19f08a19072e761eaba4d683",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/suite-theme.css",
+      "sha256": "f5f7ffed1d1fdbc4dd688f89dfbb9c5d702fc9317364403d907adb4199e4b6b3",
+      "matches": true
+    },
+    {
+      "path": "deploy/web/suite-theme.js",
+      "sha256": "2fb97f4771f82c7c334430ead991e9cf6b2db752f67e37e9604960301e2b6ce7",
+      "matches": true
+    }
+  ],
+  "source_image": "deploy/web/platform-logo.png",
+  "image_sha256": "b60d31cf6b35b5aaf9101eabee3b692f017d3f04c34a6cad288a6ce695353e1d",
+  "service_restart_required": false,
+  "verification": "doc/平台标识替换验收.json",
+  "browser_verification_passed": true,
+  "verified_applications": [
+    "platform",
+    "login",
+    "prefect",
+    "maxun"
+  ],
+  "verified_viewport_widths": [
+    1440,
+    390
+  ]
+}

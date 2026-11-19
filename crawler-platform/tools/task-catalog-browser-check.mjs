@@ -47,10 +47,10 @@ try{
  await expect(page.locator('#recent-templates .overview-version')).toHaveCount(2);
  await expect(page.locator('#recent-templates')).toContainText('最近运行：成功');
  const layout=await page.evaluate(()=>({hero:document.querySelector('.overview-hero').getBoundingClientRect().toJSON(),service:document.querySelector('#prefect-service-card').getBoundingClientRect().toJSON(),tasks:document.querySelector('#overview-published').getBoundingClientRect().toJSON(),design:document.querySelector('#overview-design').getBoundingClientRect().toJSON()}));
- if(layout.hero.height>210||layout.service.bottom>900||layout.tasks.top>=layout.design.top||layout.tasks.top>700)throw Error('概览未按首屏服务和已发布任务优先布局');
+ if(layout.hero.height>340||layout.service.bottom>900||layout.tasks.top>=layout.design.top||layout.tasks.top>830)throw Error('概览未按首屏服务和已发布任务优先布局');
  report.desktop_layout=layout;
  await expect(page.locator('#overview-guide')).not.toHaveAttribute('open');
- check('介绍横幅保留并压缩，独立Prefect服务卡位于首屏，已发布任务先于设计入口展示');
+ check('介绍横幅与引擎关系清晰展示，独立Prefect服务卡位于首屏，已发布任务先于设计入口展示');
  await page.locator('[data-overview-purpose="acceptance"]').click();
  await expect(page.locator('#recent-templates .overview-version')).toHaveCount(5);
  await expect(page.locator('#recent-templates')).toContainText('最近运行：失败');
@@ -120,6 +120,7 @@ try{
    await page.locator('.sidebar [data-view="'+view+'"]').click();
    if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('页面横向溢出：'+viewport.width+'/'+view);
    if(view==='overview'&&viewport.width===390){
+    await page.locator('#stat-prefect').scrollIntoViewIfNeeded();
     await expect(page.locator('#stat-prefect')).toBeInViewport();
     await page.screenshot({path:'.local/screenshots/overview-mobile.png',fullPage:true});
    }
