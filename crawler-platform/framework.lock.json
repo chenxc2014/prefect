@@ -36,7 +36,7 @@
     "execution_mode": "docker-backend-with-native-browser-service",
     "designer_url": "https://192.168.1.169:9443/",
     "platform_extensions": {
-      "version": "2026.11.18",
+      "version": "2026.11.19",
       "recorder": "deploy/maxun/recorder-compat.cjs",
       "browser_actions": "deploy/maxun/browser-actions.cjs",
       "backend_overlay": "deploy/maxun/patch-installed.py",
@@ -47,7 +47,7 @@
       "keystroke_values_logged": false,
       "sha256": {
         "deploy/maxun/recorder-compat.cjs": "27ab3e5856e2a0f2adc477df7698df1aa9ba634fdc861b09db06528b3ea81217",
-        "deploy/maxun/browser-actions.cjs": "d4812803556cf8441eb982d812a4cc1a9c785df02f55b235e7986bd81b725999",
+        "deploy/maxun/browser-actions.cjs": "7a0e304dead4fad476f9b3f2cd2b15f9e24d73efd09e82e63f0ca1cd3b6f1e24",
         "deploy/maxun/patch-installed.py": "cf3860b8e14f05d20ceb3cd84a792df5476e21072688576703c05e632991b928",
         "runtime/maxun.py": "2d89b5ede5d8b9172b61c8304fca0506f8d2df48cbd4fdf63d5ca69832206da6"
       },

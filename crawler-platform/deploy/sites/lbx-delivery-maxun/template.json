@@ -1,0 +1,29 @@
+{
+  "bindings": {
+    "begindate": ["workflow.0.what.0.args.1"],
+    "enddate": ["workflow.0.what.1.args.1"]
+  },
+  "checks": {
+    "date_columns": ["出入库日期"],
+    "min_rows": 1,
+    "required_columns": ["商品编码", "出入库日期", "出入库数量"],
+    "required_files": ["Data/downloads/*.xlsx"]
+  },
+  "defaults": {
+    "begindate": "2026-10-01",
+    "enddate": "2026-10-31"
+  },
+  "engine": "maxun",
+  "name": "老百姓 · 配送数据（Maxun）",
+  "node": "linux-169",
+  "purpose": "business",
+  "secret_bindings": {
+    "password": ["workflow.1.what.1.args.1"],
+    "username": ["workflow.1.what.0.args.1"]
+  },
+  "task": {
+    "robot_id": "ef7a3da8-5460-4a34-827f-eab2d3d6558d",
+    "workflow_sha256": "108cd8c5faa49bdbfc04290221a08eb0a0ebded3f8fe9418ef3da398439ae8c1"
+  },
+  "task_name": "老百姓 · 配送数据"
+}

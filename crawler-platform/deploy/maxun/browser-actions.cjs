@@ -14,6 +14,40 @@ function locate(page, selector) {
   while (parts.length > 1) context = context.frameLocator(parts.shift());
   return context.locator(parts[0]).first();
 }
+
+async function selectLbxDate(page, selector, date, close) {
+  const parsed = /^([1-9]\d{3})-(\d{2})-(\d{2})$/.exec(date);
+  const timestamp = Date.parse(`${date}T00:00:00Z`);
+  if (!parsed || !Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== date) {
+    throw new Error('配送日期必须是有效的 YYYY-MM-DD');
+  }
+  const [, year, month, day] = parsed.map(Number);
+  const targetMonth = year * 12 + month;
+  const left = page.locator('.ant-calendar-range-left:visible');
+  const right = page.locator('.ant-calendar-range-right:visible');
+  if (!await left.isVisible()) await locate(page, selector).click();
+  const shownMonth = async panel => {
+    const year = await panel.locator('.ant-calendar-year-select').innerText();
+    const month = await panel.locator('.ant-calendar-month-select').innerText();
+    return Number(year.match(/\d+/)?.[0]) * 12 + Number(month.match(/\d+/)?.[0]);
+  };
+  for (let step = 0; step < 30; step++) {
+    const from = await shownMonth(left), to = await shownMonth(right);
+    if (targetMonth === from || targetMonth === to) {
+      const panel = targetMonth === from ? left : right;
+      const cell = panel.locator(`td[title="${year}年${month}月${day}日"]:not(.ant-calendar-disabled-cell) .ant-calendar-date`);
+      await cell.click({timeout: 3000});
+      if (close && await left.isVisible()) await page.getByText('时间', {exact:true}).first().click();
+      return;
+    }
+    if (targetMonth < from) {
+      await left.locator(from - targetMonth >= 12 ? '.ant-calendar-prev-year-btn' : '.ant-calendar-prev-month-btn').click();
+    } else {
+      await right.locator(targetMonth - to >= 12 ? '.ant-calendar-next-year-btn' : '.ant-calendar-next-month-btn').click();
+    }
+  }
+  throw new Error('日期超出配送日历可选择范围');
+}
 function captureBlobDownloads(){
   if(window.__crawlerBlobDownloads)return;
   const state={enabled:false,files:[],blobs:new Map(),seen:new Set()};window.__crawlerBlobDownloads=state;
@@ -36,14 +70,33 @@ function captureBlobDownloads(){
 }
 exports.install = (page,saveBinary) => {
   const initialize=saveBinary?Promise.resolve(page.context().addInitScript(captureBlobDownloads)).then(()=>Promise.all(page.frames().map(frame=>frame.evaluate(captureBlobDownloads).catch(()=>{})))):Promise.resolve();
-  page.platformInputDate = async (selector, encrypted) => {
+  const lbx = {
+    origin: 'https://scep.lbxcn.com',
+    delivery: '/flowPlatform/flowDataDelivery',
+    downloads: '/flowPlatform/downloads/export-record',
+    module: '流向数据配送模块',
+    filename: '流向数据配送导出.xlsx',
+    before: null, start: null, end: null,
+  };
+  const lbxRows = () => page.locator('.ant-table-body tr[data-row-key]').filter({hasText:lbx.module}).filter({hasText:lbx.filename});
+  const lbxRowIdentity = row => JSON.stringify([row.getAttribute('data-row-key'), row.textContent.trim()]);
+  page.platformInputDate = async (selector, encrypted, calendar) => {
+    const date = decrypt(encrypted);
+    if (calendar === 'lbx-delivery') {
+      if (page.url() !== lbx.origin + lbx.delivery) throw new Error('配送日期控件不在预期页面');
+      const end = selector.includes('结束时间');
+      if (end && (!lbx.start || date < lbx.start)) throw new Error('结束日期不能早于开始日期');
+      await selectLbxDate(page, selector, date, end);
+      if (end) lbx.end = date; else lbx.start = date;
+      return;
+    }
     const target = locate(page, selector);
     await target.evaluate((element, value) => {
       const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
       descriptor.set.call(element, value);
       for (const name of ['input', 'change', 'blur']) element.dispatchEvent(new Event(name, {bubbles: true}));
       element.blur();
-    }, decrypt(encrypted));
+    }, date);
   };
   page.platformCaptcha = async (selector, explicitImage) => {
     const input = locate(page, selector);
@@ -108,7 +161,52 @@ exports.install = (page,saveBinary) => {
     await target.click();
     if(options.delay)await page.waitForTimeout(Math.min(Number(options.delay),10000));
   };
-  page.platformDownload = async selector => {
+  page.platformLbxPrepare = async () => {
+    if (page.url() !== lbx.origin + '/home') throw new Error('老百姓登录未成功');
+    await page.goto(lbx.origin + lbx.downloads, {waitUntil:'domcontentloaded'});
+    await lbxRows().first().waitFor({state:'attached', timeout:20000});
+    lbx.before = new Set(await lbxRows().evaluateAll(rows => rows.map(row => JSON.stringify([row.getAttribute('data-row-key'), row.textContent.trim()]))));
+    await page.goto(lbx.origin + lbx.delivery, {waitUntil:'domcontentloaded'});
+  };
+  page.platformLbxExport = async () => {
+    if (!lbx.before || !lbx.start || !lbx.end || page.url() !== lbx.origin + lbx.delivery) throw new Error('配送数据查询条件未就绪');
+    const deliveryPage = page;
+    if (await deliveryPage.locator('input[placeholder="开始时间"][readonly]').inputValue() !== lbx.start
+      || await deliveryPage.locator('input[placeholder="结束时间"][readonly]').inputValue() !== lbx.end) {
+      throw new Error('配送日期与运行参数不一致');
+    }
+    await deliveryPage.getByRole('button', {name:/^查\s*询$/}).first().click();
+    const blocked = deliveryPage.getByText(/无权限查询/).first();
+    const result = deliveryPage.locator('.ant-table-body tr[data-row-key]').first();
+    const outcome = await Promise.race([
+      result.waitFor({timeout:25000}).then(() => 'rows'),
+      blocked.waitFor({timeout:25000}).then(() => 'denied'),
+    ]).catch(() => 'empty');
+    if (outcome === 'denied') throw new Error('站点拒绝查询本次日期范围的配送数据');
+    if (outcome !== 'rows') throw new Error('配送数据查询未返回可导出的记录');
+    await deliveryPage.getByRole('button', {name:/^导\s*出$/}).click();
+    await deliveryPage.getByText('导出成功，请在下载中心查看', {exact:true}).waitFor({timeout:25000});
+    await deliveryPage.getByRole('button', {name:'下载中心', exact:true}).click();
+    await page.waitForURL(url => url.origin === lbx.origin && url.pathname === lbx.downloads, {timeout:20000});
+    const deadline = Date.now() + 90000;
+    while (Date.now() < deadline) {
+      await lbxRows().first().waitFor({state:'attached', timeout:15000});
+      const first = lbxRows().first();
+      const identity = await first.evaluate(lbxRowIdentity);
+      const key = await first.getAttribute('data-row-key');
+      if (key && !lbx.before.has(identity)) {
+        const button = `tr[data-row-key=${JSON.stringify(key)}] a:visible:text-is("文件下载")`;
+        if (await page.locator(button).count()) {
+          await page.platformDownload(button, {diagnostics:false});
+          return;
+        }
+      }
+      await page.waitForTimeout(1600);
+      await page.reload({waitUntil:'domcontentloaded'});
+    }
+    throw new Error('下载中心未生成本次导出的可下载文件');
+  };
+  page.platformDownload = async (selector, {diagnostics=true} = {}) => {
     await initialize;
     const context=page.context(),watched=new Set();let resolveDownload,rejectDownload;
     const pending=new Promise((resolve,reject)=>{resolveDownload=resolve;rejectDownload=reject});
@@ -157,18 +255,18 @@ exports.install = (page,saveBinary) => {
     blobResult.catch(()=>{});
     try{
       await locate(page,selector).click();
-      if(saveBinary){
+      if(saveBinary&&diagnostics){
         await page.waitForTimeout(2000);
         await saveBinary({name:'下载触发页面.png',mimeType:'image/png',data:(await page.screenshot({type:'png'})).toString('base64')});
       }
       const nativeResult=pending.then(async download=>{if(await download.failure())return await new Promise(()=>{});return {method:'browser-event',files:[download.suggestedFilename()]};});
       const captured=await Promise.race([nativeResult,blobResult,responseResult]);
-      if(saveBinary)await saveBinary({name:'download-method.json',mimeType:'application/json',data:Buffer.from(JSON.stringify(captured)).toString('base64')});
+      if(saveBinary&&diagnostics)await saveBinary({name:'download-method.json',mimeType:'application/json',data:Buffer.from(JSON.stringify(captured)).toString('base64')});
     }finally{
       stopped=true;
       context.off('response',onResponse);
       clearTimeout(timer);context.off('page',watch);for(const target of watched)target.off('download',receive);
-      if(saveBinary)await saveBinary({name:'download-trace.json',mimeType:'application/json',data:Buffer.from(JSON.stringify(trace)).toString('base64')});
+      if(saveBinary&&diagnostics)await saveBinary({name:'download-trace.json',mimeType:'application/json',data:Buffer.from(JSON.stringify(trace)).toString('base64')});
       for(const frame of frames())await frame.evaluate(()=>{if(window.__crawlerBlobDownloads)window.__crawlerBlobDownloads.enabled=false}).catch(()=>{});
     }
   };
